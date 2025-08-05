@@ -1,3 +1,15 @@
+## GitHub Setup
+
+### **1. Download and install Github desktop**
+https://desktop.github.com/download/
+
+### **2. Click File (Top Left) and 'Clone Repository', navigate to our one: GitHub\COMP602-Tilt and select your folder destination to clone (desktop or documents)**
+
+### **3. Select Branch: Currently there's only main**
+
+### **3. Open in Visual Studio Code**
+
+
 ## **Installation Steps**
 
 ### **1. Install Node.js:**
