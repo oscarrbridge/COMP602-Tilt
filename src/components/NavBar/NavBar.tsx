@@ -1,51 +1,49 @@
 import { Login } from '@mui/icons-material';
-import './NavBar.css'
-import { useState } from 'react'
+import './NavBar.css';
+import { useState } from 'react';
 
-import LoginWindow from '../LoginWindow/LoginWindow.tsx'
-import RegisterWindow from '../RegisterWindow/RegisterWindow.tsx'
+// import LoginWindow from '../LoginWindow/LoginWindow.tsx'
+// import RegisterWindow from '../RegisterWindow/RegisterWindow.tsx'
 
-export default function NavBar()
-{
-    const [LoginActive, SetLogin] = useState(false);
-    const [SignUpActive, SetSignUp] = useState(false);
+import SignInPopup from '../../components/Auth/SignInUser';
 
-    function HandleLoginClick()
-    {
-        if(SignUpActive)
-        {
-            SetSignUp(false);
-        }
-        
-        SetLogin(prev => !prev);
+export default function NavBar() {
+  const [LoginActive, SetLogin] = useState(false);
+  const [SignUpActive, SetSignUp] = useState(false);
+
+  function HandleLoginClick() {
+    if (SignUpActive) {
+      SetSignUp(false);
     }
 
-    function HandleRegisterClick()
-    {
-        if(LoginActive)
-        {
-            SetLogin(false);
-        }
-        
-        SetSignUp(prev => !prev);
+    SetLogin((prev) => !prev);
+  }
+
+  function HandleRegisterClick() {
+    if (LoginActive) {
+      SetLogin(false);
     }
 
-    return (
-        <>
-            <div className="NavBarContainer">
-                <div className='Logo'>Logo</div>
-                
-                <div className='UserBalance'>User Balance</div>
-                
-                <div className='LoginControls'>
-                    <button onClick={HandleLoginClick}>Login</button>
-                    <button onClick={HandleRegisterClick}>Register</button>
-                </div>
-            </div>
-            <div className='LoginMiniWindow'>
-                {LoginActive && <LoginWindow />}
-                {SignUpActive && <RegisterWindow />}
-            </div>
-        </>
-    )
+    SetSignUp((prev) => !prev);
+  }
+
+  return (
+    <>
+      <div className='NavBarContainer'>
+        <div className='Logo'>Logo</div>
+
+        <div className='UserBalance'>User Balance</div>
+
+        <div className='LoginControls'>
+          <button onClick={HandleLoginClick}>Login</button>
+          <button onClick={HandleRegisterClick}>Register</button>
+        </div>
+      </div>
+      {/* <div className='LoginMiniWindow'>
+        {LoginActive && <LoginWindow />}
+        {SignUpActive && <RegisterWindow />}
+      </div> */}
+      <SignInPopup open={LoginActive} onClose={() => SetLogin(false)} />
+    </>
+  );
 }
