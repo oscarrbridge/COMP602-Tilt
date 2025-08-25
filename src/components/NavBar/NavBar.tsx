@@ -32,7 +32,7 @@ export default function NavBar() {
     return (
         <>
             <div className="NavBarContainer">
-                <div className='Logo'>Logo</div>
+                <div className='Logo'><img src='src\assets\Tilt.png' width={80} /></div>
                 
                 <div className='UserBalance'><UserBalance /></div>
                 

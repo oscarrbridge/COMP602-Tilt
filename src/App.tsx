@@ -6,7 +6,9 @@ export default function App() {
 
   return (
     <>
-      <NavBar />
+      <div className='NavBar'>
+        <NavBar />
+      </div>
     </>
   )
 }
