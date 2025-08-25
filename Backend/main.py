@@ -13,6 +13,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from Backend.firebase_config import db
+from Backend.routers import blackjack
 
 app = FastAPI()
 
@@ -23,6 +24,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(blackjack.router)
 
 @app.get("/")
 def read_root():
