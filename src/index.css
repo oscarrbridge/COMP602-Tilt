@@ -33,6 +33,8 @@ a:hover {
 }
 
 body {
+  background-color: var(--primary-colour);
+
   margin: 0;
   display: flex;
   min-width: 320px;

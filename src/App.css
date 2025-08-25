@@ -1,0 +1,21 @@
+.SpecialEvents {
+    display: flex;
+    gap: 20px;
+
+    justify-content: space-evenly;
+    width: 100%;
+}
+
+.SpecialEventsTitle h2{
+    color: var(--text-colour);
+    margin: 0px 0px 0px 0px;
+}
+
+.SpecialEventsContainer{
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+
+    margin: 20px
+}

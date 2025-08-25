@@ -1,5 +1,5 @@
 .NavBarContainer{
-    background-color: var(--primary-colour);
+    background-color: var(--secondary-colour);
 
     width: 100vw;
     box-sizing: border-box;
@@ -29,6 +29,6 @@
 }
 
 .LoginControls button{
-    background-color: var(--secondary-colour);
+    background-color: var(--primary-colour);
     color: var(--text-colour)
 }
