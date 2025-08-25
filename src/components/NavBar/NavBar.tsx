@@ -2,6 +2,8 @@ import { Login } from '@mui/icons-material';
 import './NavBar.css'
 import { useState } from 'react'
 
+import UserBalance from '../UserBalance/UserBalance.tsx';
+
 import LoginWindow from '../LoginWindow/LoginWindow.tsx'
 import RegisterWindow from '../RegisterWindow/RegisterWindow.tsx'
 
@@ -35,7 +37,7 @@ export default function NavBar()
             <div className="NavBarContainer">
                 <div className='Logo'>Logo</div>
                 
-                <div className='UserBalance'>User Balance</div>
+                <div className='UserBalance'><UserBalance /></div>
                 
                 <div className='LoginControls'>
                     <button onClick={HandleLoginClick}>Login</button>
