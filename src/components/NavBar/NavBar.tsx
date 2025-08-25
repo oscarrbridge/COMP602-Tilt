@@ -7,30 +7,27 @@ import UserBalance from '../UserBalance/UserBalance.tsx';
 import LoginWindow from '../LoginWindow/LoginWindow.tsx'
 import RegisterWindow from '../RegisterWindow/RegisterWindow.tsx'
 
-export default function NavBar()
-{
-    const [LoginActive, SetLogin] = useState(false);
-    const [SignUpActive, SetSignUp] = useState(false);
+import SignInPopup from '../../components/Auth/SignInUser';
 
-    function HandleLoginClick()
-    {
-        if(SignUpActive)
-        {
-            SetSignUp(false);
-        }
-        
-        SetLogin(prev => !prev);
+export default function NavBar() {
+  const [LoginActive, SetLogin] = useState(false);
+  const [SignUpActive, SetSignUp] = useState(false);
+
+  function HandleLoginClick() {
+    if (SignUpActive) {
+      SetSignUp(false);
     }
 
-    function HandleRegisterClick()
-    {
-        if(LoginActive)
-        {
-            SetLogin(false);
-        }
-        
-        SetSignUp(prev => !prev);
+    SetLogin((prev) => !prev);
+  }
+
+  function HandleRegisterClick() {
+    if (LoginActive) {
+      SetLogin(false);
     }
+
+    SetSignUp((prev) => !prev);
+  }
 
     return (
         <>
@@ -44,10 +41,11 @@ export default function NavBar()
                     <button onClick={HandleRegisterClick}>Register</button>
                 </div>
             </div>
-            <div className='LoginMiniWindow'>
-                {LoginActive && <LoginWindow />}
-                {SignUpActive && <RegisterWindow />}
-            </div>
+        {/* <div className='LoginMiniWindow'>
+            {LoginActive && <LoginWindow />}
+            {SignUpActive && <RegisterWindow />}
+        </div> */}
+        <SignInPopup open={LoginActive} onClose={() => SetLogin(false)} />
         </>
     )
 }
