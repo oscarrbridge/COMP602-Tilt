@@ -1,7 +1,53 @@
 import NavBar from './components/NavBar/NavBar.tsx'
 import SpecialEvent from './components/SpecialEvent/SpecialEvent.tsx'
+import GameCard from './components/GameCard/GameCard.tsx'
+
 
 import './App.css'
+
+const SpecialEvents = [
+  {
+    EventHook: 'Hook',
+    EventTitle: 'Title',
+    EventDescription: 'Description',
+    EventImage: 'src/assets/Tilt.png',
+    EventLink: '/'
+  },
+  {
+    EventHook: 'Hook',
+    EventTitle: 'Title',
+    EventDescription: 'Description',
+    EventImage: 'src/assets/Tilt.png',
+    EventLink: '/'
+  },
+  {
+    EventHook: 'Hook',
+    EventTitle: 'Title',
+    EventDescription: 'Description',
+    EventImage: 'src/assets/Tilt.png',
+    EventLink: '/'
+  }
+]
+
+const PopularGames = [
+  {
+    Text: 'Slots',
+    Image: 'src/assets/Tilt.png'
+  },
+  {
+    Text: 'Slots',
+    Image: 'src/assets/Tilt.png'
+  },
+  {
+    Text: 'Slots',
+    Image: 'src/assets/Tilt.png'
+  },
+  {
+    Text: 'Slots',
+    Image: 'src/assets/Tilt.png'
+  },
+
+]
 
 export default function App() {
 
@@ -13,32 +59,23 @@ export default function App() {
 
       <div className='SpecialEventsContainer'>
         <div className='SpecialEventsTitle'>
-          <strong><h2>Special Events</h2></strong>
+          <h2>Special Events</h2>
         </div>
         <div className='SpecialEvents'>
-          <SpecialEvent
-            EventHook='Hook'
-            EventTitle='Title'
-            EventDescription='Description'
-            EventImage='src\assets\Tilt.png'
-            EventLink='/'
-          />
+          {SpecialEvents.map((event, index) => (
+            <SpecialEvent key={index} {...event} />
+          ))}
+        </div>
 
-          <SpecialEvent
-            EventHook='Hook'
-            EventTitle='Title'
-            EventDescription='Description'
-            EventImage='src\assets\Tilt.png'
-            EventLink='/'
-          />
-
-          <SpecialEvent
-            EventHook='Hook'
-            EventTitle='Title'
-            EventDescription='Description'
-            EventImage='src\assets\Tilt.png'
-            EventLink='/'
-          />
+        <div className='PopularGamesContainer'>
+          <div className='PopularGamesTitle'>
+            <h2>Popular Games</h2>
+          </div>
+          <div className='PopularGames'>
+            {PopularGames.map((game, index) => (
+              <GameCard key={index} {...game} />
+            ))}
+          </div>
         </div>
 
       </div>
