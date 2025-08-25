@@ -38,3 +38,11 @@ h2 {
   
   padding-bottom: 10px;
 }
+
+/* Search bar */
+.HomeSearchBarContainer {
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+}

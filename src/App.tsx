@@ -1,9 +1,11 @@
 import NavBar from './components/NavBar/NavBar.tsx'
 import SpecialEvent from './components/SpecialEvent/SpecialEvent.tsx'
 import GameCard from './components/GameCard/GameCard.tsx'
-
+import SearchBar from './components/SearchBar/SearchBar.tsx'
 
 import './App.css'
+
+// Required npm packages: react-router-dom
 
 const SpecialEvents = [
   {
@@ -67,6 +69,8 @@ export default function App() {
           ))}
         </div>
 
+        <br />
+
         <div className='PopularGamesContainer'>
           <div className='PopularGamesTitle'>
             <h2>Popular Games</h2>
@@ -75,6 +79,17 @@ export default function App() {
             {PopularGames.map((game, index) => (
               <GameCard key={index} {...game} />
             ))}
+          </div>
+        </div>
+
+            <br />
+
+        <div className='HomeSearchBarContainer'>
+          <div className='HomeSearchBarTitle'>
+            <h2>Looking for a game?</h2>
+          </div>
+          <div className='HomeSearchBar'>
+            <SearchBar Placeholder='Search for a game...'/>
           </div>
         </div>
 
