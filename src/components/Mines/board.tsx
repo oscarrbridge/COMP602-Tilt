@@ -1,5 +1,5 @@
 // Import cell view component which renders the single cells.
-import CellView from "./cell";
+import CellView from "../Mines/cell";
 import type {Cell as CellType} from "../../services/game";
 
 // Define the Item props that the board will use
