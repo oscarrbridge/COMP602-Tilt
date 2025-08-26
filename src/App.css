@@ -1,0 +1,48 @@
+/* General Styling */
+h2 {
+  color: var(--text-colour);
+  margin: 0px 0px 0px 0px;
+}
+
+/*  Special Events */
+
+.SpecialEventsContainer {
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+
+  margin: 20px;
+}
+
+.SpecialEvents {
+  display: flex;
+  gap: 20px;
+
+  justify-content: space-evenly;
+  width: 100%;
+}
+
+/* Popular Games */
+
+.PopularGamesContainer {
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+.PopularGames {
+  display: flex;
+  gap: 20px;
+  
+  padding-bottom: 10px;
+}
+
+/* Search bar */
+.HomeSearchBarContainer {
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+}
