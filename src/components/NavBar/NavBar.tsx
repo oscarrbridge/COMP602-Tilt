@@ -1,14 +1,16 @@
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import type { User } from 'firebase/auth';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from '../../../Backend/firebase/firebaseConfig';
 
-import { auth } from '../../firebaseConfig';
+import { auth } from '../../../Backend/firebase/firebaseConfig.ts';
 import './NavBar.css';
 import { useState, useEffect } from 'react';
 
 import UserBalance from '../UserBalance/UserBalance.tsx';
 
-import LoginWindow from '../LoginWindow/LoginWindow.tsx'
-import RegisterWindow from '../RegisterWindow/RegisterWindow.tsx'
+import LoginWindow from '../LoginWindow/LoginWindow.tsx';
+import RegisterWindow from '../RegisterWindow/RegisterWindow.tsx';
 
 import RegisterUser from '../../components/Auth/RegisterUser';
 import SignInPopup from '../../components/Auth/SignInUser';
@@ -46,13 +48,17 @@ export default function NavBar() {
     SetSignUp((prev) => !prev);
   }
 
-    return (
-        <>
-            <div className="NavBarContainer">
-                <div className='Logo'><img src='src\assets\Tilt.png' width={80} /></div>
-                
-                <div className='UserBalance'><UserBalance /></div>
-            
+  return (
+    <>
+      <div className='NavBarContainer'>
+        <div className='Logo'>
+          <img src='src\assets\Tilt.png' width={80} />
+        </div>
+
+        <div className='UserBalance'>
+          <UserBalance />
+        </div>
+
         <div className='LoginControls'>
           {/* If user is logged in, show their info and logout */}
           {user ? (

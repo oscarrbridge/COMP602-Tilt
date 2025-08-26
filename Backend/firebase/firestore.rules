@@ -1,0 +1,21 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /users/{uid} {
+      // Public read access for leaderboard functionality
+      allow read: if true;
+
+      // Allow a user to create their own doc if it doesn't exist yet
+      allow create: if request.auth != null && request.auth.uid == uid;
+
+      // No update/delete allowed
+      allow update, delete: if false;
+    }
+
+    // Block everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
