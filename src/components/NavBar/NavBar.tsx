@@ -5,8 +5,10 @@ import { auth } from '../../firebaseConfig';
 import './NavBar.css';
 import { useState, useEffect } from 'react';
 
-// import LoginWindow from '../LoginWindow/LoginWindow.tsx'
-// import RegisterWindow from '../RegisterWindow/RegisterWindow.tsx'
+import UserBalance from '../UserBalance/UserBalance.tsx';
+
+import LoginWindow from '../LoginWindow/LoginWindow.tsx'
+import RegisterWindow from '../RegisterWindow/RegisterWindow.tsx'
 
 import RegisterUser from '../../components/Auth/RegisterUser';
 import SignInPopup from '../../components/Auth/SignInUser';
