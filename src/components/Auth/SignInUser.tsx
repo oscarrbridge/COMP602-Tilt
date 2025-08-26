@@ -13,9 +13,7 @@ import {
   InputAdornment,
 } from '@mui/material';
 import { Google as GoogleIcon, Visibility, VisibilityOff } from '@mui/icons-material';
-import { AppProvider } from '@toolpad/core/AppProvider';
 import * as React from 'react';
-
 
 type SignInPopupProps = {
   open: boolean;
@@ -80,8 +78,7 @@ export default function SignInPopup({ open, onClose }: SignInPopupProps) {
   }
 
   return (
-    // Provide MUI theme via AppProvider
-    <AppProvider >
+    <>
       {/* Dialog popup for sign-in */}
       <Dialog open={open} onClose={onClose} fullWidth maxWidth='xs'>
         <DialogTitle>Welcome back</DialogTitle>
@@ -146,6 +143,6 @@ export default function SignInPopup({ open, onClose }: SignInPopupProps) {
           </Stack>
         </DialogContent>
       </Dialog>
-    </AppProvider>
+    </>
   );
 }

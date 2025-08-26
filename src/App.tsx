@@ -1,9 +1,20 @@
-import NavBar from './components/NavBar/NavBar.tsx'
-import SpecialEvent from './components/SpecialEvent/SpecialEvent.tsx'
-import GameCard from './components/GameCard/GameCard.tsx'
-import SearchBar from './components/SearchBar/SearchBar.tsx'
+import NavBar from './components/NavBar/NavBar.tsx';
+import SpecialEvent from './components/SpecialEvent/SpecialEvent.tsx';
+import GameCard from './components/GameCard/GameCard.tsx';
+import SearchBar from './components/SearchBar/SearchBar.tsx';
+import { AppProvider } from '@toolpad/core/AppProvider';
+import { createTheme } from '@mui/material/styles';
 
-import './App.css'
+import './App.css';
+
+// Styling theme
+const theme = createTheme({
+  palette: {
+    background: {
+      default: 'var(--background)',
+    },
+  },
+});
 
 // Required npm packages: react-router-dom
 
@@ -13,48 +24,46 @@ const SpecialEvents = [
     EventTitle: 'Title',
     EventDescription: 'Description',
     EventImage: 'src/assets/Tilt.png',
-    EventLink: '/'
+    EventLink: '/',
   },
   {
     EventHook: 'Hook',
     EventTitle: 'Title',
     EventDescription: 'Description',
     EventImage: 'src/assets/Tilt.png',
-    EventLink: '/'
+    EventLink: '/',
   },
   {
     EventHook: 'Hook',
     EventTitle: 'Title',
     EventDescription: 'Description',
     EventImage: 'src/assets/Tilt.png',
-    EventLink: '/'
-  }
-]
+    EventLink: '/',
+  },
+];
 
 const PopularGames = [
   {
     Text: 'Slots',
-    Image: 'src/assets/Tilt.png'
+    Image: 'src/assets/Tilt.png',
   },
   {
     Text: 'Slots',
-    Image: 'src/assets/Tilt.png'
+    Image: 'src/assets/Tilt.png',
   },
   {
     Text: 'Slots',
-    Image: 'src/assets/Tilt.png'
+    Image: 'src/assets/Tilt.png',
   },
   {
     Text: 'Slots',
-    Image: 'src/assets/Tilt.png'
+    Image: 'src/assets/Tilt.png',
   },
-
-]
+];
 
 export default function App() {
-
   return (
-    <>
+    <AppProvider theme={theme}>
       <div className='NavBar'>
         <NavBar />
       </div>
@@ -82,18 +91,17 @@ export default function App() {
           </div>
         </div>
 
-            <br />
+        <br />
 
         <div className='HomeSearchBarContainer'>
           <div className='HomeSearchBarTitle'>
             <h2>Looking for a game?</h2>
           </div>
           <div className='HomeSearchBar'>
-            <SearchBar Placeholder='Search for a game...'/>
+            <SearchBar Placeholder='Search for a game...' />
           </div>
         </div>
-
       </div>
-    </>
-  )
+    </AppProvider>
+  );
 }

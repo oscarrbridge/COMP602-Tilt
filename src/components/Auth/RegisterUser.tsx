@@ -13,7 +13,6 @@ import {
   InputAdornment,
 } from '@mui/material';
 import { Google as GoogleIcon, Visibility, VisibilityOff } from '@mui/icons-material';
-import { AppProvider } from '@toolpad/core/AppProvider';
 import * as React from 'react';
 
 type RegisterPopupProps = {
@@ -89,8 +88,7 @@ export default function RegisterUser({ open, onClose }: RegisterPopupProps) {
   }
 
   return (
-    // Provide MUI theme via AppProvider
-    <AppProvider>
+    <>
       <Dialog open={open} onClose={onClose} maxWidth='xs' fullWidth>
         {/* Dialog popup for sign-in */}
         <DialogTitle>Create your account</DialogTitle>
@@ -184,6 +182,6 @@ export default function RegisterUser({ open, onClose }: RegisterPopupProps) {
           </Stack>
         </DialogContent>
       </Dialog>
-    </AppProvider>
+    </>
   );
 }
