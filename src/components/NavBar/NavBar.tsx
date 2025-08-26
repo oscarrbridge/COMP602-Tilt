@@ -46,13 +46,13 @@ export default function NavBar() {
     SetSignUp((prev) => !prev);
   }
 
-  return (
-    <>
-      <div className='NavBarContainer'>
-        <div className='Logo'>Logo</div>
-
-        <div className='UserBalance'>User Balance</div>
-
+    return (
+        <>
+            <div className="NavBarContainer">
+                <div className='Logo'><img src='src\assets\Tilt.png' width={80} /></div>
+                
+                <div className='UserBalance'><UserBalance /></div>
+            
         <div className='LoginControls'>
           {/* If user is logged in, show their info and logout */}
           {user ? (

@@ -1,5 +1,5 @@
 .NavBarContainer{
-    background-color: var(--primary-colour);
+    background-color: var(--secondary-colour);
 
     width: 100vw;
     box-sizing: border-box;
@@ -8,7 +8,7 @@
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
 
-    padding: 10px 10px;
+    padding: 10px 25px;
 }
 
 .Logo {
@@ -29,6 +29,6 @@
 }
 
 .LoginControls button{
-    background-color: var(--secondary-colour);
+    background-color: var(--primary-colour);
     color: var(--text-colour)
 }
