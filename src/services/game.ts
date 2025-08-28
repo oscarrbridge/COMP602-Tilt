@@ -7,23 +7,26 @@ export type Cell = {
 
 // Creates the board game create function with size times size and random mines placed
 export function BoardCreate(size: number, MineCount: number): Cell[] {
-    const total = size * size; // Number of cells on the board
-    const indices = Array.from({ length: total}, (_, i) => i); // Creates array of indices
+  const total = size * size;
 
-    // Shuffle algorithm that randomly arranges the indices array
-    for (let i = indices.length = 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [indices[i], indices[j]] = [indices[j], indices[i]]; // swaps indices
-    }
+  // clamp mine count to a valid range
+  const mineCount = Math.max(0, Math.min(MineCount, Math.max(0, total - 1)));
 
-    const mines = new Set(indices.slice(0, MineCount)); // Selects mine count and shuffles array as mine position
-    
-    // Creates and returns board, each cell is assigned, eitehr mine or not and reveales the state
-    return Array.from({ length: total}, (_, i) => ({
-        Index: i,
-        IsMine: mines.has(i),
-        Revealed: false,
-    }));
+  const indices = Array.from({ length: total }, (_, i) => i);
+
+  // ✅ correct shuffle
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+
+  const mines = new Set(indices.slice(0, mineCount));
+
+  return Array.from({ length: total }, (_, i) => ({
+    Index: i,
+    IsMine: mines.has(i),
+    Revealed: false,
+  }));
 }
 
 // Caclulates pay out based on the multipler per safe cells being revealed, lesser safe cells more multiplier

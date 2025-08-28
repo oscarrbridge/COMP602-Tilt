@@ -1,32 +1,30 @@
-// Import cell view component which renders the single cells.
-import CellView from "../Mines/cell";
-import type {Cell as CellType} from "../../services/game";
+import CellView from "./cell";
+import type { Cell as CellType } from "../../services/game";
 
-// Define the Item props that the board will use
-type Items = { 
-    size: number; // Size of grid
-    cells: CellType[]; // Array
-    gameOver: boolean; // Game ended function
-    onCellClick: (index: number) => void; 
+type Items = {
+  size: number;
+  cells: CellType[];
+  gameOver: boolean;
+  onCellClick: (index: number) => void;
 };
 
-// Renders the entire Mines Game Board creation
-export default function Board({size, cells, gameOver, onCellClick }: Items) {
-    return (
-        <div
-            className="board"
-            style={{gridTemplateColumns:'repeat(&{Size}, 56px)'}}
-        >
-            {cells.map((Cell, i) => (
-                <CellView
-                    key={i}
-                    Cell={Cell}
-                    GameOver={gameOver}
-                    OnClick={() => onCellClick(i)}
-                    />     
-            
-            ))}
 
-        </div>
-    );
+// runs the entier board grid UI
+export default function Board({ size, cells, gameOver, onCellClick }: Items) {
+  return (
+    <div
+      className="board"
+      // was: repeat(${size}, 56px)
+      style={{ gridTemplateColumns: `repeat(${size}, var(--cell-size))` }}
+    >
+      {cells.map((c, i) => (
+        <CellView
+          key={i}
+          Cell={c}
+          GameOver={gameOver}
+          OnClick={() => onCellClick(i)}
+        />
+      ))}
+    </div>
+  );
 }

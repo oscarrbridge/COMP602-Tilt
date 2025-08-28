@@ -1,31 +1,26 @@
-import {Cell} from "../../services/game";
+import type { Cell as CellType } from "../../services/game";
 
+type Props = {
+  Cell: CellType;          // a single tile
+  GameOver: boolean;       // true if lost/cashed
+  OnClick: () => void;     // click handler
+};
 
-// Defining items that CellView component recieves
-type Items = {
-    Cell: Cell; // Single cell data
-    GameOver: boolean; // Gameover function, win, loss or cash out
-    OnClick: () => void; // Clicking cell function
-}
+export default function CellView({ Cell, GameOver, OnClick }: Props) {
+  // show Diamond when safe+revealed, Mine when revealed mine
+  // after GameOver, show all mines
+  const content = Cell.Revealed
+    ? (Cell.IsMine ? "Mines" : "Diamonds")
+    : (GameOver && Cell.IsMine ? "Mines" : "");
 
-// Represents one cell on the square mines board
-export default function CellView({ Cell, GameOver, OnClick }: Items) {
-    const content = Cell.Revealed
-    ? Cell.IsMine
-        ? "Mine"
-        : "Diamond"
-    : GameOver && Cell.IsMine
-    ? "Mine"
-    : "";
-
-return (
+  return (
     <button
       className={`cell ${Cell.Revealed ? "revealed" : ""} ${Cell.Revealed && Cell.IsMine ? "mine" : ""}`}
       onClick={OnClick}
-      disabled={Cell.Revealed|| GameOver} 
+      disabled={Cell.Revealed || GameOver}
+      aria-label={Cell.Revealed ? (Cell.IsMine ? "Mine" : "Safe") : "Hidden"}
     >
       {content}
     </button>
   );
 }
-
