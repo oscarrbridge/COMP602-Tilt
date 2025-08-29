@@ -2,27 +2,27 @@ import CellView from "./cell";
 import type { Cell as CellType } from "../../services/game";
 
 type Items = {
-  size: number;
-  cells: CellType[];
-  gameOver: boolean;
-  onCellClick: (index: number) => void;
+  Size: number;
+  Cells: CellType[];
+  GameOver: boolean;
+  OnCellClick: (index: number) => void;
 };
 
 
 // runs the entier board grid UI
-export default function Board({ size, cells, gameOver, onCellClick }: Items) {
+export default function Board({ Size, Cells, GameOver, OnCellClick }: Items) {
   return (
     <div
       className="board"
       // was: repeat(${size}, 56px)
-      style={{ gridTemplateColumns: `repeat(${size}, var(--cell-size))` }}
+      style={{ gridTemplateColumns: `repeat(${Size}, var(--cell-size))` }}
     >
-      {cells.map((c, i) => (
+      {Cells.map((c, i) => (
         <CellView
           key={i}
           Cell={c}
-          GameOver={gameOver}
-          OnClick={() => onCellClick(i)}
+          GameOver={GameOver}
+          OnClick={() => OnCellClick(i)}
         />
       ))}
     </div>

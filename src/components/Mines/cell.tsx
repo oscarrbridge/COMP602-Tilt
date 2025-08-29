@@ -10,8 +10,8 @@ export default function CellView({ Cell, GameOver, OnClick }: Props) {
   // show Diamond when safe+revealed, Mine when revealed mine
   // after GameOver, show all mines
   const content = Cell.Revealed
-    ? (Cell.IsMine ? "Mines" : "Diamonds")
-    : (GameOver && Cell.IsMine ? "Mines" : "");
+    ? (Cell.IsMine ? "💣" : "💎")
+    : (GameOver && Cell.IsMine ? "💣" : "");
 
   return (
     <button

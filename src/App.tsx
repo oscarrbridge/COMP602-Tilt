@@ -5,77 +5,77 @@ import type { Cell as CellType } from "./services/game";
 import { BoardCreate, multiplier, NextClick } from "./services/game";
 
 // Game states during playtime
-type Status = "idle" | "inProgress" | "lost" | "cashed";
+type Status = "Idle" | "Playing" | "Lost" | "Cash";
 
 export default function App() {
-  const [size, setSize] = useState(5); // Board Size
-  const [mines, setMines] = useState(5); //Num of Mines
-  const [bet, setBet] = useState(10); //Amount used to bet
-  const [cells, setCells] = useState<CellType[] | null>(null); //Stores board cells
-  const [status, setStatus] = useState<Status>("idle"); //status of current playing game
-  const [safeRevealed, setSafeRevealed] = useState(0); //Safe tiles that have been shown
+  const [Size, SetSize] = useState(5); // Board Size
+  const [Mines, SetMines] = useState(5); //Num of Mines
+  const [Bet, SetBet] = useState(10); //Amount used to bet
+  const [Cells, SetCells] = useState<CellType[] | null>(null); //Stores board cells
+  const [Status, SetStatus] = useState<Status>("Idle"); //status of current playing game
+  const [SafeRevealed, SetSafeRevealed] = useState(0); //Safe tiles that have been shown
 
-  const total = size * size; //cells on the board that get configured by player
+  const total = Size * Size; //cells on the board that get configured by player
 
   // Payout multiplier
-  const currentMult = useMemo(
-    () => multiplier(total, mines, safeRevealed),
-    [total, mines, safeRevealed]
+  const CurrentMult = useMemo(
+    () => multiplier(total, Mines, SafeRevealed),
+    [total, Mines, SafeRevealed]
   );
   // Multiplier increase if next click turns out to be safe
   const nextFactor = useMemo(
-    () => NextClick(total, mines, safeRevealed),
-    [total, mines, safeRevealed]
+    () => NextClick(total, Mines, SafeRevealed),
+    [total, Mines, SafeRevealed]
   );
 
   // Payouts
-  const payoutNow  = +(bet * currentMult).toFixed(2);
-  const nextPayout = +(bet * currentMult * nextFactor).toFixed(2);
+  const PayoutNow  = +(Bet * CurrentMult).toFixed(2);
+  const NextPayout = +(Bet * CurrentMult * nextFactor).toFixed(2);
 
   // starting new game
   function startGame() {
-    const validMines = Math.max(1, Math.min(mines, total - 1));
-    setCells(BoardCreate(size, validMines)); //Generates the board
-    setSafeRevealed(0);
-    setStatus("inProgress");
+    const validMines = Math.max(1, Math.min(Mines, total - 1));
+    SetCells(BoardCreate(Size, validMines)); //Generates the board
+    SetSafeRevealed(0);
+    SetStatus("Playing");
   }
   // Cell handling for when clicked
-  function handleCellClick(index: number) {
-    if (status !== "inProgress" || !cells) return;
+  function HandleCellClick(index: number) {
+    if (Status !== "Playing" || !Cells) return;
 
-    const tile = cells[index];
+    const tile = Cells[index];
     if (tile.Revealed) return;
 
-    const next = cells.slice();
+    const next = Cells.slice();
     next[index] = { ...tile, Revealed: true };
 
     // If clicked a mine is revealed
     if (tile.IsMine) {
       const revealedAll = next.map(c => (c.IsMine ? { ...c, Revealed: true } : c));
-      setCells(revealedAll);
-      setStatus("lost");
+      SetCells(revealedAll);
+      SetStatus("Lost");
       return;
     }
 
     // safe tiles
-    setCells(next);
-    setSafeRevealed(v => v + 1);
+    SetCells(next);
+    SetSafeRevealed(v => v + 1);
   }
 
   // Cash out with current if game isnt lost 
   function cashOut() {
-    if (status === "inProgress" && safeRevealed > 0) setStatus("cashed");
+    if (Status === "Playing" && SafeRevealed > 0)SetStatus("Cash");
   }
 
   // Idle reset
   function reset() {
-    setCells(null);
-    setSafeRevealed(0);
-    setStatus("idle");
+    SetCells(null);
+    SetSafeRevealed(0);
+    SetStatus("Idle");
   }
 
   // constant check if game end
-  const gameOver = status === "lost" || status === "cashed";
+  const gameOver = Status === "Lost" || Status === "Cash";
 
   // Board display before start
   const placeholder: CellType[] = Array.from({ length: total }, (_, i) => ({
@@ -93,57 +93,57 @@ export default function App() {
       <div className="panel">
         {/*Allows player to change bet amount*/}
         <label>Bet ($) 
-          <input type="number" min={1} step={1} value={bet}
-                 onChange={(e) => setBet(Number(e.target.value))}/>
+          <input type="number" min={1} step={1} value={Bet}
+                 onChange={(e) => SetBet(Number(e.target.value))}/>
         </label>
 
         {/*Board size changer*/}
         <label>Grid
-          <select value={size} onChange={(e) => setSize(Number(e.target.value))}
-                  disabled={status === "inProgress"}>
-            {[3,4,5,6,7,8].map(n => <option key={n} value={n}>{n} × {n}</option>)}
+          <select value={Size} onChange={(e) => SetSize(Number(e.target.value))}
+                  disabled={Status === "Playing"}>
+            {[3,4,5,6].map(n => <option key={n} value={n}>{n} × {n}</option>)}
           </select>
         </label>
         {/*Mine amount selector*/}
         <label>Mines
-          <input type="number" min={1} max={total-1} value={mines}
-                 onChange={(e) => setMines(Number(e.target.value))}
-                 disabled={status === "inProgress"} />
+          <input type="number" min={1} max={total-1} value={Mines}
+                 onChange={(e) => SetMines(Number(e.target.value))}
+                 disabled={Status === "Playing"} />
         </label>
 
         {/*Inprogress action*/}
-        {status !== "inProgress" ? (
+        {Status !== "Playing" ? (
           <button className="primary" onClick={startGame}>Start</button>
         ) : (
           <>
                   {/*Cash out function*/}
-            <button onClick={cashOut} disabled={safeRevealed === 0}>Cash out</button>
+            <button onClick={cashOut} disabled={SafeRevealed === 0}>Cash out</button>
             <button onClick={reset}>New</button>
           </>
         )}
       </div>
 
-      <div className="badges">
-        <span className="badge">Safes Found: {safeRevealed}</span>
-        <span className="badge">Current Amount ×{currentMult}</span>
-        <span className="badge">Current Payout: ${payoutNow}</span>
-        {status === "inProgress" && (
-          <span className="badge">Next Safe Amount ×{nextFactor} (${nextPayout})</span>
+      <div className="results">
+        <span className="result">Safes Found: {SafeRevealed}</span>
+        <span className="result">Current Amount ×{CurrentMult}</span>
+        <span className="result">Current Payout: ${PayoutNow}</span>
+        {Status === "Playing" && (
+          <span className="result">Next Safe Amount ×{nextFactor} (${NextPayout})</span>
         )}
       </div>
 
       <div className="status">
-        {status === "idle" && <>Press <b>Start</b> to play.</>}
-        {status === "inProgress" && <>Pick Tiles</>}
-        {status === "lost" && <>MINE HIT.</>}
-        {status === "cashed" && <>Cash Out: ${payoutNow}</>}
+        {Status === "Idle" && <>Press <b>Start</b> to play.</>}
+        {Status === "Playing" && <>Pick Tiles</>}
+        {Status === "Lost" && <>MINE HIT.</>}
+        {Status === "Cash" && <>Cash Out: ${PayoutNow}</>}
       </div>
 
       <Board
-        size={size}
-        cells={cells ?? placeholder}
-        gameOver={gameOver}
-        onCellClick={handleCellClick}
+        Size={Size}
+        Cells={Cells ?? placeholder}
+        GameOver={gameOver}
+        OnCellClick={HandleCellClick}
       />
     </div>
   );
