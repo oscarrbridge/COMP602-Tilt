@@ -1,12 +1,14 @@
 import "./GameCard.css";
 import { Link } from "react-router-dom";
 
+// Props for GameCard component
 interface GameCardProps {
   Text: string;
   Image: string;
   LinkTo?: string; // optional route to make card clickable
 }
 
+// Show card with image and text, optionally wrapped in a Link
 export default function GameCard({ Text, Image, LinkTo }: GameCardProps) {
   const CardContent = (
     <div className="GameCardImage" style={{ backgroundImage: `url(${Image})` }}>
