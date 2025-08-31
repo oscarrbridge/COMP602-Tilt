@@ -42,26 +42,27 @@ const SpecialEvents = [
   },
 ];
 
-const PopularGames = [
+export const PopularGames = [
   {
     Text: "Slots",
     Image: "src/assets/Tilt.png",
+    LinkTo: "/slots",
   },
   {
-    Text: "Slots",
-    Image: "src/assets/Tilt.png",
+    Text: "Coming Soon",
+    Image: "src/assets/Future.png",
   },
   {
-    Text: "Slots",
-    Image: "src/assets/Tilt.png",
+    Text: "Coming Soon",
+    Image: "src/assets/Future.png",
   },
   {
-    Text: "Slots",
-    Image: "src/assets/Tilt.png",
+    Text: "Coming Soon",
+    Image: "src/assets/Future.png",
   },
 ];
 
-export default function App() {
+export default function Dashboard() {
   return (
     <AppProvider theme={theme}>
       <div className="NavBar">
@@ -84,6 +85,7 @@ export default function App() {
           <div className="PopularGamesTitle">
             <h2>Popular Games</h2>
           </div>
+
           <div className="PopularGames">
             {PopularGames.map((game, index) => (
               <GameCard key={index} {...game} />
