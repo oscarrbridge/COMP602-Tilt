@@ -1,0 +1,22 @@
+.NavWindowConatiner {
+    background-color: var(--secondary-colour);
+    width: 150px;
+    border-radius: 18px;
+
+    padding: 10px 20px;
+
+    display: flex;
+    flex-direction: column;
+
+    position: absolute;
+    
+}
+
+.NavWindowConatiner p{
+    padding: 10px 0px;
+    border-bottom: 1px solid var(--text-colour);
+}
+
+.NavWindowConatiner p:last-child {
+    border-bottom: none;
+}

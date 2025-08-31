@@ -1,0 +1,35 @@
+.GameCardImage{
+    background-color: var(--accent-colour);
+    background-size: cover;
+    background-position: center;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 175px;
+    height: 260px;
+
+    border-radius: 18px;
+
+    padding: 15px;
+
+    position: relative;
+}
+
+.GameCardText {
+    background-color: var(--secondary-colour);
+
+    width: 100%;
+    
+    text-align: center;
+    position: absolute;
+
+    top: 66%;
+
+    color: var(--text-colour);
+}
+
+.GameCardText h3 {
+    margin: 3px;
+}
