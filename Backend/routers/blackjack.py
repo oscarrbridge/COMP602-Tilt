@@ -33,7 +33,7 @@ def stand(state: blackjack.GameState):
 
 
 @router.post("", summary="Create a new multiplayer game")
-def create_game(body: CreateGameBody):
+def create_game(body: CreateGameRequest):
     # Create a new document reference in the games collection in FireStore
     doc = db.collection("games").document()
     # Initilise the game state in Firestore with assigned values of:
@@ -77,7 +77,7 @@ def get_game(game_id: str):
 
 # Router for players joining to a game
 @router.post("/{game_id}/join", summary="Join waiting game")
-def join_game(game_id: str, body: JoinBody):
+def join_game(game_id: str, body: JoinGameRequest):
     # Grab the games document
     doc = db.collection("games").document(game_id)
     data = doc.get()
@@ -113,7 +113,7 @@ def join_game(game_id: str, body: JoinBody):
 
 # Initlising game logic
 @router.post("/{game_id}/start", summary="Deal two to each player and dealer")
-def start_multiplayer(game_id: str, body: StartBody):
+def start_multiplayer(game_id: str, body: StartGameRequest):
     doc = db.collection("games").document(game_id)
     data = doc.get()
 

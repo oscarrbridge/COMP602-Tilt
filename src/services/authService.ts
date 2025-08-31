@@ -11,7 +11,7 @@ import {
 } from 'firebase/auth';
 
 async function profileData(user: User) {
-  // Create Firestore player profile if it doesn't exist
+  // Create Firestore user profile if it doesn't exist
   const userProfile = doc(db, 'users', user.uid);
   // Grabs the profile that was registered
   const grabUser = await getDoc(userProfile);
