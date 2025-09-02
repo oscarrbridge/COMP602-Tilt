@@ -1,5 +1,7 @@
 import { useState } from "react";
 import "./Blackjack.css";
+import NavBar from "@components/NavBar/NavBar";
+// import { recordBet, recordWin, recordLoss } from '@myfirebase/transactions';
 
 const suits = ["♠", "♥", "♦", "♣"];
 const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
@@ -19,7 +21,7 @@ const cardValue = (card: { rank: string; suit: string }) => {
 export default function Blackjack() {
   const [playerCards, setPlayerCards] = useState<{ rank: string; suit: string }[]>([]);
   const [dealerCards, setDealerCards] = useState<{ rank: string; suit: string }[]>([]);
-  const [balance, setBalance] = useState(100);
+  const [balance, setBalance] = useState(100); // Change to the user balance 
   const [bet, setBet] = useState(10);
   const [lastWin, setLastWin] = useState(0);
   const [roundResult, setRoundResult] = useState("");
@@ -58,7 +60,7 @@ export default function Blackjack() {
     setPlayerCards(newCards);
 
     if (calcScore(newCards) > 21) {
-      setBalance(balance - bet);
+      setBalance(balance - bet); // Change to the user balance 
       setLastWin(0);
       setRoundResult("loss"); // player busts
       setRoundInProgress(false);
@@ -74,7 +76,7 @@ export default function Blackjack() {
     const dealerScore = calcScore(dealerHand);
 
     if (playerScore > 21 || (dealerScore <= 21 && dealerScore > playerScore)) {
-      setBalance(balance - bet);
+      setBalance(balance - bet); // Change to the user balance 
       setLastWin(0);
       setRoundResult("loss");
     }
@@ -82,7 +84,7 @@ export default function Blackjack() {
       setRoundResult("tie");
     }
     else if (playerScore > dealerScore || dealerScore > 21) {
-      setBalance(balance + bet);
+      setBalance(balance + bet); // Change to the user balance 
       setLastWin(bet);
       setRoundResult("win");
     }
@@ -92,6 +94,9 @@ export default function Blackjack() {
 
   return (
     <div className="app-container">
+            <div className="NavBar">
+              <NavBar />
+            </div>
       <h1>♠ Blackjack ♣</h1>
 
       <div className="balance-display">Balance: ${balance}</div>
@@ -104,7 +109,7 @@ export default function Blackjack() {
             id="bet-input"
             type="number"
             min={5}
-            max={balance}
+            max={balance} // Change to the user balance 
             value={bet}
             onChange={(e) =>
               setBet(Math.min(Math.max(Number(e.target.value), 5), balance))
