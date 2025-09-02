@@ -3,14 +3,22 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     match /users/{uid} {
-      // Public read access for leaderboard functionality
+      // Public read (leaderboard)
       allow read: if true;
 
-      // Allow a user to create their own doc if it doesn't exist yet
-      allow create: if request.auth != null && request.auth.uid == uid;
+      // Owner can create & update their user doc
+      allow create, update: if request.auth != null && request.auth.uid == uid;
 
-      // No update/delete allowed
-      allow update, delete: if false;
+      // No delete on user doc
+      allow delete: if false;
+
+      // Transactions subcollection
+      match /transactions/{txId} {
+        // Owner can read and create/update tx docs (no delete)
+        allow read: if request.auth != null && request.auth.uid == uid;
+        allow create, update: if request.auth != null && request.auth.uid == uid;
+        // allow delete: if false; // implicit since not granted
+      }
     }
 
     // Block everything else

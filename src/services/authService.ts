@@ -26,8 +26,11 @@ async function profileData(user: User) {
         // eg: email = tilt_account@gmail.com,
         //     username = tilt_account
         username: user.email?.split('@')[0],
-        // Balance initilised to 0
+        // Balance and history initilised to 0
         balance: 0,
+        totalWinnings: 0,
+        totalLosses: 0,
+        netProfit: 0,
         createdAt: serverTimestamp(),
       },
       // Add merge to prevent override
