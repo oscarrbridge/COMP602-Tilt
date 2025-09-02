@@ -49,8 +49,9 @@ export const PopularGames = [
     LinkTo: "/slots",
   },
   {
-    Text: "Coming Soon",
-    Image: "src/assets/Future.png",
+    Text: "Blackjack",
+    Image: "src/assets/Tilt.png",
+    LinkTo: "/blackjack",
   },
   {
     Text: "Coming Soon",
