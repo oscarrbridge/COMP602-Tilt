@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
 
 import Home from "./App.tsx";
-import Slots from "./slots.tsx";
+import Slots from "./Games/Slots/slots.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
