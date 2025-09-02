@@ -1,6 +1,75 @@
 import { useState, useEffect } from "react";
 import "./Slots.css";
 
+// ---------------- Slot Logic ----------------
+function generateNum(): number {
+  return Math.floor(Math.random() * 17) + 1; // 1–17
+}
+
+function generateRow(): number[] {
+  return Array.from({ length: 5 }, () => generateNum());
+}
+
+function spinSlots(): number[][] {
+  return Array.from({ length: 5 }, () => generateRow());
+}
+
+function getDuplicates(row: number[]): number[] {
+  const unique: number[] = [];
+  const duplicates: number[] = [];
+
+  for (const item of row) {
+    if (!unique.includes(item)) {
+      unique.push(item);
+    } else {
+      duplicates.push(item);
+    }
+  }
+
+  return duplicates;
+}
+
+interface RowResult {
+  match: number;
+  multiplier: number;
+}
+
+function calculateWinnings(slotGrid: number[][]): RowResult[] {
+  const result: RowResult[] = [];
+
+  for (const row of slotGrid) {
+    const duplicates = getDuplicates(row);
+    let rowMultiplier = 0;
+    let matchValue = 0;
+
+    if (duplicates.length > 0) {
+      const amount = duplicates.length + 1;
+      if (amount >= 3) {
+        matchValue = duplicates[0];
+
+        if (amount === 3) rowMultiplier = 1;
+        else if (amount === 4) rowMultiplier = 2;
+        else if (amount === 5) rowMultiplier = 5;
+
+        if (rowMultiplier > 0) {
+          if (matchValue <= 8) rowMultiplier *= 2;
+          else if (matchValue <= 12) rowMultiplier *= 3;
+          else if (matchValue <= 13) rowMultiplier *= 4;
+          else if (matchValue <= 14) rowMultiplier *= 5;
+          else if (matchValue <= 15) rowMultiplier *= 10;
+          else if (matchValue <= 16) rowMultiplier *= 15;
+          else if (matchValue <= 17) rowMultiplier *= 20;
+        }
+      }
+    }
+
+    result.push({ match: matchValue, multiplier: rowMultiplier });
+  }
+
+  return result;
+}
+
+// ---------------- React Component ----------------
 function Slots() {
   const [grid, setGrid] = useState<number[][]>([]);
   const [bet, setBet] = useState<number>(2.0);
@@ -16,42 +85,30 @@ function Slots() {
     [16, 1, 2, 3, 4],
   ];
 
-  const spin = async () => {
+  const spin = () => {
     if (bet > balance) {
       alert("Insufficient balance for this bet.");
       return;
-    } else {
-      try {
-        const res = await fetch("http://127.0.0.1:8000/spin");
-        const data = await res.json();
-        setGrid(data.grid);
-
-        const matches = data.winning_data.map(
-          (row: { match: number; multiplier: number }) => row.match
-        );
-        const multipliers = data.winning_data.map(
-          (row: { match: number; multiplier: number }) => row.multiplier
-        );
-
-        let multiplier = 0;
-        for (const item of multipliers) {
-          if (item > 0) {
-            multiplier += item;
-          }
-        }
-        setWinningCells(matches);
-
-        setBalance((prev) => prev - bet + bet * multiplier);
-        const winAmount = bet * multiplier;
-        if (multiplier > 0) {
-          setLastWin(winAmount);
-        } else {
-          setLastWin(0);
-        }
-      } catch (error) {
-        console.error("Error fetching slot grid:", error);
-      }
     }
+
+    const newGrid = spinSlots();
+    setGrid(newGrid);
+
+    const winningData = calculateWinnings(newGrid);
+    const matches = winningData.map((row) => row.match);
+    const multipliers = winningData.map((row) => row.multiplier);
+
+    let totalMultiplier = multipliers.reduce(
+      (acc, val) => (val > 0 ? acc + val : acc),
+      0
+    );
+
+    setWinningCells(matches);
+
+    setBalance((prev) => prev - bet + bet * totalMultiplier);
+    const winAmount = bet * totalMultiplier;
+
+    setLastWin(winAmount > 0 ? winAmount : 0);
   };
 
   const increaseBet = () => setBet((prev) => prev + 1);
@@ -63,7 +120,10 @@ function Slots() {
 
   return (
     <div className="app-container">
-      <h1>Tilt Slots</h1>
+      <br />
+      <br />
+      <br />
+      <br />
 
       <div className="slot-grid">
         {grid.map((row, rowIndex) => (
@@ -72,16 +132,6 @@ function Slots() {
               const isWinning =
                 winningCells[rowIndex] !== 0 && cell === winningCells[rowIndex];
 
-              console.log(
-                "rowIndex:",
-                rowIndex,
-                "winningCells[rowIndex]:",
-                winningCells[0],
-                winningCells[1],
-                winningCells[2],
-                winningCells[3],
-                winningCells[4]
-              );
               return (
                 <img
                   key={cellIndex}
@@ -94,23 +144,29 @@ function Slots() {
           </div>
         ))}
       </div>
-
-      <button onClick={spin} className="spin-button">
-        Spin Again
-      </button>
-
-      <div className="bet-controls">
-        <button onClick={decreaseBet} className="bet-button">
-          -
-        </button>
-        <span className="bet-value">${bet.toFixed(2)}</span>
-        <button onClick={increaseBet} className="bet-button">
-          +
-        </button>
-      </div>
       <div className="balance-display">Balance: ${balance.toFixed(2)}</div>
-      <div className={`win-display ${lastWin > 0 ? "win-amount" : ""}`}>
-        {lastWin > 0 ? `$${lastWin.toFixed(2)}` : ""}
+      <div className="controls-row">
+        <div className="bet-controls">
+          <button className="bet-button" onClick={decreaseBet}>
+            -
+          </button>
+          <span className="bet-value">${bet.toFixed(2)}</span>
+          <button className="bet-button" onClick={increaseBet}>
+            +
+          </button>
+        </div>
+
+        <button className="spin-button" onClick={spin}>
+          SPIN
+        </button>
+
+        <div className="win-display">
+          {lastWin > 0 ? (
+            <span className="win-amount">+ ${lastWin.toFixed(2)}</span>
+          ) : (
+            <span>&nbsp;</span>
+          )}
+        </div>
       </div>
     </div>
   );
