@@ -1,17 +1,17 @@
-import NavBar from './components/NavBar/NavBar.tsx';
-import SpecialEvent from './components/SpecialEvent/SpecialEvent.tsx';
-import GameCard from './components/GameCard/GameCard.tsx';
-import SearchBar from './components/SearchBar/SearchBar.tsx';
-import { AppProvider } from '@toolpad/core/AppProvider';
-import { createTheme } from '@mui/material/styles';
+import NavBar from "./components/NavBar/NavBar.tsx";
+import SpecialEvent from "./components/SpecialEvent/SpecialEvent.tsx";
+import GameCard from "./components/GameCard/GameCard.tsx";
+import SearchBar from "./components/SearchBar/SearchBar.tsx";
+import { AppProvider } from "@toolpad/core/AppProvider";
+import { createTheme } from "@mui/material/styles";
 
-import './App.css';
+import "./App.css";
 
 // Styling theme
 const theme = createTheme({
   palette: {
     background: {
-      default: 'var(--background)',
+      default: "var(--background)",
     },
   },
 });
@@ -20,59 +20,60 @@ const theme = createTheme({
 
 const SpecialEvents = [
   {
-    EventHook: 'Hook',
-    EventTitle: 'Title',
-    EventDescription: 'Description',
-    EventImage: 'src/assets/Tilt.png',
-    EventLink: '/',
+    EventHook: "Hook",
+    EventTitle: "Title",
+    EventDescription: "Description",
+    EventImage: "src/assets/Tilt.png",
+    EventLink: "/",
   },
   {
-    EventHook: 'Hook',
-    EventTitle: 'Title',
-    EventDescription: 'Description',
-    EventImage: 'src/assets/Tilt.png',
-    EventLink: '/',
+    EventHook: "Hook",
+    EventTitle: "Title",
+    EventDescription: "Description",
+    EventImage: "src/assets/Tilt.png",
+    EventLink: "/",
   },
   {
-    EventHook: 'Hook',
-    EventTitle: 'Title',
-    EventDescription: 'Description',
-    EventImage: 'src/assets/Tilt.png',
-    EventLink: '/',
+    EventHook: "Hook",
+    EventTitle: "Title",
+    EventDescription: "Description",
+    EventImage: "src/assets/Tilt.png",
+    EventLink: "/",
   },
 ];
 
-const PopularGames = [
+export const PopularGames = [
   {
-    Text: 'Slots',
-    Image: 'src/assets/Tilt.png',
+    Text: "Slots",
+    Image: "src/assets/Tilt.png",
+    LinkTo: "/slots",
   },
   {
-    Text: 'Slots',
-    Image: 'src/assets/Tilt.png',
+    Text: "Coming Soon",
+    Image: "src/assets/Future.png",
   },
   {
-    Text: 'Slots',
-    Image: 'src/assets/Tilt.png',
+    Text: "Coming Soon",
+    Image: "src/assets/Future.png",
   },
   {
-    Text: 'Slots',
-    Image: 'src/assets/Tilt.png',
+    Text: "Coming Soon",
+    Image: "src/assets/Future.png",
   },
 ];
 
-export default function App() {
+export default function Dashboard() {
   return (
     <AppProvider theme={theme}>
-      <div className='NavBar'>
+      <div className="NavBar">
         <NavBar />
       </div>
 
-      <div className='SpecialEventsContainer'>
-        <div className='SpecialEventsTitle'>
+      <div className="SpecialEventsContainer">
+        <div className="SpecialEventsTitle">
           <h2>Special Events</h2>
         </div>
-        <div className='SpecialEvents'>
+        <div className="SpecialEvents">
           {SpecialEvents.map((event, index) => (
             <SpecialEvent key={index} {...event} />
           ))}
@@ -80,11 +81,12 @@ export default function App() {
 
         <br />
 
-        <div className='PopularGamesContainer'>
-          <div className='PopularGamesTitle'>
+        <div className="PopularGamesContainer">
+          <div className="PopularGamesTitle">
             <h2>Popular Games</h2>
           </div>
-          <div className='PopularGames'>
+
+          <div className="PopularGames">
             {PopularGames.map((game, index) => (
               <GameCard key={index} {...game} />
             ))}
@@ -93,12 +95,12 @@ export default function App() {
 
         <br />
 
-        <div className='HomeSearchBarContainer'>
-          <div className='HomeSearchBarTitle'>
+        <div className="HomeSearchBarContainer">
+          <div className="HomeSearchBarTitle">
             <h2>Looking for a game?</h2>
           </div>
-          <div className='HomeSearchBar'>
-            <SearchBar Placeholder='Search for a game...' />
+          <div className="HomeSearchBar">
+            <SearchBar Placeholder="Search for a game..." />
           </div>
         </div>
       </div>
