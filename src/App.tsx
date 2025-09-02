@@ -1,3 +1,4 @@
+
 import NavBar from "./components/NavBar/NavBar.tsx";
 import SpecialEvent from "./components/SpecialEvent/SpecialEvent.tsx";
 import GameCard from "./components/GameCard/GameCard.tsx";
@@ -54,8 +55,9 @@ export const PopularGames = [
     LinkTo: "/blackjack",
   },
   {
-    Text: "Coming Soon",
-    Image: "src/assets/Future.png",
+    Text: "Mines",
+    Image: "src/assets/Tilt.png",
+    LinkTo: "/mines",
   },
   {
     Text: "Coming Soon",
