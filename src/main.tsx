@@ -7,15 +7,14 @@ import Home from "./App.tsx";
 import Slots from "./Games/Slots/slots.tsx";
 import MinesPage from "./minespage";
 
-
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/slots" element={<Slots />} />
-        <Route path="/blackjack" element={<Blackjack />}/>
-         <Route path="/mines" element={<MinesPage />} />
+        <Route path="/blackjack" element={<Blackjack />} />
+        <Route path="/mines" element={<MinesPage />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>
