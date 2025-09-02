@@ -1,6 +1,5 @@
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
   font-weight: 400;
 
   color-scheme: light dark;
@@ -11,6 +10,17 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --text-colour: #f3f3f3;
+  --primary-colour: #1d1d1d;
+  --secondary-colour: #2c2c2c;
+  --accent-colour: #af7f10;
+}
+
+p {
+  margin: 0;
+
+  color: var(--text-colour);
 }
 
 a {
@@ -23,9 +33,10 @@ a:hover {
 }
 
 body {
+  background-color: var(--primary-colour);
+
   margin: 0;
   display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
 }

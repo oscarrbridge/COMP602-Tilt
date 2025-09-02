@@ -1,0 +1,21 @@
+.UserBalanceConatiner {
+    background-color: var(--primary-colour);
+    border-radius: 18px;
+
+
+    display: flex;
+    align-items: center;
+
+    gap: 20px;
+}
+
+.UserIcon {
+    background-color: var(--accent-colour);
+    padding: 8px 20px;
+
+    border-radius: 18px;
+}
+
+.DropArrow {
+    padding-right: 10px;
+}

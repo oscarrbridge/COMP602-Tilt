@@ -1,0 +1,61 @@
+.SpecialEventContainer {
+  background-color: var(--secondary-colour);
+  color: var(--text-colour);
+
+  display: flex;
+  flex-direction: row;
+
+  border-radius: 18px;
+
+  gap: 10px;
+  padding: 10px;
+}
+
+.SpecialEventContainer img {
+  object-fit: contain;
+  height: auto;
+  width: 100%;
+}
+
+.Column {
+  width: 50%;
+  height: 225px;
+
+  gap: 10px;
+}
+
+.LeftColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.RightColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.EventSection {
+  padding: 5px 10px;
+
+  border-radius: 18px;
+}
+
+.EventHook,
+.EventButton {
+  background-color: var(--primary-colour);
+
+  text-align: center;
+}
+
+.EventDescription,
+.EventImage {
+    background-color: var(--accent-colour);
+
+  height: 100%;
+}
+
+.EventImage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

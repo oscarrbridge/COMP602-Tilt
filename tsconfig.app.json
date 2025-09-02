@@ -21,7 +21,14 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "@backend/*": ["Backend/*"],
+      "@myfirebase/*": ["Backend/firebase/*"], 
+      "@components/*": ["src/components/*"]
+    }
   },
-  "include": ["src"]
+  "include": ["src", "Backend/firebase/firebaseConfig.ts", "Backend/**/*"]
 }
