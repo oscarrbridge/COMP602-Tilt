@@ -84,12 +84,12 @@ export default function Dashboard() {
 
         <br />
 
-        <div className="PopularGamesContainer">
-          <div className="PopularGamesTitle">
+        <div className="GamesContainer">
+          <div className="GamesTitle">
             <h2>Popular Games</h2>
           </div>
 
-          <div className="PopularGames">
+          <div className="Games">
             {PopularGames.map((game, index) => (
               <GameCard key={index} {...game} />
             ))}
