@@ -1,7 +1,9 @@
 import { useState } from "react";
 import "./Blackjack.css";
 import NavBar from "@components/NavBar/NavBar";
-// import { recordBet, recordWin, recordLoss } from '@myfirebase/transactions';
+import { placeBet, recordWinTx, recordLossTx } from "../../../Backend/transactions";
+import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
+
 
 const suits = ["♠", "♥", "♦", "♣"];
 const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
@@ -19,9 +21,9 @@ const cardValue = (card: { rank: string; suit: string }) => {
 };
 
 export default function Blackjack() {
+  const { user, balance, refreshBalance } = useUser();
   const [playerCards, setPlayerCards] = useState<{ rank: string; suit: string }[]>([]);
   const [dealerCards, setDealerCards] = useState<{ rank: string; suit: string }[]>([]);
-  const [balance, setBalance] = useState(100); // Change to the user balance 
   const [bet, setBet] = useState(10);
   const [lastWin, setLastWin] = useState(0);
   const [roundResult, setRoundResult] = useState("");
@@ -55,19 +57,21 @@ export default function Blackjack() {
     setRoundInProgress(true);
   };
 
-  const hit = () => {
+  const hit = async () => {
     const newCards = [...playerCards, getCard()];
     setPlayerCards(newCards);
 
     if (calcScore(newCards) > 21) {
-      setBalance(balance - bet); // Change to the user balance 
       setLastWin(0);
       setRoundResult("loss"); // player busts
       setRoundInProgress(false);
+
+      await recordLossTx(user.uid, bet, 1, "blackjack");
+      await refreshBalance();
     }
   };
 
-  const stand = () => {
+  const stand = async()  => {
     let dealerHand = [...dealerCards];
     while (calcScore(dealerHand) < 17) dealerHand.push(getCard());
     setDealerCards(dealerHand);
@@ -76,17 +80,22 @@ export default function Blackjack() {
     const dealerScore = calcScore(dealerHand);
 
     if (playerScore > 21 || (dealerScore <= 21 && dealerScore > playerScore)) {
-      setBalance(balance - bet); // Change to the user balance 
       setLastWin(0);
       setRoundResult("loss");
+
+      await recordLossTx(user.uid, bet, 1, "blackjack");
+      await refreshBalance();
+      
     }
     else if (playerScore == dealerScore){
       setRoundResult("tie");
     }
     else if (playerScore > dealerScore || dealerScore > 21) {
-      setBalance(balance + bet); // Change to the user balance 
       setLastWin(bet);
       setRoundResult("win");
+
+      await recordWinTx(user.uid, bet, 1, "blackjack");
+      await refreshBalance();
     }
 
     setRoundInProgress(false);
