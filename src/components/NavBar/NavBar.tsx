@@ -4,6 +4,8 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { auth, db } from "../../../Backend/firebase/firebaseConfig";
 import { useState, useEffect } from "react";
 import TestTransactions from "./transactionTest";
+import { useNavigate } from "react-router-dom"
+
 
 import "./NavBar.css";
 
@@ -11,8 +13,11 @@ import NavWindow from "../NavWindow/NavWindow.tsx";
 import RegisterUser from "../../components/Auth/RegisterUser";
 import SignInPopup from "../../components/Auth/SignInUser";
 import UserBalance from "../UserBalance/UserBalance";
+import type { Style } from "@mui/icons-material";
 
 export default function NavBar() {
+  const navigate = useNavigate();
+
   const [NavActive, SetNavActive] = useState(false);
   // State for showing login popup (Boolean)
   const [LoginActive, SetLogin] = useState(false);
@@ -69,7 +74,7 @@ export default function NavBar() {
   return (
     <>
       <div className="NavBarContainer">
-        <div className="Logo">
+        <div className="Logo" onClick={() => navigate('/')}>
           <img src="src/assets/Tilt.png" width={80} />
         </div>
 
