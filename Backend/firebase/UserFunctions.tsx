@@ -8,6 +8,7 @@ import { doc, getDoc } from 'firebase/firestore';
 export function useUser() {
   const [user, setUser] = useState<{ uid: string; email?: string | null } | null>(null);
   const [balance, setBalance] = useState<number>(0);
+  const [loading, setLoading] = useState(true); // wait for auth check
 
   // Fetch balance from Firestore
   const fetchBalance = async (uid: string) => {
@@ -20,25 +21,32 @@ export function useUser() {
     }
   };
 
-  // Refresh balance manually
+  // Use this after win loss or bet to change the balance
   const refreshBalance = async () => {
-    if (user) await fetchBalance(user.uid);
+    if (!user) throw new Error("User is not logged in");
+    await fetchBalance(user.uid);
   };
 
-  // Listen to auth changes
+  // Get user data
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
         const u = { uid: firebaseUser.uid, email: firebaseUser.email };
         setUser(u);
-        fetchBalance(u.uid);
+        fetchBalance(u.uid).finally(() => setLoading(false));
       } else {
         setUser(null);
         setBalance(0);
+        setLoading(false);
       }
     });
     return () => unsub();
   }, []);
 
-  return { user, balance, refreshBalance };
+  // Ensure user is never null
+  if (!loading && !user) {
+    throw new Error("User is not logged in");
+  }
+
+  return { user: user!, balance, refreshBalance }; // non-null assertion
 }

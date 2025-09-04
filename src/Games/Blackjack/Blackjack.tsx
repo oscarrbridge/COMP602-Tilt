@@ -27,6 +27,7 @@ export default function Blackjack() {
   const [bet, setBet] = useState(10);
   const [lastWin, setLastWin] = useState(0);
   const [roundResult, setRoundResult] = useState("");
+  const [dealerRevealed, setDealerRevealed] = useState(false);
 
   // Track whether a round is in progress
   const [roundInProgress, setRoundInProgress] = useState(false);
@@ -45,7 +46,7 @@ export default function Blackjack() {
     return total;
   };
 
-  const startGame = () => {
+  const startGame = async() => {
     if (bet > balance) {
       alert("Not enough balance!");
       return;
@@ -55,6 +56,11 @@ export default function Blackjack() {
     setDealerCards([getCard(), getCard()]);
     setLastWin(0);
     setRoundInProgress(true);
+    setDealerRevealed(false);
+
+    await placeBet(user.uid, bet,1, "blackjack");
+    await refreshBalance();
+
   };
 
   const hit = async () => {
@@ -72,6 +78,7 @@ export default function Blackjack() {
   };
 
   const stand = async()  => {
+    setDealerRevealed(true);
     let dealerHand = [...dealerCards];
     while (calcScore(dealerHand) < 17) dealerHand.push(getCard());
     setDealerCards(dealerHand);
@@ -81,10 +88,10 @@ export default function Blackjack() {
 
     if (playerScore > 21 || (dealerScore <= 21 && dealerScore > playerScore)) {
       setLastWin(0);
-      setRoundResult("loss");
 
       await recordLossTx(user.uid, bet, 1, "blackjack");
       await refreshBalance();
+      setRoundResult("loss");
       
     }
     else if (playerScore == dealerScore){
@@ -92,10 +99,10 @@ export default function Blackjack() {
     }
     else if (playerScore > dealerScore || dealerScore > 21) {
       setLastWin(bet);
-      setRoundResult("win");
 
-      await recordWinTx(user.uid, bet, 1, "blackjack");
+      await recordWinTx(user.uid, bet*2, 1, "blackjack"); // Double bet to accomadate  
       await refreshBalance();
+      setRoundResult("win");
     }
 
     setRoundInProgress(false);
@@ -104,11 +111,9 @@ export default function Blackjack() {
   return (
     <div className="app-container">
             <div className="NavBar">
-              <NavBar />
+              <NavBar/>
             </div>
       <h1>♠ Blackjack ♣</h1>
-
-      <div className="balance-display">Balance: ${balance}</div>
 
       {/* Bet Input & Deal */}
       {!roundInProgress && (
@@ -138,7 +143,7 @@ export default function Blackjack() {
                 key={i}
                 className={`card ${c.suit === "♥" || c.suit === "♦" ? "red" : ""} dealt`}
               >
-                {i === 1 && roundInProgress ? "??" : `${c.rank}${c.suit}`}
+                {i === 1 && !dealerRevealed ? "??" : `${c.rank}${c.suit}`}
               </div>
             ))}
           </div>

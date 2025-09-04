@@ -9,10 +9,9 @@
   color: #fff;
   font-family: Arial, sans-serif;
 
-  background-image: url('/assets/background.jpg');
   background-size: cover;        
   background-position: center;   
-  background-repeat: no-repeat;  
+  background-color: var(--primary-colour);
 }
 
 h1 {
@@ -21,13 +20,6 @@ h1 {
   font-family: 'Press Start 2P', 'Arial', sans-serif;
   text-shadow: 2px 2px 4px black;
 }
-
-.balance-display {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 15px;
-}
-
 .table {
   width: 90%;
   max-width: 700px;
