@@ -1,10 +1,21 @@
+
 import NavBar from "./components/NavBar/NavBar.tsx";
 import SpecialEvent from "./components/SpecialEvent/SpecialEvent.tsx";
 import GameCard from "./components/GameCard/GameCard.tsx";
 import SearchBar from "./components/SearchBar/SearchBar.tsx";
-import FilterBar from "./components/FilterBar/FilterBar.tsx"
+import { AppProvider } from "@toolpad/core/AppProvider";
+import { createTheme } from "@mui/material/styles";
 
 import "./App.css";
+
+// Styling theme
+const theme = createTheme({
+  palette: {
+    background: {
+      default: "var(--background)",
+    },
+  },
+});
 
 // Required npm packages: react-router-dom
 
@@ -32,28 +43,31 @@ const SpecialEvents = [
   },
 ];
 
-const PopularGames = [
+export const PopularGames = [
   {
     Text: "Slots",
     Image: "src/assets/Tilt.png",
+    LinkTo: "/slots",
   },
   {
-    Text: "Slots",
+    Text: "Blackjack",
     Image: "src/assets/Tilt.png",
+    LinkTo: "/blackjack",
   },
   {
-    Text: "Slots",
+    Text: "Mines",
     Image: "src/assets/Tilt.png",
+    LinkTo: "/mines",
   },
   {
-    Text: "Slots",
-    Image: "src/assets/Tilt.png",
+    Text: "Coming Soon",
+    Image: "src/assets/Future.png",
   },
 ];
 
-export default function App() {
+export default function Dashboard() {
   return (
-    <>
+    <AppProvider theme={theme}>
       <div className="NavBar">
         <NavBar />
       </div>
@@ -70,11 +84,12 @@ export default function App() {
 
         <br />
 
-        <div className="GamesContainer">
-          <div className="GamesTitle">
+        <div className="PopularGamesContainer">
+          <div className="PopularGamesTitle">
             <h2>Popular Games</h2>
           </div>
-          <div className="Games">
+
+          <div className="PopularGames">
             {PopularGames.map((game, index) => (
               <GameCard key={index} {...game} />
             ))}
@@ -91,38 +106,7 @@ export default function App() {
             <SearchBar Placeholder="Search for a game..." />
           </div>
         </div>
-
-        <br />
-
-            <div className="FilterBar">
-              <FilterBar />
-            </div>
-
-        <br />
-
-        <div className="GamesContainer">
-          <div className="GamesTitle">
-            <h2>Sports</h2>
-          </div>
-          <div className="Games">
-            {PopularGames.map((game, index) => (
-              <GameCard key={index} {...game} />
-            ))}
-          </div>
-        </div>
-
-
-        <div className="GamesContainer">
-          <div className="GamesTitle">
-            <h2>Slots</h2>
-          </div>
-          <div className="Games">
-            {PopularGames.map((game, index) => (
-              <GameCard key={index} {...game} />
-            ))}
-          </div>
-        </div>
       </div>
-    </>
+    </AppProvider>
   );
 }
