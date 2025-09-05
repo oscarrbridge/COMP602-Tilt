@@ -1,0 +1,23 @@
+.StatisticsContainer {
+    display: flex;
+    flex-direction: row;
+
+    justify-content: space-around;
+
+    padding-top: 40px;
+}
+
+.StatisticsComponent {
+    background-color: var(--secondary-colour);
+    width: 40%;
+    height: 75vh;
+    border-radius: 18px;
+
+    display: flex;
+    flex-direction: column;
+    overflow: scroll;
+
+    gap: 10px;
+    padding: 15px 25px;
+    
+}
