@@ -2,6 +2,7 @@
     background-color: var(--secondary-colour);
     width: 150px;
     border-radius: 18px;
+    border: 0.7px solid var(--text-colour);
 
     padding: 10px 20px;
 
@@ -10,6 +11,7 @@
 
     position: absolute;
     
+    z-index: 9999;
 }
 
 .NavWindowContainer div{
