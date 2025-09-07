@@ -32,5 +32,18 @@
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.35.1",
     "vite": "^7.0.4"
-  }
+  },
+  "description": "https://desktop.github.com/download/",
+  "main": "eslint.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oscarrbridge/COMP602-Tilt.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/oscarrbridge/COMP602-Tilt/issues"
+  },
+  "homepage": "https://github.com/oscarrbridge/COMP602-Tilt#readme"
 }
