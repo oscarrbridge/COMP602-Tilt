@@ -3,10 +3,12 @@ import NavBar from "./components/NavBar/NavBar.tsx";
 import SpecialEvent from "./components/SpecialEvent/SpecialEvent.tsx";
 import GameCard from "./components/GameCard/GameCard.tsx";
 import SearchBar from "./components/SearchBar/SearchBar.tsx";
+import FilterBar from "./components/FilterBar/FilterBar.tsx"
 import { AppProvider } from "@toolpad/core/AppProvider";
 import { createTheme } from "@mui/material/styles";
 
 import "./App.css";
+import { Filter } from "@mui/icons-material";
 
 // Styling theme
 const theme = createTheme({
@@ -66,6 +68,7 @@ export const PopularGames = [
 ];
 
 export default function Dashboard() {
+
   return (
     <AppProvider theme={theme}>
       <div className="NavBar">
@@ -84,12 +87,12 @@ export default function Dashboard() {
 
         <br />
 
-        <div className="PopularGamesContainer">
-          <div className="PopularGamesTitle">
+        <div className="GamesContainer">
+          <div className="GamesTitle">
             <h2>Popular Games</h2>
           </div>
 
-          <div className="PopularGames">
+          <div className="Games">
             {PopularGames.map((game, index) => (
               <GameCard key={index} {...game} />
             ))}
@@ -106,6 +109,14 @@ export default function Dashboard() {
             <SearchBar Placeholder="Search for a game..." />
           </div>
         </div>
+
+        <div className="FilterBarContainer">
+          <div className="FilterBar">
+            <FilterBar />
+          </div>
+        </div>
+
+
       </div>
     </AppProvider>
   );
