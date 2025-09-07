@@ -1,4 +1,4 @@
-# To run this file:
+# To run this file: 
 
 
 # Make sure python extension is installed.
@@ -12,8 +12,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from Backend.firebase.firebase_config import db
-from Backend.routers.blackjack import router as blackjack_router
+from Backend.firebase_config import db
 
 app = FastAPI()
 
@@ -25,17 +24,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(blackjack_router)
-
-
 @app.get("/")
 def read_root():
     return {"message": "Backend is running!"}
 
 
-@app.get("/ping")
-def ping_firestore():
-    doc_ref = db.collection("demo").document("ping")
-    doc_ref.set({"ok": True})
-    snap = doc_ref.get()
-    return {"doc_id": snap.id, "data": snap.to_dict()}
+    
