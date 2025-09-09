@@ -1,8 +1,7 @@
-.NavWindowContainer {
+.NavWindowConatiner {
     background-color: var(--secondary-colour);
     width: 150px;
     border-radius: 18px;
-    border: 0.7px solid var(--text-colour);
 
     padding: 10px 20px;
 
@@ -11,24 +10,13 @@
 
     position: absolute;
     
-    z-index: 9999;
 }
 
-.NavWindowContainer div{
+.NavWindowConatiner p{
     padding: 10px 0px;
     border-bottom: 1px solid var(--text-colour);
 }
 
-.NavWindowContainer div:last-child {
+.NavWindowConatiner p:last-child {
     border-bottom: none;
-}
-
-.NavWindowContainer p:hover {
-    background-color: var(--primary-colour);
-    border-radius: 18px;
-    cursor: pointer;
-}
-
-.NavWindowContainer p {
-    padding: 6px 12px;
 }

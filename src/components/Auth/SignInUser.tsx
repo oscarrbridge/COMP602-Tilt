@@ -1,5 +1,6 @@
 // SignInUser.tsx contains the login form with email/password fields and calls authService.js
 
+import { createTheme } from '@mui/material/styles';
 import { signInUser, signInWithGoogle } from '../../services/authService';
 import {
   Dialog,
@@ -13,7 +14,16 @@ import {
   InputAdornment,
 } from '@mui/material';
 import { Google as GoogleIcon, Visibility, VisibilityOff } from '@mui/icons-material';
+import { AppProvider } from '@toolpad/core/AppProvider';
 import * as React from 'react';
+
+// Theme for SignIn
+const theme = createTheme({
+  palette: {
+    primary: { main: '#000000ff' },
+    secondary: { main: '#000000' },
+  },
+});
 
 type SignInPopupProps = {
   open: boolean;
@@ -78,7 +88,8 @@ export default function SignInPopup({ open, onClose }: SignInPopupProps) {
   }
 
   return (
-    <>
+    // Provide MUI theme via AppProvider
+    <AppProvider theme={theme}>
       {/* Dialog popup for sign-in */}
       <Dialog open={open} onClose={onClose} fullWidth maxWidth='xs'>
         <DialogTitle>Welcome back</DialogTitle>
@@ -143,6 +154,6 @@ export default function SignInPopup({ open, onClose }: SignInPopupProps) {
           </Stack>
         </DialogContent>
       </Dialog>
-    </>
+    </AppProvider>
   );
 }

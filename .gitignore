@@ -5,8 +5,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
-firebase-debug.log*
-firebase-debug.*.log*
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
@@ -41,9 +39,7 @@ build/Release
 
 # Dependency directories
 node_modules/
-bower_components/
 jspm_packages/
-web_modules/
 
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
@@ -120,6 +116,9 @@ dist
 # DynamoDB Local files
 .dynamodb/
 
+# Firebase cache directory
+.firebase/
+
 # TernJS port file
 .tern-port
 
@@ -138,19 +137,3 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
-
-# dotenv / secrets
-.env
-
-.env.*
-!.env.example
-*.pem
-*.p12
-*.json   # ignore ALL json keys (safe), see below for exceptions
-
-# Firebase
-.firebase/
-# Keep rules + indexes tracked:
-!Backend/firebase/firestore.rules
-!Backend/firebase/firestore.indexes.json
-

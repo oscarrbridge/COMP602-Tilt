@@ -1,5 +1,6 @@
 // RegisterUser.tsx contains the register form with email/password fields and calls authService.js
 
+import { createTheme } from '@mui/material/styles';
 import { registerUser, signInWithGoogle } from '../../services/authService';
 import {
   Dialog,
@@ -13,7 +14,16 @@ import {
   InputAdornment,
 } from '@mui/material';
 import { Google as GoogleIcon, Visibility, VisibilityOff } from '@mui/icons-material';
+import { AppProvider } from '@toolpad/core/AppProvider';
 import * as React from 'react';
+
+// Theme for Register
+const theme = createTheme({
+  palette: {
+    primary: { main: '#000000ff' },
+    secondary: { main: '#000000' },
+  },
+});
 
 type RegisterPopupProps = {
   open: boolean;
@@ -88,7 +98,8 @@ export default function RegisterUser({ open, onClose }: RegisterPopupProps) {
   }
 
   return (
-    <>
+    // Provide MUI theme via AppProvider
+    <AppProvider theme={theme}>
       <Dialog open={open} onClose={onClose} maxWidth='xs' fullWidth>
         {/* Dialog popup for sign-in */}
         <DialogTitle>Create your account</DialogTitle>
@@ -182,6 +193,6 @@ export default function RegisterUser({ open, onClose }: RegisterPopupProps) {
           </Stack>
         </DialogContent>
       </Dialog>
-    </>
+    </AppProvider>
   );
 }
