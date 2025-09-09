@@ -1,6 +1,7 @@
 .GameCardImage{
     background-color: var(--accent-colour);
-    background-size: cover;
+    background-size: 110%;
+    background-repeat: no-repeat;
     background-position: center;
 
     display: flex;

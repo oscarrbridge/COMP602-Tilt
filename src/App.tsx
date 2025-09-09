@@ -48,17 +48,17 @@ const SpecialEvents = [
 export const PopularGames = [
   {
     Text: "Slots",
-    Image: "src/assets/Tilt.png",
+    Image: "src/assets/icon-slots.png",
     LinkTo: "/slots",
   },
   {
     Text: "Blackjack",
-    Image: "src/assets/Tilt.png",
+    Image: "src/assets/icon-blackjack.png",
     LinkTo: "/blackjack",
   },
   {
     Text: "Mines",
-    Image: "src/assets/Tilt.png",
+    Image: "src/assets/icon-bomb.png",
     LinkTo: "/mines",
   },
   {
