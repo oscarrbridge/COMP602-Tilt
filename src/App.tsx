@@ -1,10 +1,10 @@
-
 import NavBar from "./components/NavBar/NavBar.tsx";
 import SpecialEvent from "./components/SpecialEvent/SpecialEvent.tsx";
 import GameCard from "./components/GameCard/GameCard.tsx";
 import SearchBar from "./components/SearchBar/SearchBar.tsx";
 import { AppProvider } from "@toolpad/core/AppProvider";
 import { createTheme } from "@mui/material/styles";
+import { CurrencyProvider } from "./components/CurrencySwitcher/currencyswitcher.tsx"; 
 
 import "./App.css";
 
@@ -17,8 +17,7 @@ const theme = createTheme({
   },
 });
 
-// Required npm packages: react-router-dom
-
+// Special Events data
 const SpecialEvents = [
   {
     EventHook: "Hook",
@@ -43,6 +42,7 @@ const SpecialEvents = [
   },
 ];
 
+// Popular games data
 export const PopularGames = [
   {
     Text: "Slots",
@@ -67,46 +67,49 @@ export const PopularGames = [
 
 export default function Dashboard() {
   return (
-    <AppProvider theme={theme}>
-      <div className="NavBar">
-        <NavBar />
-      </div>
-
-      <div className="SpecialEventsContainer">
-        <div className="SpecialEventsTitle">
-          <h2>Special Events</h2>
-        </div>
-        <div className="SpecialEvents">
-          {SpecialEvents.map((event, index) => (
-            <SpecialEvent key={index} {...event} />
-          ))}
+    // Wrapper for Currency Nav Bar
+    <CurrencyProvider base="NZD" DefaultCurrency="NZD">
+      <AppProvider theme={theme}>
+        <div className="NavBar">
+          <NavBar />
         </div>
 
-        <br />
-
-        <div className="PopularGamesContainer">
-          <div className="PopularGamesTitle">
-            <h2>Popular Games</h2>
+        <div className="SpecialEventsContainer">
+          <div className="SpecialEventsTitle">
+            <h2>Special Events</h2>
           </div>
-
-          <div className="PopularGames">
-            {PopularGames.map((game, index) => (
-              <GameCard key={index} {...game} />
+          <div className="SpecialEvents">
+            {SpecialEvents.map((event, index) => (
+              <SpecialEvent key={index} {...event} />
             ))}
           </div>
-        </div>
 
-        <br />
+          <br />
 
-        <div className="HomeSearchBarContainer">
-          <div className="HomeSearchBarTitle">
-            <h2>Looking for a game?</h2>
+          <div className="PopularGamesContainer">
+            <div className="PopularGamesTitle">
+              <h2>Popular Games</h2>
+            </div>
+
+            <div className="PopularGames">
+              {PopularGames.map((game, index) => (
+                <GameCard key={index} {...game} />
+              ))}
+            </div>
           </div>
-          <div className="HomeSearchBar">
-            <SearchBar Placeholder="Search for a game..." />
+
+          <br />
+
+          <div className="HomeSearchBarContainer">
+            <div className="HomeSearchBarTitle">
+              <h2>Looking for a game?</h2>
+            </div>
+            <div className="HomeSearchBar">
+              <SearchBar Placeholder="Search for a game..." />
+            </div>
           </div>
         </div>
-      </div>
-    </AppProvider>
+      </AppProvider>
+    </CurrencyProvider>
   );
 }
