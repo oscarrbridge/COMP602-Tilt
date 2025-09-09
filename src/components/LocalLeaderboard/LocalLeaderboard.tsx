@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import './LocalLeaderboard.css'
 
 export default function LocalLeaderboard()
@@ -69,6 +70,8 @@ export default function LocalLeaderboard()
     );
 }
 =======
+=======
+>>>>>>> Stashed changes
 import './LocalLeaderboard.css';
 
 import { collection, onSnapshot as update, query, orderBy, limit } from 'firebase/firestore';
@@ -131,4 +134,7 @@ export default function LocalLeaderboard() {
     </>
   );
 }
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes

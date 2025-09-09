@@ -7,6 +7,7 @@ import TestTransactions from "./transactionTest";
 import { useNavigate } from "react-router-dom"
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
 import "./NavBar.css";
 
@@ -16,6 +17,8 @@ import SignInPopup from "../../components/Auth/SignInUser";
 import UserBalance from "../UserBalance/UserBalance";
 import type { Style } from "@mui/icons-material";
 =======
+=======
+>>>>>>> Stashed changes
 import './NavBar.css';
 
 import LoginWindow from '../LoginWindow/LoginWindow.tsx';
@@ -31,6 +34,9 @@ import NavWindow from '../NavWindow/NavWindow.tsx';
 import RegisterUser from '../../components/Auth/RegisterUser';
 import SignInPopup from '../../components/Auth/SignInUser';
 import UserBalance from '../UserBalance/UserBalance';
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
 export default function NavBar() {
@@ -79,7 +85,11 @@ export default function NavBar() {
     }
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     const data = doc(db, "users", user.uid);
+=======
+    const data = doc(db, 'users', user.uid);
+>>>>>>> Stashed changes
 =======
     const data = doc(db, 'users', user.uid);
 >>>>>>> Stashed changes
@@ -95,6 +105,7 @@ export default function NavBar() {
 
   return (
     <>
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       <div className="NavBarContainer">
         <div className="Logo" onClick={() => navigate('/')}>
@@ -114,6 +125,8 @@ export default function NavBar() {
             >
               <img src="src/assets/caret-icon.png" width={25} />
 =======
+=======
+>>>>>>> Stashed changes
       <div className='NavBarContainer'>
         <div className='Logo' onClick={() => navigate('/')}>
           <img src='src/assets/Tilt.png' width={80} />
@@ -131,6 +144,9 @@ export default function NavBar() {
               onMouseLeave={() => SetNavActive(false)}
             >
               <img src='src/assets/caret-icon.png' width={25} />
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
               {NavActive && <NavWindow />}
             </div>
@@ -138,8 +154,11 @@ export default function NavBar() {
         </div>
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         <div className="LoginControls">
 =======
+=======
+>>>>>>> Stashed changes
         <div className='LoginControls'>
 >>>>>>> Stashed changes
           {/* If user is logged in, show their info and logout */}

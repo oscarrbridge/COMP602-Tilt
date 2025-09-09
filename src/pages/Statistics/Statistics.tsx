@@ -1,4 +1,5 @@
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import './Statistics.css'
 import NavBar from '../../components/NavBar/NavBar.tsx'
 
@@ -21,6 +22,8 @@ export default function Statistics()
     );
 } 
 =======
+=======
+>>>>>>> Stashed changes
 import './Statistics.css';
 import NavBar from '../../components/NavBar/NavBar.tsx';
 
@@ -44,4 +47,7 @@ export default function Statistics() {
     </>
   );
 }
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes

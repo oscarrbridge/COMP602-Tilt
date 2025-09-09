@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import './TransactionHistory.css'
 
 export default function()
@@ -68,6 +69,8 @@ export default function()
     );
 }
 =======
+=======
+>>>>>>> Stashed changes
 import './TransactionHistory.css';
 
 import { collection, onSnapshot as update } from 'firebase/firestore';
@@ -149,4 +152,7 @@ export default function () {
     </>
   );
 }
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
