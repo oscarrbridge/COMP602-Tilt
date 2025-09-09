@@ -1,0 +1,16 @@
+.WithdrawForm {
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.WithdrawForm input, .WithdrawForm select{
+    height: 30px;
+    border-radius: 18px;
+}
+
+.WithdrawForm button {
+    border-radius: 18px;
+}
+

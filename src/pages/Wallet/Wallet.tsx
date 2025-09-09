@@ -1,6 +1,7 @@
 import './Wallet.css'
 import NavBar from '../../components/NavBar/NavBar.tsx'
 import Withdraw from '../../components/Withdraw/Withdraw.tsx'
+import Deposit from '../../components/Deposit/Deposit.tsx';
 
 export default function Wallet()
 {
@@ -8,11 +9,18 @@ export default function Wallet()
         <>
             <NavBar />
 
-            <div className=''>
+            <div className='WalletContainer'>
+                <div className='DepositContainer'>
+                    <h2>Deposit</h2>
+                    <Deposit />
+                </div>
 
-
+                <div className='WithdrawContainer'>
+                    <h2>Withdraw</h2>
+                    <Withdraw />
+                </div>
             </div>
-            <Withdraw />
+            
         </>
     );
 } 

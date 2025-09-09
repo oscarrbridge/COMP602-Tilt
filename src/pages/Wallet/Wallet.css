@@ -1,0 +1,15 @@
+.WalletContainer {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    padding: 20px;
+    }
+
+.DepositContainer,
+.WithdrawContainer {
+    width: 40%;
+    background-color: var(--secondary-colour);
+    padding: 20px;
+    border-radius: 18px;
+}
