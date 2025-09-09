@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import './TransactionHistory.css'
 
 export default function()
@@ -69,6 +70,8 @@ export default function()
     );
 }
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 import './TransactionHistory.css';
@@ -153,6 +156,9 @@ export default function () {
   );
 }
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes

@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom"
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
 import "./NavBar.css";
 
@@ -17,6 +18,8 @@ import SignInPopup from "../../components/Auth/SignInUser";
 import UserBalance from "../UserBalance/UserBalance";
 import type { Style } from "@mui/icons-material";
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 import './NavBar.css';
@@ -35,6 +38,9 @@ import RegisterUser from '../../components/Auth/RegisterUser';
 import SignInPopup from '../../components/Auth/SignInUser';
 import UserBalance from '../UserBalance/UserBalance';
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
@@ -86,7 +92,11 @@ export default function NavBar() {
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     const data = doc(db, "users", user.uid);
+=======
+    const data = doc(db, 'users', user.uid);
+>>>>>>> Stashed changes
 =======
     const data = doc(db, 'users', user.uid);
 >>>>>>> Stashed changes
@@ -105,6 +115,7 @@ export default function NavBar() {
 
   return (
     <>
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
       <div className="NavBarContainer">
@@ -127,6 +138,8 @@ export default function NavBar() {
 =======
 =======
 >>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
       <div className='NavBarContainer'>
         <div className='Logo' onClick={() => navigate('/')}>
           <img src='src/assets/Tilt.png' width={80} />
@@ -145,6 +158,9 @@ export default function NavBar() {
             >
               <img src='src/assets/caret-icon.png' width={25} />
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
@@ -155,8 +171,11 @@ export default function NavBar() {
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         <div className="LoginControls">
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
         <div className='LoginControls'>

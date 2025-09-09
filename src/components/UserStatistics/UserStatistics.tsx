@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import './UserStatistics.css'
 
 export default function UserStatistics()
@@ -106,6 +107,8 @@ export default function UserStatistics()
         );
 }
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 import { doc, collection, onSnapshot as onUpdate } from 'firebase/firestore';
@@ -265,6 +268,9 @@ export default function GetStatistics() {
   );
 }
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
