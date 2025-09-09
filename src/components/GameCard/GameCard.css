@@ -16,6 +16,12 @@
     padding: 15px;
 
     position: relative;
+
+    transition: all 0.3s ease;
+}
+
+.GameCardImage:hover {
+    transform: scale(1.03);
 }
 
 .GameCardText {
