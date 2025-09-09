@@ -60,7 +60,7 @@ h1 {
   justify-content: center;
   transform: translateY(-150px);
   opacity: 0;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition: transform 0s ease, opacity 0s ease;
 }
 
 .card.red {

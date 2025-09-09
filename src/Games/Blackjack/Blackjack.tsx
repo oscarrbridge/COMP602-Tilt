@@ -28,6 +28,7 @@ export default function Blackjack() {
   const [lastWin, setLastWin] = useState(0);
   const [roundResult, setRoundResult] = useState("");
   const [dealerRevealed, setDealerRevealed] = useState(false);
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   // Track whether a round is in progress
   const [roundInProgress, setRoundInProgress] = useState(false);
@@ -44,6 +45,22 @@ export default function Blackjack() {
       aces--;
     }
     return total;
+  };
+
+
+  const getDealerDisplayScore = () => {
+    if (!roundInProgress) {
+      // Round over → reveal full dealer score
+      return calcScore(dealerCards);
+    }
+
+    if (dealerCards.length > 1) {
+      // Hide second card, show only the first one’s value
+      const firstCardValue = cardValue(dealerCards[0]);
+      return `${firstCardValue} + ??`;
+    }
+
+    return "??";
   };
 
   const startGame = async() => {
@@ -80,8 +97,17 @@ export default function Blackjack() {
   const stand = async()  => {
     setDealerRevealed(true);
     let dealerHand = [...dealerCards];
-    while (calcScore(dealerHand) < 17) dealerHand.push(getCard());
+
     setDealerCards(dealerHand);
+    await sleep(800);
+
+    while (calcScore(dealerHand) < 17) {
+      dealerHand.push(getCard());
+      setDealerCards([...dealerHand]); 
+      await sleep(800); // delay between draws
+  }
+
+    
 
     const playerScore = calcScore(playerCards);
     const dealerScore = calcScore(dealerHand);
@@ -136,14 +162,14 @@ export default function Blackjack() {
       {/* Table */}
       <div className="table">
         <div className="hand-container">
-          <h2>Dealer ({roundInProgress ? "??" : calcScore(dealerCards)})</h2>
+          <h2>Dealer ({getDealerDisplayScore()})</h2>
           <div className="cards">
             {dealerCards.map((c, i) => (
               <div
                 key={i}
                 className={`card ${c.suit === "♥" || c.suit === "♦" ? "red" : ""} dealt`}
               >
-                {i === 1 && !dealerRevealed ? "??" : `${c.rank}${c.suit}`}
+                {i === 1 && roundInProgress  ? "??" : `${c.rank}${c.suit}`}
               </div>
             ))}
           </div>
