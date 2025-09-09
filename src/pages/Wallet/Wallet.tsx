@@ -11,12 +11,12 @@ export default function Wallet()
 
             <div className='WalletContainer'>
                 <div className='DepositContainer'>
-                    <h2>Deposit</h2>
+                    <h2>Deposit Funds</h2>
                     <Deposit />
                 </div>
 
                 <div className='WithdrawContainer'>
-                    <h2>Withdraw</h2>
+                    <h2>Withdraw Funds</h2>
                     <Withdraw />
                 </div>
             </div>

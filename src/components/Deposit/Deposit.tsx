@@ -3,9 +3,12 @@ import './Deposit.css'
 export default function Deposit() {
     return(
         <>
-            <div >
+            <div>
+                <br />
                 <form className='WithdrawForm'>
-                    <input type='number'></input>
+                    <label>Amount:</label>
+                    <input type='number' placeholder="Enter amount"></input>
+                    <label>Currency:</label>
                     <select>
                         <option value={"NZD"}>NZD</option>
                         <option value={"USD"}>USD</option>
