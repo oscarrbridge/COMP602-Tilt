@@ -1,9 +1,9 @@
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import type { User } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { auth, db } from '../../../Backend/firebase/firebaseConfig';
 import { useState, useEffect } from 'react';
-import TestTransactions from './transactionTest';
+import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+
+import { auth, db } from '../../../Backend/firebase/firebaseConfig';
 
 import './NavBar.css';
 
@@ -11,8 +11,11 @@ import NavWindow from '../NavWindow/NavWindow.tsx';
 import RegisterUser from '../../components/Auth/RegisterUser';
 import SignInPopup from '../../components/Auth/SignInUser';
 import UserBalance from '../UserBalance/UserBalance';
+import TestTransactions from './transactionTest';
 
 export default function NavBar() {
+  const navigate = useNavigate();
+
   const [NavActive, SetNavActive] = useState(false);
   // State for showing login popup (Boolean)
   const [LoginActive, SetLogin] = useState(false);
@@ -69,27 +72,27 @@ export default function NavBar() {
   return (
     <>
       <div className='NavBarContainer'>
-        <div className='Logo'>
+        <div className='Logo' onClick={() => navigate('/')}>
           <img src='src/assets/Tilt.png' width={80} />
         </div>
 
         <div className='UserBalance'>
-          <div
-            className='UserBalanceContainer'
-            onMouseEnter={() => SetNavActive(true)}
-            onMouseLeave={() => SetNavActive(false)}
-          >
+          <div className='UserBalanceContainer'>
             <div className='UserIcon'>
               <img src='src/assets/user-icon.png' width={25} />
             </div>
             <UserBalance balance={balance} />
-            <div className='DropArrow'>
-              <img src='src/assets/user-icon.png' width={25} />
+            <div
+              className='DropArrow'
+              onMouseEnter={() => SetNavActive(true)}
+              onMouseLeave={() => SetNavActive(false)}
+            >
+              <img src='src/assets/caret-icon.png' width={25} />
+
               {NavActive && <NavWindow />}
             </div>
           </div>
         </div>
-
         <div className='LoginControls'>
           {/* If user is logged in, show their info and logout */}
           {user ? (

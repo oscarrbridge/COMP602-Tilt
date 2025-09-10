@@ -1,0 +1,12 @@
+.StatisticsTable table {
+    width: 100%;
+
+    text-align: left;
+
+    justify-content: space-between;
+
+    border-spacing: 20px;
+
+    overflow: scroll;
+
+}
