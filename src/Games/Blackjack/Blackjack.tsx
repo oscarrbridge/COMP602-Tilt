@@ -3,7 +3,7 @@ import "./Blackjack.css";
 import NavBar from "@components/NavBar/NavBar";
 import { placeBet, recordWinTx, recordLossTx } from "../../../Backend/transactions";
 import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
-
+import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx"; 
 
 const suits = ["♠", "♥", "♦", "♣"];
 const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
@@ -136,9 +136,12 @@ export default function Blackjack() {
 
   return (
     <div className="app-container">
+          <CurrencyProvider base="NZD" DefaultCurrency="NZD">
             <div className="NavBar">
               <NavBar/>
             </div>
+          </CurrencyProvider>
+            
       <h1>♠ Blackjack ♣</h1>
 
       {/* Bet Input & Deal */}
