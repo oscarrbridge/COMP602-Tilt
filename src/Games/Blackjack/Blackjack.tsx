@@ -4,6 +4,7 @@ import NavBar from "@components/NavBar/NavBar";
 import { placeBet, recordWinTx, recordLossTx } from "../../../Backend/transactions";
 import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
 import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx"; 
+import BetControls from "../BetControls.tsx";
 
 const suits = ["♠", "♥", "♦", "♣"];
 const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
@@ -28,8 +29,9 @@ export default function Blackjack() {
   const [lastWin, setLastWin] = useState(0);
   const [roundResult, setRoundResult] = useState("");
   const [dealerRevealed, setDealerRevealed] = useState(false);
+  const [betInBase, setBetInBase] = useState(0);
   const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
+  
   // Track whether a round is in progress
   const [roundInProgress, setRoundInProgress] = useState(false);
 
@@ -62,20 +64,20 @@ export default function Blackjack() {
 
     return "??";
   };
-
-  const startGame = async() => {
-    if (bet > balance) {
+  const startGame = async(newBetInBase : number) => {
+    if (newBetInBase > balance) {
       alert("Not enough balance!");
       return;
     }
 
+    setBetInBase(newBetInBase);
     setPlayerCards([getCard(), getCard()]);
     setDealerCards([getCard(), getCard()]);
     setLastWin(0);
     setRoundInProgress(true);
     setDealerRevealed(false);
 
-    await placeBet(user.uid, bet,1, "blackjack");
+    await placeBet(user.uid, newBetInBase,1, "blackjack");
     await refreshBalance();
 
   };
@@ -89,7 +91,7 @@ export default function Blackjack() {
       setRoundResult("loss"); // player busts
       setRoundInProgress(false);
 
-      await recordLossTx(user.uid, bet, 1, "blackjack");
+      await recordLossTx(user.uid, betInBase, 1, "blackjack");
       await refreshBalance();
     }
   };
@@ -115,7 +117,7 @@ export default function Blackjack() {
     if (playerScore > 21 || (dealerScore <= 21 && dealerScore > playerScore)) {
       setLastWin(0);
 
-      await recordLossTx(user.uid, bet, 1, "blackjack");
+      await recordLossTx(user.uid, betInBase, 1, "blackjack");
       await refreshBalance();
       setRoundResult("loss");
       
@@ -126,7 +128,7 @@ export default function Blackjack() {
     else if (playerScore > dealerScore || dealerScore > 21) {
       setLastWin(bet);
 
-      await recordWinTx(user.uid, bet*2, 1, "blackjack"); // Double bet to accomadate  
+      await recordWinTx(user.uid, betInBase*2, 1, "blackjack"); // Double bet to accomadate  
       await refreshBalance();
       setRoundResult("win");
     }
@@ -140,27 +142,14 @@ export default function Blackjack() {
             <div className="NavBar">
               <NavBar/>
             </div>
-          </CurrencyProvider>
             
       <h1>♠ Blackjack ♣</h1>
 
       {/* Bet Input & Deal */}
       {!roundInProgress && (
-        <div className="bet-controls">
-          <label htmlFor="bet-input">Bet Amount:</label>
-          <input
-            id="bet-input"
-            type="number"
-            min={5}
-            max={balance} // Change to the user balance 
-            value={bet}
-            onChange={(e) =>
-              setBet(Math.min(Math.max(Number(e.target.value), 5), balance))
-            }
-          />
-          <button onClick={startGame}>Deal</button>
-        </div>
+          <BetControls balance={balance} bet={bet} setBet={setBet} startGame={startGame} />
       )}
+      </CurrencyProvider>
 
       {/* Table */}
       <div className="table">
