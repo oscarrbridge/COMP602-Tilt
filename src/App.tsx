@@ -6,6 +6,11 @@ import SearchBar from "./components/SearchBar/SearchBar.tsx";
 import FilterBar from "./components/FilterBar/FilterBar.tsx"
 import { AppProvider } from "@toolpad/core/AppProvider";
 import { createTheme } from "@mui/material/styles";
+// Carousel Slider Import
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import Slider from "react-slick";
+import type { Settings } from "react-slick";
 
 import "./App.css";
 import { Filter } from "@mui/icons-material";
@@ -19,9 +24,15 @@ const theme = createTheme({
   },
 });
 
-// Required npm packages: react-router-dom
 
 const SpecialEvents = [
+  {
+    EventHook: "Hook",
+    EventTitle: "Title",
+    EventDescription: "Description",
+    EventImage: "src/assets/Tilt.png",
+    EventLink: "/",
+  },
   {
     EventHook: "Hook",
     EventTitle: "Title",
@@ -68,6 +79,39 @@ export const PopularGames = [
 ];
 
 export default function Dashboard() {
+  // Carousel setting changes
+  const sliderSettings: Settings = {
+    dots: true,
+    arrows: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 3,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3500,
+    pauseOnHover: true,
+    centerMode: false,
+    responsive: [
+      {
+        breakpoint: 1200,
+        settings: {
+          slidesToShow: 3,
+        },
+      },
+      {
+        breakpoint: 900,
+        settings: {
+          slidesToShow: 2,
+        },
+      },
+      {
+        breakpoint: 600,
+        settings: {
+          slidesToShow: 1,
+        },
+      },
+    ],
+  };
 
   return (
     <AppProvider theme={theme}>
@@ -79,11 +123,19 @@ export default function Dashboard() {
         <div className="SpecialEventsTitle">
           <h2>Special Events</h2>
         </div>
-        <div className="SpecialEvents">
-          {SpecialEvents.map((event, index) => (
-            <SpecialEvent key={index} {...event} />
-          ))}
-        </div>
+
+        {/* Carousel slider*/}
+        <section className="SpecialEventsFull">
+          <div className="SpecialEventsInside">
+            <Slider {...sliderSettings}>
+              {SpecialEvents.map((event, index) => (
+                <div key={index} className="SpecialEventsSlide">
+                  <SpecialEvent {...event} />
+                </div>
+              ))}
+            </Slider>
+          </div>
+        </section>
 
         <br />
 
