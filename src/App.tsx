@@ -2,11 +2,13 @@ import NavBar from "./components/NavBar/NavBar.tsx";
 import SpecialEvent from "./components/SpecialEvent/SpecialEvent.tsx";
 import GameCard from "./components/GameCard/GameCard.tsx";
 import SearchBar from "./components/SearchBar/SearchBar.tsx";
+import FilterBar from "./components/FilterBar/FilterBar.tsx"
 import { AppProvider } from "@toolpad/core/AppProvider";
 import { createTheme } from "@mui/material/styles";
 import { CurrencyProvider } from "./components/CurrencySwitcher/currencyswitcher.tsx"; 
 
 import "./App.css";
+import { Filter } from "@mui/icons-material";
 
 // Styling theme
 const theme = createTheme({
@@ -66,6 +68,7 @@ export const PopularGames = [
 ];
 
 export default function Dashboard() {
+
   return (
     // Wrapper for Currency Nav Bar
     <CurrencyProvider base="NZD" DefaultCurrency="NZD">
