@@ -28,7 +28,7 @@ export default function Blackjack() {
   const [bet, setBet] = useState(10);
   const [lastWin, setLastWin] = useState(0);
   const [roundResult, setRoundResult] = useState("");
-  const [dealerRevealed, setDealerRevealed] = useState(false);
+  const [dealerRevealed, setDealerRevealed] = useState(false); // Implement CSS here
   const [betInBase, setBetInBase] = useState(0);
   const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   
