@@ -1,0 +1,88 @@
+/* BackgroundLayout.css or App.css */
+.background-container {
+   min-height: 100vh;  /* ensures at least full screen */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #111;
+  padding-top: 80px;
+}
+
+/* Navbar on top */
+.NavBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 80px; /* example navbar height */
+  z-index: 1000;
+}
+
+.title-panel {
+  position: fixed;
+   /* below navbar */
+  left: 50%;
+  transform: translateX(-50%);
+  
+  top: 8vh;
+  width: 68vw;   /* fixed width */
+  height: auto;    /* adjusts with content */
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 20px;
+
+  background: #1a1818;
+  color: white;
+  text-align: center;
+  padding: 1.2rem 2rem;
+  border: 2px solid #333;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  z-index: 800;
+  pointer-events: auto;
+}
+
+
+.title-panel h1 {
+  margin: 0;
+  font-size: 24px; /* scales with screen width */
+  font-weight: bold;
+}
+
+.content-wrapper {
+  position: fixed;
+  top: 11vh;  /* navbar + title */
+  left: 50%;
+  transform: translateX(-50%);
+  
+  width: 70vw;   /* fixed width */
+  height: 800px;   /* fixed height */
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  z-index: 800;
+  pointer-events: auto;
+}
+
+@media (max-height: 850px) {
+  .title-panel {
+    display: none;
+  }
+  .content-wrapper {
+    top: 3vh;
+  }
+}
+
+@media (max-width: 900px) {
+  .content-wrapper {
+    width: 620px; ;
+  }
+  .title-panel {
+    width: 620px; ;
+  }
+
+}
