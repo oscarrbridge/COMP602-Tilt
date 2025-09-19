@@ -1,7 +1,6 @@
 import { useState } from "react";
 import "./Blackjack.css";
 import BackgroundLayout from "../../components/BackgroundLayout/BackgroundLayout";
-
 const suits = ["♠", "♥", "♦", "♣"];
 const ranks = [
   "A",

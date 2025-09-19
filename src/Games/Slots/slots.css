@@ -1,7 +1,27 @@
 /* App.css */
 
 /* Main window (fixed size, centered) */
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
 
+  width: 1200px;
+  height: 700px;
+
+  border: 6px solid #222;
+  border-radius: 20px;
+  background-color: #1a1818;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  color: #fff;
+  font-family: Arial, sans-serif;
+  box-shadow: 0 0 40px rgba(0,0,0,0.8);
+  overflow: hidden;
+}
 
 /* Balance display */
 .balance-display {

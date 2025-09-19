@@ -7,7 +7,7 @@ import Wallet from "./pages/Wallet/Wallet.tsx";
 import Statistics from "./pages/Statistics/Statistics.tsx";
 import Blackjack from "./Games/Blackjack/Blackjack.tsx";
 import Slots from "./Games/Slots/slots.tsx";
-import Mines from "./Games/Mines/mines.tsx";
+import Mines from "./Games/mines/mines.tsx";
 import Leaderboard from "./pages/Leaderboard/Leaderboard.tsx";
 
 createRoot(document.getElementById("root")!).render(
