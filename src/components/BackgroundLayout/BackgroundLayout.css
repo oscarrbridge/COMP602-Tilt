@@ -1,45 +1,87 @@
-.board {
-  grid-area: board;
-  background: var(--card);
-  border: 1px solid var(--card-border);
-  border-radius: 14px;
-  padding: 10px;
-  display: grid;
-
-  /* fixed board size */
-  width: 400px;
-  height: 400px;
-  margin: 16px auto;
+/* BackgroundLayout.css or App.css */
+.background-container {
+   min-height: 100vh;  /* ensures at least full screen */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #272525;
+  padding-top: 80px;
 }
 
-.cell {
+/* Navbar on top */
+.NavBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 80px; /* example navbar height */
+  z-index: 1000;
+}
+
+.title-panel {
+  position: fixed;
+   
+  left: 50%;
+  transform: translateX(-50%);
+  
+  top: 8vh;
+  width: 800px;   /* fixed width */
+  height: auto;    /* adjusts with content */
+  
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 2rem;
 
-  background: var(--accent);
-  color: #000;
-  border: none;
-  border-radius: 8px;
+  padding: 20px;
 
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.06) inset,
-    0 6px 18px rgba(0, 0, 0, 0.35);
-
-  cursor: pointer;
-  transition: transform 120ms ease, filter 120ms ease;
+  background: #1a1818;
+  color: white;
+  text-align: center;
+  padding: 1.2rem 2rem;
+  border: 2px solid #333;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  z-index: 800;
+  pointer-events: auto;
 }
 
-.cell:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.03);
+
+.title-panel h1 {
+  margin: 0;
+  font-size: 24px; /* scales with screen width */
+  font-weight: bold;
 }
 
-.cell:active {
-  transform: translateY(0);
+.content-wrapper {
+  position: fixed;
+  top: 10vh;  /* navbar + title */
+  left: 50%;
+  transform: translateX(-50%);
+  
+  width: 70vw;   /* fixed width */
+  height: 800px;   /* fixed height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  z-index: 800;
+  pointer-events: auto;
 }
 
-.cell.mine {
-  outline: 2px solid rgba(0, 0, 0, 0.22);
+@media (max-height: 850px) {
+  .title-panel {
+    display: none;
+  }
+  .content-wrapper {
+    top: 3vh;
+  }
+}
+
+@media (max-width: 900px) {
+  .content-wrapper {
+    width: 620px; ;
+  }
+  .title-panel {
+    width: 620px; ;
+  }
+
 }

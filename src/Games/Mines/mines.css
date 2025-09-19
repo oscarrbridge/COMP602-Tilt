@@ -1,228 +1,176 @@
+/* mines.css */
 
-:root {
-  --bg: #0b0b0b;
-
-  /* layout */
-  --panel-w: 320px;  
-  --col-gap: 24px;   
-  --center-tweak: 0px;
-
-  /* colors */
-  --panel: #2f3435;
-  --panel-text: #e7e9ea;
-  --panel-input-bg: #fff;
-  --panel-input-text: #111;
-  --panel-label: #cfd3d6;
-  --accent: #b38619;
-  --accent-text: #111;
-  --card: #3a3f41;
-  --card-border: #2b2f30;
-
-  /*  tiles */
-  --cell-size: 116px;
-  --cell-radius: 18px;
-  --gap: 18px;
-}
-
-/* constant box sizing */
-* { box-sizing: border-box; }
-html, body, #root { height: 100%; }
-body {
-  margin: 0;
-  background: var(--bg);
-  color: #f5f7f8;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-}
-
-/* main app layout CSS for grid to change sidebar, title, board */
-.app
- {
+/* Main app container */
+.app {
   display: grid;
-  grid-template-columns: var(--panel-w) 1fr;
+  grid-template-columns: 250px 1fr; /* panel left, board right */
+  grid-template-rows: auto 1fr auto; /* header, board, status/results */
   grid-template-areas:
-    "panel title"
+    "header header"
     "panel board"
-    "panel results"
-    "panel status";
-  gap: var(--col-gap);
-  max-width: 1400px;
+    "status board"
+    "results board";
+    
+  gap: 16px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 24px;
-  align-items: start;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #222;
 }
 
-/* title */
-.app > h1 {
-  grid-area: title;
-  margin: 8px 0 12px;
-  font-size: 60px;
-  font-weight: 800;
-  letter-spacing: 2px;
+/* Header */
+.app h1 {
+  grid-area: header;
+  font-size: 2.5rem;
   text-align: center;
+  color: #d32f2f;
+  margin: 0;
 }
 
-/* side bar panel */
+/* Panel */
 .panel {
   grid-area: panel;
-  background: var(--panel);
-  color: var(--panel-text);
-  border-radius: 8px;
-  padding: 18px 16px;
   display: flex;
   flex-direction: column;
-  gap: 60px; 
-  min-height: calc(100vh - 48px);
+  gap: 12px;
+  padding: 16px;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  background-color: #f5f5f5;
 }
 
-/* input labels */
 .panel label {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--panel-label);
+  font-weight: bold;
 }
 
-/* Dropdown styles like the rodunding */
-.panel input,
+.panel input[type="number"],
 .panel select {
-  appearance: none;
-  padding: 12px 16px;
-  background: var(--panel-input-bg);
-  color: var(--panel-input-text);
-  border: none;
-  border-radius: 9999px;
-  outline: none;
-  box-shadow: 0 0 0 1px rgba(0,0,0,.15) inset;
-  font-size: 15px;
+  margin-top: 6px;
+  padding: 6px 10px;
+  font-size: 1rem;
+  border: 1px solid #aaa;
+  border-radius: 5px;
 }
 
-/* buttons/hover effects */
-button {
-  background: var(--bg);
-  color: #e7e9ea;
-  border: 1px solid #4b4f50;
-  border-radius: 10px;
-  padding: 10px 14px;
+/* Buttons */
+.panel button {
+  padding: 8px 16px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
-  transition: border-color .15s ease;
-}
-button:hover { border-color: #6b7173; }
-
-
-/* button colours */
-button.primary {
-  background: var(--accent);
-  color: var(--accent-text);
-  border: none;
-  border-radius: 10px;
-  padding: 12px 18px;
-  font-weight: 700;
-  width: 170px;
-  align-self: center;
+  transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
-/* mijnes board + stats */
-.board {
-  grid-area: board;
-  background: var(--card);
-  border: 1px solid var(--card-border);
-  border-radius: 14px;
-  padding: 22px;
-  display: grid;
-  gap: var(--gap);
-  justify-content: center;
-  width: max-content;
-  margin: 16px auto 20px; 
+.panel button.primary {
+  background-color: #1976d2;
+  color: #fff;
 }
 
-/* constant box sizing */
+.panel button.primary:hover {
+  background-color: #115293;
+  transform: scale(1.05);
+}
+
+.panel button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Non-primary buttons (New, Cash out) */
+.panel button:not(.primary) {
+  background-color: #1976d2;  /* darker blue */
+  color: #fff;
+  font-weight: bold;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.panel button:not(.primary):hover {
+  background-color: #115293;  /* slightly darker on hover */
+  transform: scale(1.05);
+}
+
+
+/* Results */
 .results {
   grid-area: results;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  margin: 8px auto;
-  flex-wrap: wrap;
-  max-width: 640px;
+  flex-wrap: nowrap;      /* prevent wrapping */
+  justify-content: flex-start; /* align left */
+  gap: 8px;               /* spacing between results */
+  margin-top: 12px;
+  flex-shrink: 0;
 }
 
-/* individual badge sizing */
-.result {
-  background: #202425;
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-weight: 700;
-  color: #f1f5f9;
-  border: 1px solid #2e3233;
-  font-size: 14px;
-  text-align: center;
+
+.results .result {
+  font-weight: bold;
+  background-color: #f0f0f0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  min-width: 140px;
 }
 
-/* game status */
+/* Status */
 .status {
   grid-area: status;
-  text-align: center;
-  font-size: 30px;
-  font-weight: 600;
-  margin: 4px 0 10px;
-  color: #f1f5f9;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-top: 5px;
+ font-weight: bold;
+  background-color: #f0f0f0;
+  padding: 8px 12px;
+  border-radius: 6px;
+  min-width: 140px;
 }
 
-/* each clickable cell on game */
-.cell {
+/* Board */
+.board {
+  grid-area: board;
   display: grid;
-  place-items: center;
-  width: var(--cell-size);
-  height: var(--cell-size);
-  font-size: 56px;
-  background: var(--accent);
-  color: #000;
-  border: none;
-  border-radius: var(--cell-radius);
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.06) inset,
-    0 6px 18px rgba(0,0,0,.35);
+  gap: 4px;
+  width: 100%;
+  max-width: 500px;
+  grid-template-columns: repeat(var(--size), 1fr);
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  padding: 4px;
+  background-color: #e8e8e8;
+  border-radius: 10px;
+}
+
+/* Cells */
+.cell {
+  width: 98%;
+  aspect-ratio: 1 / 1; /* keep cell square */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #eee;
+  border-radius: 6px;
+  font-weight: bold;
   cursor: pointer;
-  transition: transform 120ms ease, filter 120ms ease;
-}
-.cell:hover  { transform: translateY(-2px); filter: brightness(1.03); }
-.cell:active { transform: translateY(0); }
-.cell.mine   { outline: 2px solid rgba(0,0,0,.22); }
-
-
-@media (min-width: 981px) {
-  .app > h1,
-  .results,
-  .status,
-  .board {
-    justify-self: center;
-    transform: translateX(calc((var(--panel-w) + var(--col-gap)) / 2 + var(--center-tweak)));
-  }
+  box-sizing: border-box; /* include border in size */
+  text-align: center;
+  line-height: 1;
+  font-size: 1.5rem; /* fixed font size to avoid stretching */
+  transition: background-color 0.2s, transform 0.1s;
 }
 
-@media (max-width: 980px) {
-  .app {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "title"
-      "board"
-      "results"
-      "status"
-      "panel";
-    justify-items: center;
-  }
+.cell:hover {
+  background-color: #ddd;
+  transform: scale(1.05);
+}
 
-  .app > h1,
-  .results,
-  .status,
-  .board {
-    justify-self: center;
-    transform: none;
-  }
+.cell.revealed {
+  background-color: #fff;
+  cursor: default;
+}
 
-  :root { --cell-size: 96px; --gap: 16px; }
-  .panel { min-height: auto; width: 100%; max-width: 420px; margin: 0 auto 16px; }
+.cell.mine {
+  background-color: #d32f2f;
+  color: #fff;
 }
