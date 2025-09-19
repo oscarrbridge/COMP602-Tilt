@@ -1,8 +1,23 @@
 import { useState } from "react";
 import "./Blackjack.css";
+import BackgroundLayout from "../../components/BackgroundLayout/BackgroundLayout";
 
 const suits = ["♠", "♥", "♦", "♣"];
-const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+const ranks = [
+  "A",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "J",
+  "Q",
+  "K",
+];
 
 const getCard = () => {
   const suit = suits[Math.floor(Math.random() * suits.length)];
@@ -17,8 +32,12 @@ const cardValue = (card: { rank: string; suit: string }) => {
 };
 
 export default function Blackjack() {
-  const [playerCards, setPlayerCards] = useState<{ rank: string; suit: string }[]>([]);
-  const [dealerCards, setDealerCards] = useState<{ rank: string; suit: string }[]>([]);
+  const [playerCards, setPlayerCards] = useState<
+    { rank: string; suit: string }[]
+  >([]);
+  const [dealerCards, setDealerCards] = useState<
+    { rank: string; suit: string }[]
+  >([]);
   const [balance, setBalance] = useState(100);
   const [bet, setBet] = useState(10);
   const [lastWin, setLastWin] = useState(0);
@@ -77,11 +96,9 @@ export default function Blackjack() {
       setBalance(balance - bet);
       setLastWin(0);
       setRoundResult("loss");
-    }
-    else if (playerScore == dealerScore){
+    } else if (playerScore == dealerScore) {
       setRoundResult("tie");
-    }
-    else if (playerScore > dealerScore || dealerScore > 21) {
+    } else if (playerScore > dealerScore || dealerScore > 21) {
       setBalance(balance + bet);
       setLastWin(bet);
       setRoundResult("win");
@@ -91,76 +108,91 @@ export default function Blackjack() {
   };
 
   return (
-    <div className="app-container">
-      <h1>♠ Blackjack ♣</h1>
+    <BackgroundLayout>
+      <div className="game-container">
+        <h1>♠ Blackjack ♣</h1>
 
-      <div className="balance-display">Balance: ${balance}</div>
+        <div className="balance-display">Balance: ${balance}</div>
 
-      {/* Bet Input & Deal */}
-      {!roundInProgress && (
-        <div className="bet-controls">
-          <label htmlFor="bet-input">Bet Amount:</label>
-          <input
-            id="bet-input"
-            type="number"
-            min={5}
-            max={balance}
-            value={bet}
-            onChange={(e) =>
-              setBet(Math.min(Math.max(Number(e.target.value), 5), balance))
-            }
-          />
-          <button onClick={startGame}>Deal</button>
-        </div>
-      )}
+        {/* Bet Input & Deal */}
+        {!roundInProgress && (
+          <div className="bet-controls">
+            <label htmlFor="bet-input">Bet Amount:</label>
+            <input
+              id="bet-input"
+              type="number"
+              min={5}
+              max={balance}
+              value={bet}
+              onChange={(e) =>
+                setBet(Math.min(Math.max(Number(e.target.value), 5), balance))
+              }
+            />
+            <button onClick={startGame}>Deal</button>
+          </div>
+        )}
 
-      {/* Table */}
-      <div className="table">
-        <div className="hand-container">
-          <h2>Dealer ({roundInProgress ? "??" : calcScore(dealerCards)})</h2>
-          <div className="cards">
-            {dealerCards.map((c, i) => (
-              <div
-                key={i}
-                className={`card ${c.suit === "♥" || c.suit === "♦" ? "red" : ""} dealt`}
-              >
-                {i === 1 && roundInProgress ? "??" : `${c.rank}${c.suit}`}
-              </div>
-            ))}
+        {/* Table */}
+        <div className="table">
+          <div className="hand-container">
+            <h2>Dealer ({roundInProgress ? "??" : calcScore(dealerCards)})</h2>
+            <div className="cards">
+              {dealerCards.map((c, i) => (
+                <div
+                  key={i}
+                  className={`card ${c.suit === "♥" || c.suit === "♦" ? "red" : ""} dealt`}
+                >
+                  {i === 1 && roundInProgress ? "??" : `${c.rank}${c.suit}`}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="hand-container">
+            <h2>You ({calcScore(playerCards)})</h2>
+            <div className="cards">
+              {playerCards.map((c, i) => (
+                <div
+                  key={i}
+                  className={`card ${c.suit === "♥" || c.suit === "♦" ? "red" : ""} dealt`}
+                >
+                  {c.rank}
+                  {c.suit}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="hand-container">
-          <h2>You ({calcScore(playerCards)})</h2>
-          <div className="cards">
-            {playerCards.map((c, i) => (
-              <div
-                key={i}
-                className={`card ${c.suit === "♥" || c.suit === "♦" ? "red" : ""} dealt`}
-              >
-                {c.rank}{c.suit}
-              </div>
-            ))}
+        {/* Hit / Stand */}
+        {roundInProgress && (
+          <div className="controls">
+            <button onClick={hit}>Hit</button>
+            <button onClick={stand}>Stand</button>
           </div>
+        )}
+
+        {/* Win Display */}
+        <div
+          className={`win-display ${
+            roundResult === "win"
+              ? "win-amount"
+              : roundResult === "loss"
+                ? "loss-amount"
+                : roundResult === "tie"
+                  ? "tie-amount"
+                  : ""
+          }`}
+        >
+          {roundResult === "win"
+            ? `+ $${lastWin}`
+            : roundResult === "loss"
+              ? `- $${bet}`
+              : roundResult === "tie"
+                ? "Tie"
+                : ""}
         </div>
       </div>
-
-      {/* Hit / Stand */}
-      {roundInProgress && (
-        <div className="controls">
-          <button onClick={hit}>Hit</button>
-          <button onClick={stand}>Stand</button>
-        </div>
-      )}
-
-      {/* Win Display */}
-    <div className={`win-display ${
-        roundResult === "win" ? "win-amount" : roundResult === "loss" ? "loss-amount" : roundResult === "tie" ? "tie-amount" : ""
-      }`}>
-        {roundResult === "win" ? `+ $${lastWin}` :
-        roundResult === "loss" ? `- $${bet}` :
-        roundResult === "tie" ? "Tie" : ""}
-      </div>
-    </div>
+    </BackgroundLayout>
   );
 }
