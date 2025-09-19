@@ -121,7 +121,7 @@ function Slots() {
 
   return (
     <BackgroundLayout>
-      <div className="slots-container">
+      <div className="game-container">
         {/* Slot grid */}
         <div className="slot-grid">
           {grid.map((row, rowIndex) => (
