@@ -1,6 +1,10 @@
 import { useMemo, useState, useEffect } from "react";
 import "./mines.css";
 import BackgroundLayout from "../../components/BackgroundLayout/BackgroundLayout";
+import { placeBet, recordWinTx, recordLossTx } from "../../../Backend/transactions";
+import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
+import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx";
+import BetControls from "../BetControls.tsx";
 
 // Game states during playtime
 type Status = "Idle" | "Playing" | "Lost" | "Cash";
@@ -42,10 +46,12 @@ function Board({
 }
 
 // Main App component
-export default function App() {
+export default function Mines() {
+  const { user, balance, refreshBalance } = useUser();
   const [Size, SetSize] = useState(5);
   const [Mines, SetMines] = useState(5);
-  const [Bet, SetBet] = useState(10);
+  const [bet, setBet] = useState(10); // Display bet
+  const [betInBase, setBetInBase] = useState(0); // Bet in base currency
   const [Cells, SetCells] = useState<Cell[] | null>(null);
   const [Status, SetStatus] = useState<Status>("Idle");
   const [SafeRevealed, SetSafeRevealed] = useState(0);
@@ -103,18 +109,27 @@ export default function App() {
     [total, Mines, SafeRevealed]
   );
 
-  const PayoutNow = +(Bet * CurrentMult).toFixed(2);
-  const NextPayout = +(Bet * CurrentMult * nextFactor).toFixed(2);
+  const PayoutNow = +(betInBase * CurrentMult).toFixed(2);
+  const NextPayout = +(betInBase * CurrentMult * nextFactor).toFixed(2);
 
   // --- Game actions ---
-  function startGame() {
+  const startGame = async (newBetInBase: number) => {
+    if (newBetInBase > balance) {
+      alert("Not enough balance!");
+      return;
+    }
+
+    setBetInBase(newBetInBase);
     const validMines = Math.max(1, Math.min(Mines, total - 1));
     SetCells(BoardCreate(Size, validMines));
     SetSafeRevealed(0);
     SetStatus("Playing");
-  }
 
-  function HandleCellClick(index: number) {
+    await placeBet(user.uid, newBetInBase, 1, "mines");
+    await refreshBalance();
+  };
+
+  async function HandleCellClick(index: number) {
     if (Status !== "Playing" || !Cells) return;
 
     const tile = Cells[index];
@@ -129,6 +144,9 @@ export default function App() {
       );
       SetCells(revealedAll);
       SetStatus("Lost");
+
+      await recordLossTx(user.uid, betInBase, 1, "mines");
+      await refreshBalance();
       return;
     }
 
@@ -136,13 +154,17 @@ export default function App() {
     SetSafeRevealed((v) => v + 1);
   }
 
-  function cashOut() {
+  const cashOut = async () => {
     if (SafeRevealed === 0) {
       reset();
-      return; // stop further cash out logic
+      return;
     }
-    if (Status === "Playing" && SafeRevealed > 0) SetStatus("Cash");
-  }
+    if (Status === "Playing" && SafeRevealed > 0) {
+      SetStatus("Cash");
+      await recordWinTx(user.uid, PayoutNow, 1, "mines");
+      await refreshBalance();
+    }
+  };
 
   function reset() {
     SetCells(null);
@@ -158,99 +180,90 @@ export default function App() {
     Revealed: false,
   }));
 
-  useEffect(() => {
-    // Reset the board whenever grid size or mine count changes
-    reset();
-  }, [Size, Mines]);
+useEffect(() => {
+  if (Status === "Lost" || Status === "Cash") {
+    const timer = setTimeout(() => SetStatus("Idle"), 2000);
+    return () => clearTimeout(timer);
+  }
+}, [Status]);
 
   // --- UI ---
   return (
     <BackgroundLayout>
-      <div className="game-container">
-        <div className="app">
-          <h1>Mines</h1>
+      <CurrencyProvider base="NZD" DefaultCurrency="NZD">
+        <div className="game-container">
+          <div className="app">
+            <h1>Mines</h1>
 
-          <div className="panel">
-            <label>
-              Bet ($)
-              <input
-                type="number"
-                min={1}
-                step={1}
-                value={Bet}
-                onChange={(e) => SetBet(Number(e.target.value))}
-                disabled={Status === "Playing"}
-              />
-            </label>
+            <div className="panel">
+              {/* Shared bet controls */}
+            {(Status === "Idle" || Status === "Lost" || Status === "Cash") && (
+                <BetControls
+                  balance={balance}
+                  bet={bet}
+                  setBet={setBet}
+                  startGame={startGame}
+                />
+              )}
+              <label>
+                Grid
+                <select
+                  value={Size}
+                  onChange={(e) => SetSize(Number(e.target.value))}
+                  disabled={Status === "Playing"}
+                >
+                  {[3, 4, 5, 6].map((n) => (
+                    <option key={n} value={n}>
+                      {n} × {n}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-            <label>
-              Grid
-              <select
-                value={Size}
-                onChange={(e) => SetSize(Number(e.target.value))}
-                disabled={Status === "Playing"}
-              >
-                {[3, 4, 5, 6].map((n) => (
-                  <option key={n} value={n}>
-                    {n} × {n}
-                  </option>
-                ))}
-              </select>
-            </label>
+              <label>
+                Mines
+                <input
+                  type="number"
+                  min={1}
+                  max={total - 1}
+                  value={Mines}
+                  onChange={(e) => SetMines(Number(e.target.value))}
+                  disabled={Status === "Playing"}
+                />
+              </label>
 
-            <label>
-              Mines
-              <input
-                type="number"
-                min={1}
-                max={total - 1}
-                value={Mines}
-                onChange={(e) => SetMines(Number(e.target.value))}
-                disabled={Status === "Playing"}
-              />
-            </label>
-
-            {Status !== "Playing" ? (
-              <button className="primary" onClick={startGame}>
-                Start
-              </button>
-            ) : (
-              <>
+              {Status === "Playing" && (
                 <button onClick={cashOut}>Cash out</button>
-              </>
-            )}
-          </div>
+              )}
+            </div>
 
-          <div className="results">
-            <span className="result">Safes Found: {SafeRevealed}</span>
-            <span className="result">Current Amount ×{CurrentMult}</span>
-            <span className="result">Current Payout: ${PayoutNow}</span>
-            {Status === "Playing" && (
-              <span className="result">
-                Next Safe Amount ×{nextFactor} (${NextPayout})
-              </span>
-            )}
-          </div>
+            <div className="results">
+              <span className="result">Safes Found: {SafeRevealed}</span>
+              <span className="result">Current Multiplier ×{CurrentMult}</span>
+              <span className="result">Current Payout: ${PayoutNow}</span>
+              {Status === "Playing" && (
+                <span className="result">
+                  Next Safe ×{nextFactor} (${NextPayout})
+                </span>
+              )}
+            </div>
 
-          <div className="status">
-            {Status === "Idle" && (
-              <>
-                Press <b>Start</b> to play.
-              </>
-            )}
-            {Status === "Playing" && <>Pick Tiles</>}
-            {Status === "Lost" && <>MINE HIT.</>}
-            {Status === "Cash" && <>Cash Out: ${PayoutNow}</>}
-          </div>
+            <div className="status">
+              {Status === "Idle" && <>Press <b>Bet</b> to play.</>}
+              {Status === "Playing" && <>Pick Tiles</>}
+              {Status === "Lost" && <>💣 Mine Hit. You lost.</>}
+              {Status === "Cash" && <>💰 Cashed Out: ${PayoutNow}</>}
+            </div>
 
-          <Board
-            Size={Size}
-            Cells={Cells ?? placeholder}
-            GameOver={gameOver}
-            OnCellClick={HandleCellClick}
-          />
+            <Board
+              Size={Size}
+              Cells={Cells ?? placeholder}
+              GameOver={gameOver}
+              OnCellClick={HandleCellClick}
+            />
+          </div>
         </div>
-      </div>
+      </CurrencyProvider>
     </BackgroundLayout>
   );
 }
