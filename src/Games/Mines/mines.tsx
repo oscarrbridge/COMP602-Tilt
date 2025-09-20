@@ -137,6 +137,10 @@ export default function App() {
   }
 
   function cashOut() {
+    if (SafeRevealed === 0) {
+      reset();
+      return; // stop further cash out logic
+    }
     if (Status === "Playing" && SafeRevealed > 0) SetStatus("Cash");
   }
 
@@ -161,92 +165,92 @@ export default function App() {
 
   // --- UI ---
   return (
-    <div className="app">
-      <h1>Mines</h1>
+    <BackgroundLayout>
+      <div className="game-container">
+        <div className="app">
+          <h1>Mines</h1>
 
-      <div className="panel">
-        <label>
-          Bet ($)
-          <input
-            type="number"
-            min={1}
-            step={1}
-            value={Bet}
-            onChange={(e) => SetBet(Number(e.target.value))}
+          <div className="panel">
+            <label>
+              Bet ($)
+              <input
+                type="number"
+                min={1}
+                step={1}
+                value={Bet}
+                onChange={(e) => SetBet(Number(e.target.value))}
+                disabled={Status === "Playing"}
+              />
+            </label>
+
+            <label>
+              Grid
+              <select
+                value={Size}
+                onChange={(e) => SetSize(Number(e.target.value))}
+                disabled={Status === "Playing"}
+              >
+                {[3, 4, 5, 6].map((n) => (
+                  <option key={n} value={n}>
+                    {n} × {n}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              Mines
+              <input
+                type="number"
+                min={1}
+                max={total - 1}
+                value={Mines}
+                onChange={(e) => SetMines(Number(e.target.value))}
+                disabled={Status === "Playing"}
+              />
+            </label>
+
+            {Status !== "Playing" ? (
+              <button className="primary" onClick={startGame}>
+                Start
+              </button>
+            ) : (
+              <>
+                <button onClick={cashOut}>Cash out</button>
+              </>
+            )}
+          </div>
+
+          <div className="results">
+            <span className="result">Safes Found: {SafeRevealed}</span>
+            <span className="result">Current Amount ×{CurrentMult}</span>
+            <span className="result">Current Payout: ${PayoutNow}</span>
+            {Status === "Playing" && (
+              <span className="result">
+                Next Safe Amount ×{nextFactor} (${NextPayout})
+              </span>
+            )}
+          </div>
+
+          <div className="status">
+            {Status === "Idle" && (
+              <>
+                Press <b>Start</b> to play.
+              </>
+            )}
+            {Status === "Playing" && <>Pick Tiles</>}
+            {Status === "Lost" && <>MINE HIT.</>}
+            {Status === "Cash" && <>Cash Out: ${PayoutNow}</>}
+          </div>
+
+          <Board
+            Size={Size}
+            Cells={Cells ?? placeholder}
+            GameOver={gameOver}
+            OnCellClick={HandleCellClick}
           />
-        </label>
-
-        <label>
-          Grid
-          <select
-            value={Size}
-            onChange={(e) => SetSize(Number(e.target.value))}
-            disabled={Status === "Playing"}
-          >
-            {[3, 4, 5, 6].map((n) => (
-              <option key={n} value={n}>
-                {n} × {n}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label>
-          Mines
-          <input
-            type="number"
-            min={1}
-            max={total - 1}
-            value={Mines}
-            onChange={(e) => SetMines(Number(e.target.value))}
-            disabled={Status === "Playing"}
-          />
-        </label>
-
-        {Status !== "Playing" ? (
-          <button className="primary" onClick={startGame}>
-            Start
-          </button>
-        ) : (
-          <>
-            <button onClick={cashOut} disabled={SafeRevealed === 0}>
-              Cash out
-            </button>
-            <button onClick={reset}>New</button>
-          </>
-        )}
-      </div>
-
-      {Status !== "Idle" && (
-        <div className="results">
-          <span className="result">Safes Found: {SafeRevealed}</span>
-          <span className="result">Current Amount ×{CurrentMult}</span>
-          <span className="result">Current Payout: ${PayoutNow}</span>
-          {Status === "Playing" && (
-            <span className="result">
-              Next Safe Amount ×{nextFactor} (${NextPayout})
-            </span>
-          )}
         </div>
-      )}
-
-      <div className="status">
-        {Status === "Idle" && (
-          <>
-            Press <b>Start</b> to play.
-          </>
-        )}
-        {Status === "Playing" && <>Pick Tiles</>}
-        {Status === "Lost" && <>MINE HIT.</>}
-        {Status === "Cash" && <>Cash Out: ${PayoutNow}</>}
       </div>
-
-      <Board
-        Size={Size}
-        Cells={Cells ?? placeholder}
-        GameOver={gameOver}
-        OnCellClick={HandleCellClick}
-      />
-    </div>
+    </BackgroundLayout>
   );
 }
