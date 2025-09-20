@@ -29,7 +29,7 @@ export default function BetControls({ balance, bet, setBet, startGame }: BetCont
           setBet(Math.min(Math.max(Number(e.target.value), 5), balanceInCurrency))
         }
       />
-      <button onClick={handleStart}>Deal</button>
+      <button onClick={handleStart}>Bet</button>
     </div>
   );
 }
