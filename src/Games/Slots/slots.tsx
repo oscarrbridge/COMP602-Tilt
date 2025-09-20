@@ -139,11 +139,8 @@ function Slots() {
 
   return (
  <BackgroundLayout>
- <div className="app-container">
+ <div className="game-container">
       <CurrencyProvider base="NZD" DefaultCurrency="NZD">
-        <div className="NavBar">
-          <NavBar/>
-        </div>
 
         <h1>♠ Slots ♣</h1>
 
