@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import "./Slots.css";
-import NavBar from "@components/NavBar/NavBar";
 import { placeBet, recordWinTx, recordLossTx } from "../../../Backend/transactions";
 import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
 import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx"; 
@@ -139,11 +138,8 @@ function Slots() {
 
   return (
  <BackgroundLayout>
- <div className="app-container">
+ <div className="game-container">
       <CurrencyProvider base="NZD" DefaultCurrency="NZD">
-        <div className="NavBar">
-          <NavBar/>
-        </div>
 
         <h1>♠ Slots ♣</h1>
 

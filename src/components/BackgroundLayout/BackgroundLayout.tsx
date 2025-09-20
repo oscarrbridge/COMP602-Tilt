@@ -32,7 +32,7 @@ const BackgroundLayout: React.FC<BackgroundLayoutProps> = ({ children }) => {
 
       <div className="info-menu">
         <div className="info-panel">
-          <InfoPanel />
+          <InfoPanel/>
         </div>
       </div>
     </div>
