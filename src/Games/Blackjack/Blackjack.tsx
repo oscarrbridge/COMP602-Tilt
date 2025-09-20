@@ -1,6 +1,12 @@
 import { useState } from "react";
 import "./Blackjack.css";
 import BackgroundLayout from "../../components/BackgroundLayout/BackgroundLayout";
+import NavBar from "@components/NavBar/NavBar";
+import { placeBet, recordWinTx, recordLossTx } from "../../../Backend/transactions";
+import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
+import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx"; 
+import BetControls from "../BetControls.tsx";
+
 const suits = ["♠", "♥", "♦", "♣"];
 const ranks = [
   "A",
@@ -31,17 +37,16 @@ const cardValue = (card: { rank: string; suit: string }) => {
 };
 
 export default function Blackjack() {
-  const [playerCards, setPlayerCards] = useState<
-    { rank: string; suit: string }[]
-  >([]);
-  const [dealerCards, setDealerCards] = useState<
-    { rank: string; suit: string }[]
-  >([]);
-  const [balance, setBalance] = useState(100);
+  const { user, balance, refreshBalance } = useUser();
+  const [playerCards, setPlayerCards] = useState<{ rank: string; suit: string }[]>([]);
+  const [dealerCards, setDealerCards] = useState<{ rank: string; suit: string }[]>([]);
   const [bet, setBet] = useState(10);
   const [lastWin, setLastWin] = useState(0);
   const [roundResult, setRoundResult] = useState("");
-
+  const [dealerRevealed, setDealerRevealed] = useState(false); // Implement CSS here
+  const [betInBase, setBetInBase] = useState(0);
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+  
   // Track whether a round is in progress
   const [roundInProgress, setRoundInProgress] = useState(false);
 
@@ -59,47 +64,87 @@ export default function Blackjack() {
     return total;
   };
 
-  const startGame = () => {
-    if (bet > balance) {
+
+  const getDealerDisplayScore = () => {
+    if (!roundInProgress) {
+      // Round over → reveal full dealer score
+      return calcScore(dealerCards);
+    }
+
+    if (dealerCards.length > 1) {
+      // Hide second card, show only the first one’s value
+      const firstCardValue = cardValue(dealerCards[0]);
+      return `${firstCardValue} + ??`;
+    }
+
+    return "??";
+  };
+  const startGame = async(newBetInBase : number) => {
+    if (newBetInBase > balance) {
       alert("Not enough balance!");
       return;
     }
 
+    setBetInBase(newBetInBase);
     setPlayerCards([getCard(), getCard()]);
     setDealerCards([getCard(), getCard()]);
     setLastWin(0);
     setRoundInProgress(true);
+    setDealerRevealed(false);
+
+    await placeBet(user.uid, newBetInBase,1, "blackjack");
+    await refreshBalance();
+
   };
 
-  const hit = () => {
+  const hit = async () => {
     const newCards = [...playerCards, getCard()];
     setPlayerCards(newCards);
 
     if (calcScore(newCards) > 21) {
-      setBalance(balance - bet);
       setLastWin(0);
       setRoundResult("loss"); // player busts
       setRoundInProgress(false);
+
+      await recordLossTx(user.uid, betInBase, 1, "blackjack");
+      await refreshBalance();
     }
   };
 
-  const stand = () => {
+  const stand = async()  => {
+    setDealerRevealed(true);
     let dealerHand = [...dealerCards];
-    while (calcScore(dealerHand) < 17) dealerHand.push(getCard());
+
     setDealerCards(dealerHand);
+    await sleep(800);
+
+    while (calcScore(dealerHand) < 17) {
+      dealerHand.push(getCard());
+      setDealerCards([...dealerHand]); 
+      await sleep(800); // delay between draws
+  }
+
+    
 
     const playerScore = calcScore(playerCards);
     const dealerScore = calcScore(dealerHand);
 
     if (playerScore > 21 || (dealerScore <= 21 && dealerScore > playerScore)) {
-      setBalance(balance - bet);
       setLastWin(0);
+
+      await recordLossTx(user.uid, betInBase, 1, "blackjack");
+      await refreshBalance();
       setRoundResult("loss");
-    } else if (playerScore == dealerScore) {
+      
+    }
+    else if (playerScore == dealerScore){
       setRoundResult("tie");
-    } else if (playerScore > dealerScore || dealerScore > 21) {
-      setBalance(balance + bet);
+    }
+    else if (playerScore > dealerScore || dealerScore > 21) {
       setLastWin(bet);
+
+      await recordWinTx(user.uid, betInBase*2, 1, "blackjack"); // Double bet to accomadate  
+      await refreshBalance();
       setRoundResult("win");
     }
 
@@ -108,44 +153,35 @@ export default function Blackjack() {
 
   return (
     <BackgroundLayout>
-      <div className="game-container">
+      <div className="app-container">
+            <CurrencyProvider base="NZD" DefaultCurrency="NZD">
+              <div className="NavBar">
+                <NavBar/>
+              </div>
+              
         <h1>♠ Blackjack ♣</h1>
-
-        <div className="balance-display">Balance: ${balance}</div>
 
         {/* Bet Input & Deal */}
         {!roundInProgress && (
-          <div className="bet-controls">
-            <label htmlFor="bet-input">Bet Amount:</label>
-            <input
-              id="bet-input"
-              type="number"
-              min={5}
-              max={balance}
-              value={bet}
-              onChange={(e) =>
-                setBet(Math.min(Math.max(Number(e.target.value), 5), balance))
-              }
-            />
-            <button onClick={startGame}>Deal</button>
-          </div>
+            <BetControls balance={balance} bet={bet} setBet={setBet} startGame={startGame} />
         )}
+        </CurrencyProvider>
 
-        {/* Table */}
-        <div className="table">
-          <div className="hand-container">
-            <h2>Dealer ({roundInProgress ? "??" : calcScore(dealerCards)})</h2>
-            <div className="cards">
-              {dealerCards.map((c, i) => (
-                <div
-                  key={i}
-                  className={`card ${c.suit === "♥" || c.suit === "♦" ? "red" : ""} dealt`}
-                >
-                  {i === 1 && roundInProgress ? "??" : `${c.rank}${c.suit}`}
-                </div>
-              ))}
-            </div>
+      {/* Table */}
+      <div className="table">
+        <div className="hand-container">
+          <h2>Dealer ({getDealerDisplayScore()})</h2>
+          <div className="cards">
+            {dealerCards.map((c, i) => (
+              <div
+                key={i}
+                className={`card ${c.suit === "♥" || c.suit === "♦" ? "red" : ""} dealt`}
+              >
+                {i === 1 && roundInProgress  ? "??" : `${c.rank}${c.suit}`}
+              </div>
+            ))}
           </div>
+        </div>
 
           <div className="hand-container">
             <h2>You ({calcScore(playerCards)})</h2>
