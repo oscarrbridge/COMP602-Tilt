@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "./Slots.css";
+import BackgroundLayout from "../../components/BackgroundLayout/BackgroundLayout";
 
 // ---------------- Slot Logic ----------------
 function generateNum(): number {
@@ -119,56 +120,59 @@ function Slots() {
   }, []);
 
   return (
-    <div className="app-container">
-      <br />
-      <br />
-      <br />
-      <br />
+    <BackgroundLayout>
+      <div className="game-container">
+        {/* Slot grid */}
+        <div className="slot-grid">
+          {grid.map((row, rowIndex) => (
+            <div key={rowIndex} className="slot-row">
+              {row.map((cell, cellIndex) => {
+                const isWinning =
+                  winningCells[rowIndex] !== 0 &&
+                  cell === winningCells[rowIndex];
 
-      <div className="slot-grid">
-        {grid.map((row, rowIndex) => (
-          <div key={rowIndex} className="slot-row">
-            {row.map((cell, cellIndex) => {
-              const isWinning =
-                winningCells[rowIndex] !== 0 && cell === winningCells[rowIndex];
+                return (
+                  <img
+                    key={cellIndex}
+                    src={`/assets/${cell}.png`}
+                    alt={`Slot ${cell}`}
+                    className={`slot-cell ${isWinning ? "winning" : ""}`}
+                  />
+                );
+              })}
+            </div>
+          ))}
+        </div>
 
-              return (
-                <img
-                  key={cellIndex}
-                  src={`/assets/${cell}.png`}
-                  alt={`Slot ${cell}`}
-                  className={`slot-cell ${isWinning ? "winning" : ""}`}
-                />
-              );
-            })}
+        {/* Controls row */}
+        <div className="controls-row">
+          {/* Bet controls */}
+          <div className="bet-controls">
+            <button className="bet-button" onClick={decreaseBet}>
+              -
+            </button>
+            <span className="bet-value">${bet.toFixed(2)}</span>
+            <button className="bet-button" onClick={increaseBet}>
+              +
+            </button>
           </div>
-        ))}
-      </div>
-      <div className="balance-display">Balance: ${balance.toFixed(2)}</div>
-      <div className="controls-row">
-        <div className="bet-controls">
-          <button className="bet-button" onClick={decreaseBet}>
-            -
-          </button>
-          <span className="bet-value">${bet.toFixed(2)}</span>
-          <button className="bet-button" onClick={increaseBet}>
-            +
-          </button>
-        </div>
 
-        <button className="spin-button" onClick={spin}>
-          SPIN
-        </button>
+          {/* Spin button */}
+          <button className="spin-button" onClick={spin}>
+            SPIN
+          </button>
 
-        <div className="win-display">
-          {lastWin > 0 ? (
-            <span className="win-amount">+ ${lastWin.toFixed(2)}</span>
-          ) : (
-            <span>&nbsp;</span>
-          )}
+          {/* Win display */}
+          <div className="win-display">
+            {lastWin > 0 ? (
+              <span className="win-amount">+ ${lastWin.toFixed(2)}</span>
+            ) : (
+              <span>&nbsp;</span>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </BackgroundLayout>
   );
 }
 

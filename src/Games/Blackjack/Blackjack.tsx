@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./Blackjack.css";
+import BackgroundLayout from "../../components/BackgroundLayout/BackgroundLayout";
 import NavBar from "@components/NavBar/NavBar";
 import { placeBet, recordWinTx, recordLossTx } from "../../../Backend/transactions";
 import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
@@ -7,7 +8,21 @@ import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswit
 import BetControls from "../BetControls.tsx";
 
 const suits = ["♠", "♥", "♦", "♣"];
-const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+const ranks = [
+  "A",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "J",
+  "Q",
+  "K",
+];
 
 const getCard = () => {
   const suit = suits[Math.floor(Math.random() * suits.length)];
@@ -167,37 +182,51 @@ export default function Blackjack() {
           </div>
         </div>
 
-        <div className="hand-container">
-          <h2>You ({calcScore(playerCards)})</h2>
-          <div className="cards">
-            {playerCards.map((c, i) => (
-              <div
-                key={i}
-                className={`card ${c.suit === "♥" || c.suit === "♦" ? "red" : ""} dealt`}
-              >
-                {c.rank}{c.suit}
-              </div>
-            ))}
+          <div className="hand-container">
+            <h2>You ({calcScore(playerCards)})</h2>
+            <div className="cards">
+              {playerCards.map((c, i) => (
+                <div
+                  key={i}
+                  className={`card ${c.suit === "♥" || c.suit === "♦" ? "red" : ""} dealt`}
+                >
+                  {c.rank}
+                  {c.suit}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Hit / Stand */}
-      {roundInProgress && (
-        <div className="controls">
-          <button onClick={hit}>Hit</button>
-          <button onClick={stand}>Stand</button>
+        {/* Hit / Stand */}
+        {roundInProgress && (
+          <div className="controls">
+            <button onClick={hit}>Hit</button>
+            <button onClick={stand}>Stand</button>
+          </div>
+        )}
+
+        {/* Win Display */}
+        <div
+          className={`win-display ${
+            roundResult === "win"
+              ? "win-amount"
+              : roundResult === "loss"
+                ? "loss-amount"
+                : roundResult === "tie"
+                  ? "tie-amount"
+                  : ""
+          }`}
+        >
+          {roundResult === "win"
+            ? `+ $${lastWin}`
+            : roundResult === "loss"
+              ? `- $${bet}`
+              : roundResult === "tie"
+                ? "Tie"
+                : ""}
         </div>
-      )}
-
-      {/* Win Display */}
-    <div className={`win-display ${
-        roundResult === "win" ? "win-amount" : roundResult === "loss" ? "loss-amount" : roundResult === "tie" ? "tie-amount" : ""
-      }`}>
-        {roundResult === "win" ? `+ $${lastWin}` :
-        roundResult === "loss" ? `- $${bet}` :
-        roundResult === "tie" ? "Tie" : ""}
       </div>
-    </div>
+    </BackgroundLayout>
   );
 }

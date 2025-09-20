@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 // Currency Types
 export type CurrencyCode = "NZD" | "AUD" | "USD" | "EUR" | "GBP";
 export type RateTable = Record<CurrencyCode, number>;
@@ -51,16 +57,17 @@ export function CurrencyProvider({
   DefaultCurrency = base,
   storageKey = "currency.code",
 }: CurrencyProviderProps) {
-  // Merge custom rates with defaults using useMemo
   const mergedRates: RateTable = useMemo(
     () => ({ ...defaultRates, ...(rates || {}) }),
     [rates]
   );
-  // Current active currency
+
   const [code, setCode] = useState<CurrencyCode>(() => {
-    if (storageKey) {
-      const saved = typeof window !== "undefined" ? window.localStorage.getItem(storageKey) : null;
-      if (saved && isCurrencyCode(saved)) return saved;
+    if (typeof window !== "undefined" && storageKey) {
+      try {
+        const saved = window.localStorage.getItem(storageKey);
+        if (saved && isCurrencyCode(saved)) return saved;
+      } catch {}
     }
     return DefaultCurrency;
   });
@@ -73,14 +80,19 @@ export function CurrencyProvider({
   }, [code, storageKey]);
 
   const value: CurrencyContextValue = useMemo(() => {
-    const convert = (amount: number, from: CurrencyCode, to: CurrencyCode = code) => {
+    const convert = (
+      amount: number,
+      from: CurrencyCode,
+      to: CurrencyCode = code
+    ) => {
       if (from === to) return amount;
       if (from === base) return amount * mergedRates[to];
       if (to === base) return amount / mergedRates[from];
       return (amount / mergedRates[from]) * mergedRates[to];
     };
 
-    const convertFromBase = (amountInBase: number) => convert(amountInBase, base, code);
+    const convertFromBase = (amountInBase: number) =>
+      convert(amountInBase, base, code);
 
     const format = (amountInActive: number, opts?: Intl.NumberFormatOptions) =>
       new Intl.NumberFormat(undefined, {
@@ -91,16 +103,29 @@ export function CurrencyProvider({
         ...opts,
       }).format(amountInActive);
 
-    return { code, setCode, rates: mergedRates, base, convertFromBase, convert, format };
+    return {
+      code,
+      setCode,
+      rates: mergedRates,
+      base,
+      convertFromBase,
+      convert,
+      format,
+    };
   }, [code, mergedRates, base]);
-  // set children currency
-  return <CurrencyContext.Provider value={value}>{children}</CurrencyContext.Provider>;
+
+  return (
+    <CurrencyContext.Provider value={value}>
+      {children}
+    </CurrencyContext.Provider>
+  );
 }
 
 // Hook
 export function useCurrency() {
   const ctx = useContext(CurrencyContext);
-  if (!ctx) throw new Error("useCurrency must be used within a CurrencyProvider");
+  if (!ctx)
+    throw new Error("useCurrency must be used within a CurrencyProvider");
   return ctx;
 }
 
@@ -119,7 +144,9 @@ export function CurrencySwitcher({
   const { code, setCode } = useCurrency();
   return (
     <label className={`inline-flex items-center gap-2 ${className ?? ""}`}>
-      <span style={{ color: "white" }} className="text-sm">Currency</span>
+      <span style={{ color: "white" }} className="text-sm">
+        Currency
+      </span>
       <select
         value={code}
         onChange={(e) => setCode(e.target.value as CurrencyCode)}
@@ -149,7 +176,9 @@ export function Price({ amount, from, formatOptions, className }: PriceProps) {
     () => convert(amount, from ?? base, code),
     [amount, from, base, code, convert]
   );
-  return <span className={className}>{format(activeAmount, formatOptions)}</span>;
+  return (
+    <span className={className}>{format(activeAmount, formatOptions)}</span>
+  );
 }
 
 function isCurrencyCode(x: string): x is CurrencyCode {
