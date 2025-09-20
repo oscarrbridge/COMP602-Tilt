@@ -17,7 +17,7 @@ export default function BetControls({ balance, bet, setBet, startGame }: BetCont
     startGame(betInBase);                       // pass NZD to Blackjack
   };
   return (
-    <div>
+    <div style={{ color: "white" }}>
       <label htmlFor="bet-input">Bet Amount:</label>
       <input
         id="bet-input"
@@ -28,8 +28,28 @@ export default function BetControls({ balance, bet, setBet, startGame }: BetCont
         onChange={(e) =>
           setBet(Math.min(Math.max(Number(e.target.value), 5), balanceInCurrency))
         }
+        style={{
+          marginLeft: "8px",
+          padding: "5px 10px",
+          borderRadius: "6px",
+          border: "1px solid #ccc",
+        }}
       />
-      <button onClick={handleStart}>Bet</button>
+      <button
+        onClick={handleStart}
+        style={{
+          marginLeft: "10px",
+          padding: "6px 14px",
+          fontWeight: "bold",
+          borderRadius: "6px",
+          border: "none",
+          backgroundColor: "#b38619",
+          color: "white",
+          cursor: "pointer",
+        }}
+      >
+        Bet
+      </button>
     </div>
   );
 }

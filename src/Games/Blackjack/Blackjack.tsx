@@ -1,7 +1,6 @@
 import { useState } from "react";
 import "./Blackjack.css";
 import BackgroundLayout from "../../components/BackgroundLayout/BackgroundLayout";
-import NavBar from "@components/NavBar/NavBar";
 import { placeBet, recordWinTx, recordLossTx } from "../../../Backend/transactions";
 import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
 import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx"; 
