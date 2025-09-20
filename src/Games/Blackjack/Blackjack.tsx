@@ -152,19 +152,20 @@ export default function Blackjack() {
   };
 
   return (
-    <div className="app-container">
-          <CurrencyProvider base="NZD" DefaultCurrency="NZD">
-            <div className="NavBar">
-              <NavBar/>
-            </div>
-            
-      <h1>♠ Blackjack ♣</h1>
+    <BackgroundLayout>
+      <div className="app-container">
+            <CurrencyProvider base="NZD" DefaultCurrency="NZD">
+              <div className="NavBar">
+                <NavBar/>
+              </div>
+              
+        <h1>♠ Blackjack ♣</h1>
 
-      {/* Bet Input & Deal */}
-      {!roundInProgress && (
-          <BetControls balance={balance} bet={bet} setBet={setBet} startGame={startGame} />
-      )}
-      </CurrencyProvider>
+        {/* Bet Input & Deal */}
+        {!roundInProgress && (
+            <BetControls balance={balance} bet={bet} setBet={setBet} startGame={startGame} />
+        )}
+        </CurrencyProvider>
 
       {/* Table */}
       <div className="table">

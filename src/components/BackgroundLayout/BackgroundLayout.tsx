@@ -16,7 +16,7 @@ const BackgroundLayout: React.FC<BackgroundLayoutProps> = ({ children }) => {
       <div className="title-panel">
         <h1>🎮 My Casino Game</h1>
       </div>
-
+      
       <div className="NavBar">
         <NavBar />
       </div>
