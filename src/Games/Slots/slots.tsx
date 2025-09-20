@@ -5,6 +5,8 @@ import { placeBet, recordWinTx, recordLossTx } from "../../../Backend/transactio
 import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
 import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx"; 
 import BetControls from "../BetControls.tsx";
+import BackgroundLayout from "../../components/BackgroundLayout/BackgroundLayout";
+
 
 // ---------------- Slot Logic ----------------
 function generateNum(): number {
@@ -136,7 +138,8 @@ function Slots() {
   };
 
   return (
-    <div className="app-container">
+ <BackgroundLayout>
+ <div className="app-container">
       <CurrencyProvider base="NZD" DefaultCurrency="NZD">
         <div className="NavBar">
           <NavBar/>
@@ -180,6 +183,7 @@ function Slots() {
         )}
       </div>
     </div>
+    </BackgroundLayout>
   );
 }
 

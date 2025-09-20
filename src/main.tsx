@@ -7,7 +7,7 @@ import Wallet from "./pages/Wallet/Wallet.tsx";
 import Statistics from "./pages/Statistics/Statistics.tsx";
 import Blackjack from "./Games/Blackjack/Blackjack.tsx";
 import Slots from "./Games/Slots/slots.tsx";
-import MinesPage from "./minespage";
+import Mines from "./Games/mines/mines.tsx";
 import Leaderboard from "./pages/Leaderboard/Leaderboard.tsx";
 
 createRoot(document.getElementById("root")!).render(
@@ -20,7 +20,7 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/statistics" element={<Statistics />} />
         <Route path="/slots" element={<Slots />} />
         <Route path="/blackjack" element={<Blackjack />} />
-        <Route path="/mines" element={<MinesPage />} />
+        <Route path="/mines" element={<Mines />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>
