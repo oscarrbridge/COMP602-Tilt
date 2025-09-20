@@ -4,6 +4,7 @@ import "./BackgroundLayout.css";
 import NavBar from "../NavBar/NavBar";
 import PanelMenu from "../PanelMenu/PanelMenu";
 import InfoPanel from "../InfoPanel/InfoPanel";
+import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx"; 
 
 interface BackgroundLayoutProps {
   children: ReactNode;
@@ -17,9 +18,11 @@ const BackgroundLayout: React.FC<BackgroundLayoutProps> = ({ children }) => {
         <h1>🎮 My Casino Game</h1>
       </div>
       
-      <div className="NavBar">
-        <NavBar />
-      </div>
+      <CurrencyProvider base="NZD" DefaultCurrency="NZD">
+        <div className="NavBar">
+          <NavBar />
+        </div>
+      </CurrencyProvider>
 
       <div className="content-wrapper">{children}</div>
 
