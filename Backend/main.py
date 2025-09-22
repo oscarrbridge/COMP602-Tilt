@@ -14,6 +14,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from Backend.firebase.firebase_config import db
 from Backend.routers.blackjack import router as blackjack_router
+from Backend.routers.payments import router as payments_router
 
 app = FastAPI()
 
@@ -26,6 +27,7 @@ app.add_middleware(
 )
 
 app.include_router(blackjack_router)
+app.include_router(payments_router)
 
 
 @app.get("/")
