@@ -1,6 +1,7 @@
 .GameCardImage{
     background-color: var(--accent-colour);
-    background-size: cover;
+    background-size: 110%;
+    background-repeat: no-repeat;
     background-position: center;
 
     display: flex;
@@ -15,6 +16,12 @@
     padding: 15px;
 
     position: relative;
+
+    transition: all 0.3s ease;
+}
+
+.GameCardImage:hover {
+    transform: scale(1.03);
 }
 
 .GameCardText {

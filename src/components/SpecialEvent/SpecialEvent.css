@@ -59,3 +59,11 @@
   align-items: center;
   justify-content: center;
 }
+
+.EventButton{
+  transition: all 0.3s ease;
+}
+
+.EventButton:hover{
+  transform: scale(1.03);
+}
