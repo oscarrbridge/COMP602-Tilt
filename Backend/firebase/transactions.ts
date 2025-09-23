@@ -92,12 +92,6 @@ export const withdraw = (uid: string, amt: number) =>
   userTransaction(uid, -Math.abs(amt), 'withdraw','balance');
 
 // Unibalance functions
-export const recordUniBet = (uid: string, amt: number, o?: any) =>
-  userTransaction(uid, -Math.abs(amt), 'bet', 'unibalance', o);
-export const recordUniWin = (uid: string, amt: number, o?: any) =>
-  userTransaction(uid, Math.abs(amt), 'win', 'unibalance', o);
-export const recordUniLoss = (uid: string, amt: number, o?: any) =>
-  userTransaction(uid, -Math.abs(amt), 'loss', 'unibalance', o);
 export const uniDeposit = (uid: string, amt: number) => 
   userTransaction(uid, Math.abs(amt), 'deposit', 'unibalance');
 export const uniWithdraw = (uid: string, amt: number) =>

@@ -1,14 +1,39 @@
 .WalletContainer {
     display: flex;
-    justify-content: space-around;
+    flex-direction: column;
     align-items: center;
     width: 100%;
     padding: 20px;
-    }
+    gap: 30px;
+}
+
+.TopRow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    gap: 40px;
+}
+
+.BottomRow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
 
 .DepositContainer,
 .WithdrawContainer {
     width: 40%;
+    max-width: 400px;
+    background-color: var(--secondary-colour);
+    padding: 20px;
+    border-radius: 18px;
+}
+
+.UniCodeContainer {
+    width: 40%;
+    max-width: 400px;
     background-color: var(--secondary-colour);
     padding: 20px;
     border-radius: 18px;
