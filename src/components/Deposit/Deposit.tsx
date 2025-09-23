@@ -11,7 +11,7 @@ export default function Deposit() {
   // States for uid, withdraw amount, currency type, submit payment, error
   const [uid, setUid] = useState(auth.currentUser?.uid ?? null);
   const [amount, setAmount] = useState('');
-  const { code, format } = useCurrency();
+  const { code, format, setCode } = useCurrency();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -22,6 +22,46 @@ export default function Deposit() {
     const unsub = onAuthStateChanged(auth, (u) => setUid(u?.uid ?? null));
     return () => unsub();
   }, [uid]);
+
+  // keep currency in sync with NavWindow (reads localStorage)
+  useEffect(() => {
+    const KEY = 'currency.code';
+    // Type guard for allowed currency codes
+    const isCurrency = (x: any): x is 'NZD' | 'AUD' | 'USD' | 'EUR' | 'GBP' =>
+      x === 'NZD' || x === 'AUD' || x === 'USD' || x === 'EUR' || x === 'GBP';
+    // Initial sync on mount: read current value from localStorage
+    const initial = localStorage.getItem(KEY);
+    if (isCurrency(initial) && initial !== code) setCode(initial);
+    // Same-tab change detection:
+    // The storage event does not fire in the same tab that wrote the value,
+    let last = initial ?? code;
+    const id = window.setInterval(() => {
+      const cur = localStorage.getItem(KEY);
+      if (cur && cur !== last) {
+        last = cur;
+        if (isCurrency(cur) && cur !== code) setCode(cur);
+      }
+    }, 250);
+    // Also resync when the window regains focus (covers tab switches / minimized)
+    const onFocus = () => {
+      const cur = localStorage.getItem(KEY);
+      if (isCurrency(cur) && cur !== code) setCode(cur);
+    };
+    window.addEventListener('focus', onFocus);
+    // Cross-tab sync:
+    // The 'storage' event fires in *other* tabs when localStorage changes.
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== KEY || e.newValue == null) return;
+      if (isCurrency(e.newValue) && e.newValue !== code) setCode(e.newValue);
+    };
+    window.addEventListener('storage', onStorage);
+    // Cleanup, stop polling and remove listeners on unmount
+    return () => {
+      clearInterval(id);
+      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, [code, setCode]);
 
   // Convert major units into minor units for active currency
   function toMinorUnits(valueStr: string, currCode: string) {

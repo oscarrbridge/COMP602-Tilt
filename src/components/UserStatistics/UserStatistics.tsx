@@ -6,6 +6,8 @@ import { onAuthStateChanged } from 'firebase/auth';
 import './UserStatistics.css';
 import { useEffect, useState } from 'react';
 
+import { Price, useCurrency } from '@components/CurrencySwitcher/currencyswitcher';
+
 interface CalculatedStatistics {
   gamesPlayed: number;
   biggestWin: number;
@@ -22,6 +24,7 @@ interface Transaction {
   balanceAfter?: number;
 }
 export default function GetStatistics() {
+  const { code, setCode } = useCurrency();
   // Checks if someone is already logged in, otherwise wait on log in event
   const [uid, setUid] = useState<string | null>(auth.currentUser?.uid ?? null);
   // User's main document
@@ -44,6 +47,46 @@ export default function GetStatistics() {
     const unsub = onAuthStateChanged(auth, (u) => setUid(u?.uid ?? null));
     return () => unsub();
   }, [uid]);
+
+  // keep currency in sync with NavWindow (reads localStorage)
+  useEffect(() => {
+    const KEY = 'currency.code';
+    // Type guard for allowed currency codes
+    const isCurrency = (x: any): x is 'NZD' | 'AUD' | 'USD' | 'EUR' | 'GBP' =>
+      x === 'NZD' || x === 'AUD' || x === 'USD' || x === 'EUR' || x === 'GBP';
+    // Initial sync on mount: read current value from localStorage
+    const initial = localStorage.getItem(KEY);
+    if (isCurrency(initial) && initial !== code) setCode(initial);
+    // Same-tab change detection:
+    // The storage event does not fire in the same tab that wrote the value,
+    let last = initial ?? code;
+    const id = window.setInterval(() => {
+      const cur = localStorage.getItem(KEY);
+      if (cur && cur !== last) {
+        last = cur;
+        if (isCurrency(cur) && cur !== code) setCode(cur);
+      }
+    }, 250);
+    // Also resync when the window regains focus (covers tab switches / minimized)
+    const onFocus = () => {
+      const cur = localStorage.getItem(KEY);
+      if (isCurrency(cur) && cur !== code) setCode(cur);
+    };
+    window.addEventListener('focus', onFocus);
+    // Cross-tab sync:
+    // The 'storage' event fires in *other* tabs when localStorage changes.
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== KEY || e.newValue == null) return;
+      if (isCurrency(e.newValue) && e.newValue !== code) setCode(e.newValue);
+    };
+    window.addEventListener('storage', onStorage);
+    // Cleanup, stop polling and remove listeners on unmount
+    return () => {
+      clearInterval(id);
+      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, [code, setCode]);
 
   // Live updates with user's document data
   useEffect(() => {
@@ -128,22 +171,30 @@ export default function GetStatistics() {
   return (
     <div className='StatisticsTable'>
       <table>
-        <tbody>
+        <tbody key={code}>
           <tr>
             <td>Total Balance</td>
-            <td>{statistics?.balance ?? 0}</td>
+            <td>
+              <Price amount={(statistics?.balance ?? 0) / 100} from='NZD' />
+            </td>
           </tr>
           <tr>
             <td>Total Deposited</td>
-            <td>{(totalDepositedCents / 100).toFixed(2)}</td>
+            <td>
+              <Price amount={totalDepositedCents / 100} from='NZD' />
+            </td>
           </tr>
           <tr>
             <td>Total Withdrawn</td>
-            <td>{(totalWithdrawnCents / 100).toFixed(2)}</td>
+            <td>
+              <Price amount={totalWithdrawnCents / 100} from='NZD' />
+            </td>
           </tr>
           <tr>
             <td>Net Profit</td>
-            <td>{statistics?.netProfit ?? 0}</td>
+            <td>
+              <Price amount={((statistics?.netProfit ?? 0) as number) / 100} from='NZD' />
+            </td>
           </tr>
           <tr>
             <td>Games Played</td>
@@ -151,15 +202,21 @@ export default function GetStatistics() {
           </tr>
           <tr>
             <td>Biggest Win</td>
-            <td>{calculatedStatistics.biggestWin}</td>
+            <td>
+              <Price amount={calculatedStatistics.biggestWin / 100} from='NZD' />
+            </td>
           </tr>
           <tr>
             <td>Biggest Loss</td>
-            <td>{calculatedStatistics.biggestLoss}</td>
+            <td>
+              <Price amount={calculatedStatistics.biggestLoss / 100} from='NZD' />
+            </td>
           </tr>
           <tr>
             <td>Average Bet</td>
-            <td>{calculatedStatistics.averageBet.toFixed(2)}</td>
+            <td>
+              <Price amount={calculatedStatistics.averageBet / 100} from='NZD' />
+            </td>
           </tr>
           <tr>
             <td>Most Profitable Game</td>

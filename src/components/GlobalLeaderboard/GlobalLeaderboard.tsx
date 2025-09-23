@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import './GlobalLeaderboard.css';
 import { collection, onSnapshot as update, query, orderBy, limit } from 'firebase/firestore';
 import { db } from '../../../Backend/firebase/firebaseConfig';
+import { Price, useCurrency } from '../CurrencySwitcher/currencyswitcher';
 
 export default function GlobalLeaderboard() {
   interface Users {
@@ -13,6 +14,48 @@ export default function GlobalLeaderboard() {
 
   // List of users state
   const [Users, SetUsers] = useState<Users[]>([]);
+
+  const { code, setCode } = useCurrency();
+
+  // keep currency in sync with NavWindow (reads localStorage)
+  useEffect(() => {
+    const KEY = 'currency.code';
+    // Type guard for allowed currency codes
+    const isCurrency = (x: any): x is 'NZD' | 'AUD' | 'USD' | 'EUR' | 'GBP' =>
+      x === 'NZD' || x === 'AUD' || x === 'USD' || x === 'EUR' || x === 'GBP';
+    // Initial sync on mount: read current value from localStorage
+    const initial = localStorage.getItem(KEY);
+    if (isCurrency(initial) && initial !== code) setCode(initial);
+    // Same-tab change detection:
+    // The storage event does not fire in the same tab that wrote the value,
+    let last = initial ?? code;
+    const id = window.setInterval(() => {
+      const cur = localStorage.getItem(KEY);
+      if (cur && cur !== last) {
+        last = cur;
+        if (isCurrency(cur) && cur !== code) setCode(cur);
+      }
+    }, 250);
+    // Also resync when the window regains focus (covers tab switches / minimized)
+    const onFocus = () => {
+      const cur = localStorage.getItem(KEY);
+      if (isCurrency(cur) && cur !== code) setCode(cur);
+    };
+    window.addEventListener('focus', onFocus);
+    // Cross-tab sync:
+    // The 'storage' event fires in *other* tabs when localStorage changes.
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== KEY || e.newValue == null) return;
+      if (isCurrency(e.newValue) && e.newValue !== code) setCode(e.newValue);
+    };
+    window.addEventListener('storage', onStorage);
+    // Cleanup, stop polling and remove listeners on unmount
+    return () => {
+      clearInterval(id);
+      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, [code, setCode]);
 
   useEffect(() => {
     // Reference to collection of users in Firestore
@@ -51,18 +94,17 @@ export default function GlobalLeaderboard() {
               <th>Amount won</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody key={code}>
             {Users.map((i) => (
               <tr key={i.UserID}>
                 <td>{i.UserID}</td>
                 <td>{i.Name}</td>
                 <td>{i.University}</td>
                 <td>
-                  {new Intl.NumberFormat(undefined, {
-                    style: 'currency',
-                    currency: 'NZD',
-                    maximumFractionDigits: 2,
-                  }).format(Number.isFinite(i.netProfit) ? i.netProfit : 0)}
+                  <Price
+                    amount={(Number.isFinite(i.netProfit) ? i.netProfit : 0) / 100}
+                    from='NZD'
+                  />
                 </td>
               </tr>
             ))}
