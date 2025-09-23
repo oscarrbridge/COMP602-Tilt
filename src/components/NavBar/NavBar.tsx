@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
-import { onAuthStateChanged, signOut, type User } from "firebase/auth";
-import { doc, onSnapshot } from "firebase/firestore";
-import { useNavigate } from "react-router-dom";
-import { CurrencyProvider } from "../CurrencySwitcher/currencyswitcher.tsx";
+import { useState, useEffect } from 'react';
+import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+import { CurrencyProvider } from '../CurrencySwitcher/currencyswitcher.tsx';
 
-import { auth, db } from "../../../Backend/firebase/firebaseConfig";
+import { auth, db } from '../../../Backend/firebase/firebaseConfig';
 
-import "./NavBar.css";
+import './NavBar.css';
 
 import NavWindow from '../NavWindow/NavWindow.tsx';
 import RegisterUser from '../../components/Auth/RegisterUser';
@@ -60,7 +60,7 @@ export default function NavBar() {
       return;
     }
 
-    const data = doc(db, "users", user.uid);
+    const data = doc(db, 'users', user.uid);
     // Updates with user balance with the database value
     const unsubscribeDoc = onSnapshot(data, (user) => {
       if (user.exists()) {
@@ -73,34 +73,34 @@ export default function NavBar() {
 
   return (
     <>
-      <CurrencyProvider base="NZD" DefaultCurrency="NZD">
-        <div className="NavBarContainer">
-          <div className="Logo" onClick={() => navigate("/")}>
-            <img src="src/assets/Tilt.png" width={80} />
+      <CurrencyProvider base='NZD' DefaultCurrency='NZD'>
+        <div className='NavBarContainer'>
+          <div className='Logo' onClick={() => navigate('/')}>
+            <img src='src/assets/Tilt.png' width={80} />
           </div>
 
-          <div className="UserBalance">
-            <div className="UserBalanceContainer">
-              <div className="UserIcon">
-                <img src="src/assets/user-icon.png" width={25} />
+          <div className='UserBalance'>
+            <div className='UserBalanceContainer'>
+              <div className='UserIcon'>
+                <img src='src/assets/user-icon.png' width={25} />
               </div>
               <UserBalance balance={balance} />
               <div
-                className="DropArrow"
+                className='DropArrow'
                 onMouseEnter={() => SetNavActive(true)}
                 onMouseLeave={() => SetNavActive(false)}
               >
-                <img src="src/assets/caret-icon.png" width={25} />
+                <img src='src/assets/caret-icon.png' width={25} />
 
                 {NavActive && <NavWindow />}
               </div>
             </div>
           </div>
-          <div className="LoginControls">
+          <div className='LoginControls'>
             {/* If user is logged in, show their info and logout */}
             {user ? (
-              <div className="LoggedInBox">
-                <span>{user.displayName || user.email || "Logged in!"}</span>
+              <div className='LoggedInBox'>
+                <span>{user.displayName || user.email || 'Logged in!'}</span>
                 <button onClick={() => signOut(auth)}>Logout</button>
               </div>
             ) : (
@@ -121,11 +121,11 @@ export default function NavBar() {
         {SignUpActive && <RegisterWindow />}
       </div> */}
 
-      {/* Popups when clicked on*/}
-      <RegisterUser open={SignUpActive} onClose={() => SetSignUp(false)} />
-      <SignInPopup open={LoginActive} onClose={() => SetLogin(false)} />
-      {user && <TestTransactions user={user} />}
-
+        {/* Popups when clicked on*/}
+        <RegisterUser open={SignUpActive} onClose={() => SetSignUp(false)} />
+        <SignInPopup open={LoginActive} onClose={() => SetLogin(false)} />
+        {user && <TestTransactions user={user} />}
+      </CurrencyProvider>
     </>
   );
 }
