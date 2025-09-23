@@ -8,6 +8,10 @@
   background-color: #1a1818;
   color: #fff;
   font-family: Arial, sans-serif;
+
+  background-size: cover;        
+  background-position: center;   
+  background-color: var(--primary-colour);
 }
 
 h1 {
@@ -16,13 +20,6 @@ h1 {
   font-family: 'Press Start 2P', 'Arial', sans-serif;
   text-shadow: 2px 2px 4px black;
 }
-
-.balance-display {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 15px;
-}
-
 .table {
   width: 90%;
   max-width: 700px;
@@ -63,7 +60,7 @@ h1 {
   justify-content: center;
   transform: translateY(-150px);
   opacity: 0;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition: transform 0s ease, opacity 0s ease;
 }
 
 .card.red {
@@ -161,8 +158,4 @@ h1 {
   0% { transform: scale(1); }
   50% { transform: scale(1.05); }
   100% { transform: scale(1); }
-}
-
-.background{
-  
 }

@@ -1,61 +1,113 @@
-.SpecialEventContainer {
-  background-color: var(--secondary-colour);
-  color: var(--text-colour);
-
-  display: flex;
-  flex-direction: row;
-
-  border-radius: 18px;
-
-  gap: 10px;
-  padding: 10px;
-}
-
-.SpecialEventContainer img {
-  object-fit: contain;
-  height: auto;
+/* ---------- Slider container ---------- */
+.SpecialEventsSlider {
   width: 100%;
+  max-width: 100%; 
+  margin: 0 auto;
+  padding: 0 24px; 
 }
 
-.Column {
-  width: 50%;
-  height: 225px;
-
-  gap: 10px;
+/* Slide space */
+.SpecialEventsSlide {
+  padding: 14px; 
 }
 
-.LeftColumn {
-  display: flex;
-  flex-direction: column;
-}
-
-.RightColumn {
-  display: flex;
-  flex-direction: column;
-}
-
-.EventSection {
-  padding: 5px 10px;
-
+/* Special Event Card */
+.SpecialEventCard {
+  background: #2b2b2b;
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 18px;
-}
-
-.EventHook,
-.EventButton {
-  background-color: var(--primary-colour);
-
-  text-align: center;
-}
-
-.EventDescription,
-.EventImage {
-    background-color: var(--accent-colour);
-
+  padding: 14px;
+  color: #eaeaea;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 260px;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.EventImage {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Event Hook */
+.EventHook {
+  align-self: center;
+  padding: 8px 16px;
+  background: #3a3a3a;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #eaeaea;
 }
+
+/* Left Text and image */
+.SpecialEventBody {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr; 
+  gap: 14px;
+  align-items: stretch;
+}
+
+/* Text panel */
+.EventText {
+  background: #3a3a3a;
+  border-radius: 14px;
+  padding: 12px;
+}
+.EventTitle {
+  margin: 0 0 6px 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.EventDesc {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  opacity: 0.95;
+}
+
+/* Image Part*/
+.SpecialEventsImage {
+  background: #a47706;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.SpecialEventsImage img {
+  width: 100%;
+  height: 100%;
+  max-height: 160px;
+  object-fit: cover;
+}
+
+/* Bottom Section (PLAY) */
+.BottomSection {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: #3a3a3a;
+  color: #eaeaea;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: filter 120ms ease;
+}
+.BottomSection:hover { filter: brightness(1.05); }
+
+/* Full width for carousel*/
+.SpecialEventsFull {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+}
+.SpecialEventsInside {
+  padding: 0 32px; 
+}
+
+/* Height/Body */
+.SpecialEventBody {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  flex: 1;                 
+  min-height: 180px;       
+}
+

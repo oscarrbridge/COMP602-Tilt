@@ -25,14 +25,14 @@ h2 {
 
 /* Game Cards */
 
-.GamesContainer {
+.PopularGamesContainer {
   display: flex;
   flex-direction: column;
 
   gap: 10px;
 }
 
-.Games {
+.PopularGames {
   display: flex;
   gap: 20px;
   
@@ -45,4 +45,19 @@ h2 {
   flex-direction: column;
 
   gap: 10px;
+}
+
+
+.GamesContainer{
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+.Games {
+  display: flex;
+  gap: 20px;
+
+  padding-bottom: 10px;
 }
