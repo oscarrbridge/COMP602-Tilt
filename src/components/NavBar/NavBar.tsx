@@ -13,7 +13,6 @@ import RegisterUser from '../../components/Auth/RegisterUser';
 import SignInPopup from '../../components/Auth/SignInUser';
 import UserBalance from '../UserBalance/UserBalance';
 import TestTransactions from './transactionTest';
-// import TestTransactions from './transactionTest';
 
 export default function NavBar() {
   const navigate = useNavigate();
