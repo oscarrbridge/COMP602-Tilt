@@ -1,6 +1,4 @@
-/* mines.css */
 
-/* Main app container */
 .app {
   display: grid;
   grid-template-columns: 250px 1fr; /* panel left, board right */
@@ -10,10 +8,10 @@
     "panel board"
     "results results"
     "status status";
-  gap: 10px;
-  max-width: 900px;
+  gap: 20px;
+  
   margin: 0 auto;
-  padding: 5px;
+  padding: 20px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #222;
 }

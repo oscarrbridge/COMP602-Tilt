@@ -4,7 +4,9 @@ import "./BackgroundLayout.css";
 import NavBar from "../NavBar/NavBar";
 import PanelMenu from "../PanelMenu/PanelMenu";
 import InfoPanel from "../InfoPanel/InfoPanel";
-import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx"; 
+import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx";
+import UniCreditsPanel from "../UniCreditsPanel/UniCreditsPanel";
+import BettingHistoryPanel from "../BettingHistoryPanel/BettingHistoryPanel";
 
 interface BackgroundLayoutProps {
   children: ReactNode;
@@ -14,17 +16,23 @@ const BackgroundLayout: React.FC<BackgroundLayoutProps> = ({ children }) => {
   return (
     <div className="background-container">
       {/* Navbar */}
-      <div className="title-panel">
-        <h1>🎮 My Casino Game</h1>
-      </div>
-      
+
       <CurrencyProvider base="NZD" DefaultCurrency="NZD">
         <div className="NavBar">
           <NavBar />
         </div>
       </CurrencyProvider>
 
-      <div className="content-wrapper">{children}</div>
+      <div className="content-wrapper">
+        <div className="uni-credits-menu">
+          <UniCreditsPanel />
+        </div>
+        <div className="game-container">{children}</div>
+
+        <div className="betting-history-menu">
+          <BettingHistoryPanel />
+        </div>
+      </div>
 
       <div className="panel-menu">
         <PanelMenu />
@@ -32,7 +40,7 @@ const BackgroundLayout: React.FC<BackgroundLayoutProps> = ({ children }) => {
 
       <div className="info-menu">
         <div className="info-panel">
-          <InfoPanel/>
+          <InfoPanel />
         </div>
       </div>
     </div>
