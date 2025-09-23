@@ -26,6 +26,8 @@ export default function GetStatistics() {
   const [uid, setUid] = useState<string | null>(auth.currentUser?.uid ?? null);
   // User's main document
   const [statistics, setStatistics] = useState<UserDoc | null>(null);
+  const [totalDepositedCents, setTotalDepositedCents] = useState(0);
+  const [totalWithdrawnCents, setTotalWithdrawnCents] = useState(0);
   // Calculated stats from user's stats
   const [calculatedStatistics, setCalculatedStatistics] = useState<CalculatedStatistics>({
     gamesPlayed: 0,
@@ -81,6 +83,19 @@ export default function GetStatistics() {
         const averageBet = bets.length
           ? bets.reduce((sum, t) => sum + (t.amount as number), 0) / bets.length
           : 0;
+
+        // Totals (amounts are stored as NZD cents in Firestore)
+        const deposits = transaction.filter(
+          (t) => t.type === 'deposit' && typeof t.amount === 'number'
+        );
+        const withdrawals = transaction.filter(
+          (t) => t.type === 'withdraw' && typeof t.amount === 'number'
+        );
+        const depositSumCents = deposits.reduce((sum, t) => sum + (t.amount as number), 0);
+        const withdrawSumCents = withdrawals.reduce((sum, t) => sum + (t.amount as number), 0);
+        setTotalDepositedCents(depositSumCents);
+        setTotalWithdrawnCents(withdrawSumCents);
+
         // Group transactions by game to find most profitable game type
         const totalByGame: Record<string, number> = {};
         for (const t of transaction) {
@@ -118,14 +133,14 @@ export default function GetStatistics() {
             <td>Total Balance</td>
             <td>{statistics?.balance ?? 0}</td>
           </tr>
-          {/* <tr>
+          <tr>
             <td>Total Deposited</td>
-            <td>{i.TotalDeposited}</td>
+            <td>{(totalDepositedCents / 100).toFixed(2)}</td>
           </tr>
           <tr>
             <td>Total Withdrawn</td>
-            <td>{i.TotalWithdrawn}</td>
-          </tr> */}
+            <td>{(totalWithdrawnCents / 100).toFixed(2)}</td>
+          </tr>
           <tr>
             <td>Net Profit</td>
             <td>{statistics?.netProfit ?? 0}</td>

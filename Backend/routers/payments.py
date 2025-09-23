@@ -22,6 +22,42 @@ FRONTEND_URL = (os.getenv("FRONTEND_URL", "http://localhost:5173")).rstrip("/")
 DEFAULT_CURRENCY = (os.getenv("CURRENCY") or "nzd").lower()
 
 
+FX_RATES = {
+    "nzd": 1.0,
+    "aud": 0.90,
+    "usd": 0.59,
+    "eur": 0.50,
+    "gbp": 0.44,
+}
+ZERO_DECIMAL = {"jpy"}  # future-proof
+
+
+def _norm(c: str | None) -> str:
+    return (c or DEFAULT_CURRENCY).lower()
+
+
+def _factor(cur: str) -> int:
+    return 1 if cur in ZERO_DECIMAL else 100
+
+
+def _convert(amount: float, from_cur: str, to_cur: str, base: str = "nzd") -> float:
+    f, t = _norm(from_cur), _norm(to_cur)
+    if f == t:
+        return amount
+    if f == base:
+        return amount * FX_RATES[t]
+    if t == base:
+        return amount / FX_RATES[f]
+    return (amount / FX_RATES[f]) * FX_RATES[t]
+
+
+def _minor_to_nzd_cents(minor_in_src: int, src_cur: str) -> int:
+    src = _norm(src_cur)
+    major_src = minor_in_src / _factor(src)
+    nzd_major = _convert(major_src, src, "nzd")
+    return int(round(nzd_major * _factor("nzd")))
+
+
 # Pydantic model for validation, ensures field: string, amount in cents: integer, currency: string
 class DepositBody(BaseModel):
     uid: str = Field(..., description="Firebase Auth UID")
@@ -218,11 +254,15 @@ async def stripe_webhook(request: Request):
         session = event["data"]["object"]
         session_id = session["id"]
         uid = (session.get("metadata") or {}).get("uid")
-        amount = int(session.get("amount_total") or 0)  # cents
-        currency = (session.get("currency") or DEFAULT_CURRENCY).lower()
+        amount_minor = int(
+            session.get("amount_total") or 0
+        )  # minor units in session currency
+        charge_cur = (session.get("currency") or DEFAULT_CURRENCY).lower()
 
-        if uid and amount > 0:
-            _credit_user_and_log_transaction(uid, amount, currency, session_id)
+        if uid and amount_minor > 0:
+            # Convert charged currency -> NZD cents for the ledger
+            nzd_cents = _minor_to_nzd_cents(amount_minor, charge_cur)
+            _credit_user_and_log_transaction(uid, nzd_cents, "nzd", session_id)
 
     return {"received": True}
 
