@@ -1,3 +1,4 @@
+
 // src/App.tsx
 import NavBar from "./components/NavBar/NavBar";
 import SpecialEvent from "./components/SpecialEvent/SpecialEvent";
@@ -20,17 +21,41 @@ import type { Settings } from "react-slick";
 
 
 import "./App.css";
-import { Filter } from "@mui/icons-material";
 
 // Styling theme
 const theme = createTheme({
   palette: {
     background: {
-      default: "var(--background)",
+      default: 'var(--background)',
     },
   },
 });
 
+// Required npm packages: react-router-dom
+
+const SpecialEvents = [
+  {
+    EventHook: 'Hook',
+    EventTitle: 'Title',
+    EventDescription: 'Description',
+    EventImage: 'src/assets/Tilt.png',
+    EventLink: '/',
+  },
+  {
+    EventHook: 'Hook',
+    EventTitle: 'Title',
+    EventDescription: 'Description',
+    EventImage: 'src/assets/Tilt.png',
+    EventLink: '/',
+  },
+  {
+    EventHook: 'Hook',
+    EventTitle: 'Title',
+    EventDescription: 'Description',
+    EventImage: 'src/assets/Tilt.png',
+    EventLink: '/',
+   }
+  ];  
 // Special Events data
 const DEFAULT_EVENTS: SpecialEventItem[] = [
   {
@@ -39,30 +64,29 @@ const DEFAULT_EVENTS: SpecialEventItem[] = [
     EventDescription: "Description",
     EventImage: "src/assets/Tilt.png",
     EventLink: "/",
-    createdAt: Date.now(),
   },
-];
+]; 
 
 // Popular games data
 export const PopularGames = [
   {
-    Text: "Slots",
-    Image: "src/assets/icon-slots.png",
-    LinkTo: "/slots",
+    Text: 'Slots',
+    Image: 'src/assets/Tilt.png',
+    LinkTo: '/slots',
   },
   {
-    Text: "Blackjack",
-    Image: "src/assets/icon-blackjack.png",
-    LinkTo: "/blackjack",
+    Text: 'Blackjack',
+    Image: 'src/assets/Tilt.png',
+    LinkTo: '/blackjack',
   },
   {
-    Text: "Mines",
-    Image: "src/assets/icon-bomb.png",
-    LinkTo: "/mines",
+    Text: 'Mines',
+    Image: 'src/assets/Tilt.png',
+    LinkTo: '/mines',
   },
   {
-    Text: "Coming Soon",
-    Image: "src/assets/Future.png",
+    Text: 'Coming Soon',
+    Image: 'src/assets/Future.png',
   },
 ];
 
@@ -137,11 +161,10 @@ export default function Dashboard() {
     localStorage.removeItem("specialEvents");
     setEvents(DEFAULT_EVENTS); 
   };
-
   return (
     <CurrencyProvider base="NZD" DefaultCurrency="NZD">
     <AppProvider theme={theme}>
-      <NavBar />
+        <NavBar />
 
       <div className="SpecialEventsContainer">
         <h2>Special Events</h2>

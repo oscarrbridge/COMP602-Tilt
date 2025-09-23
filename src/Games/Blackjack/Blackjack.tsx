@@ -36,7 +36,7 @@ const cardValue = (card: { rank: string; suit: string }) => {
 };
 
 export default function Blackjack() {
-  const { user, balance, refreshBalance } = useUser();
+  const {user, balance, refreshBalance } = useUser();
   const [playerCards, setPlayerCards] = useState<{ rank: string; suit: string }[]>([]);
   const [dealerCards, setDealerCards] = useState<{ rank: string; suit: string }[]>([]);
   const [bet, setBet] = useState(10);
