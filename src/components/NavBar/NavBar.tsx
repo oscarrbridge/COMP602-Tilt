@@ -8,10 +8,11 @@ import { auth, db } from "../../../Backend/firebase/firebaseConfig";
 
 import "./NavBar.css";
 
-import NavWindow from "../NavWindow/NavWindow.tsx";
-import RegisterUser from "../../components/Auth/RegisterUser";
-import SignInPopup from "../../components/Auth/SignInUser";
-import UserBalance from "../UserBalance/UserBalance";
+import NavWindow from '../NavWindow/NavWindow.tsx';
+import RegisterUser from '../../components/Auth/RegisterUser';
+import SignInPopup from '../../components/Auth/SignInUser';
+import UserBalance from '../UserBalance/UserBalance';
+import TestTransactions from './transactionTest';
 // import TestTransactions from './transactionTest';
 
 export default function NavBar() {
@@ -120,13 +121,11 @@ export default function NavBar() {
         {SignUpActive && <RegisterWindow />}
       </div> */}
 
+      {/* Popups when clicked on*/}
+      <RegisterUser open={SignUpActive} onClose={() => SetSignUp(false)} />
+      <SignInPopup open={LoginActive} onClose={() => SetLogin(false)} />
+      {user && <TestTransactions user={user} />}
 
-        {/* Popups when clicked on*/}
-        <RegisterUser open={SignUpActive} onClose={() => SetSignUp(false)} />
-        <SignInPopup open={LoginActive} onClose={() => SetLogin(false)} />
-        {/* {user && <TestTransactions user={user} />} */}
-
-      </CurrencyProvider>
     </>
   );
 }
