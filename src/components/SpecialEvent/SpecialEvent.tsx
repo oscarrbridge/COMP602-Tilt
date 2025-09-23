@@ -15,7 +15,7 @@ export default function SpecialEvent({EventHook, EventTitle, EventDescription, E
 
   return (
     <article className="SpecialEventCard">
-      {/* Badge */}
+      {/* Hook */}
       <div className="EventHook">{EventHook}</div>
 
       {/* Left Text and Image */}

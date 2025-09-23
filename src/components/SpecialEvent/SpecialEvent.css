@@ -102,6 +102,17 @@
   padding: 0 32px; 
 }
 
+/* Height/Body */
+.SpecialEventBody {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  flex: 1;                 
+  min-height: 180px;       
+}
+
+
+
 
 
 
