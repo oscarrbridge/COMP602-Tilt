@@ -20,7 +20,7 @@ export async function userTransaction(
     // Fallback to 0 if balance is undefined
     const before = user.exists() ? (user.data()?.[balanceType] ?? 0) : 0;
     // Balance after transaction
-    const after = before + amount;
+    const after = type === 'loss' ? before : before + amount;
 
     // Only count wins/losses (not deposit/withdraw)
     const affectsStats = type === 'bet' || type === 'win' || type === 'loss';
@@ -85,7 +85,7 @@ export const recordBet = (uid: string, amt: number, o?: any) =>
 export const recordWin = (uid: string, amt: number, o?: any) =>
   userTransaction(uid, Math.abs(amt), 'win','balance' ,o);
 export const recordLoss = (uid: string, amt: number, o?: any) =>
-  userTransaction(uid, 0, 'loss','balance', o); // Changed to not deduct when loss just record they lost.
+  userTransaction(uid, -Math.abs(amt), 'loss','balance', o); // Changed to not deduct when loss just record they lost.
 export const deposit = (uid: string, amt: number) => 
   userTransaction(uid, Math.abs(amt), 'deposit','balance');
 export const withdraw = (uid: string, amt: number) =>
