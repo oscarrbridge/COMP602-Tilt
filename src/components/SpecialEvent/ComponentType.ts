@@ -5,4 +5,5 @@ export interface SpecialEventItem {
   EventDescription: string;
   EventImage: string;
   EventLink: string;
+  createdAt: number;
 }
