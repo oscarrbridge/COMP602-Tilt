@@ -81,14 +81,14 @@ export async function userTransaction(
 
 // Regular balance functions
 export const recordBet = (uid: string, amt: number, o?: any) =>
-  userTransaction(uid, -Math.abs(amt), 'bet', o); // Deduct on bet
+  userTransaction(uid, -Math.abs(amt), 'bet','balance', o); // Deduct on bet
 export const recordWin = (uid: string, amt: number, o?: any) =>
-  userTransaction(uid, Math.abs(amt), 'win', o);
+  userTransaction(uid, Math.abs(amt), 'win','balance' ,o);
 export const recordLoss = (uid: string, amt: number, o?: any) =>
   userTransaction(uid, 0, 'loss', o); // Changed to not deduct when loss just record they lost.
-export const deposit = (uid: string, amt: number) => userTransaction(uid, Math.abs(amt), 'deposit');
+export const deposit = (uid: string, amt: number) => userTransaction(uid, Math.abs(amt), 'deposit','balance');
 export const withdraw = (uid: string, amt: number) =>
-  userTransaction(uid, -Math.abs(amt), 'withdraw');
+  userTransaction(uid, -Math.abs(amt), 'withdraw','balance');
 
 // Unibalance functions
 export const recordUniBet = (uid: string, amt: number, o?: any) =>
