@@ -1,0 +1,108 @@
+/* BackgroundLayout.css or App.css */
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+
+  width: 1200px;
+  height: 700px;
+
+  border: 6px solid #222;
+  border-radius: 20px;
+  background-color: #1a1818;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  color: #fff;
+  font-family: Arial, sans-serif;
+  box-shadow: 0 0 40px rgba(0,0,0,0.8);
+  overflow: hidden;
+}
+
+
+.background-container {
+   min-height: 100vh;  /* ensures at least full screen */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #111;
+  padding-top: 80px;
+}
+
+/* Navbar on top */
+.NavBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 80px; /* example navbar height */
+  z-index: 1000;
+}
+
+.title-panel {
+  position: fixed;
+   /* below navbar */
+  left: 50%;
+  transform: translateX(-50%);
+  
+  top: 8vh;
+  width: 62vw;   /* fixed width */
+  height: auto;    /* adjusts with content */
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+
+  background: #1a1818;
+  color: white;
+  text-align: center;
+  padding: 1.1rem;
+  border: 2px solid #333;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  z-index: 800;
+  pointer-events: auto;
+}
+
+
+.title-panel h1 {
+  margin: 0;
+  font-size: 24px; /* scales with screen width */
+  font-weight: bold;
+}
+
+.content-wrapper {
+  position: fixed;
+  top: 11vh;  /* navbar + title */
+  left: 50%;
+  transform: translateX(-50%);
+  
+  width: 65vw;   /* fixed width */
+  height: 800px;   /* fixed height */
+  
+  display: flex;
+  
+  align-items: center;
+  
+}
+
+@media (max-height: 850px) {
+  .title-panel {
+    display: none;
+  }
+  .content-wrapper {
+    top: 3vh;
+  }
+}
+
+@media (max-width: 980px) {
+  .content-wrapper {
+    width: 640px; ;
+  }
+  .title-panel {
+    width: 610px; ;
+  }
+
+}

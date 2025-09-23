@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
 import "./Slots.css";
+import { placeBet, recordWinTx, recordLossTx } from "../../../Backend/transactions";
+import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
+import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx"; 
+import BetControls from "../BetControls.tsx";
+import BackgroundLayout from "../../components/BackgroundLayout/BackgroundLayout";
+
 
 // ---------------- Slot Logic ----------------
 function generateNum(): number {
@@ -71,11 +77,12 @@ function calculateWinnings(slotGrid: number[][]): RowResult[] {
 
 // ---------------- React Component ----------------
 function Slots() {
+  const { user, balance, refreshBalance } = useUser();
   const [grid, setGrid] = useState<number[][]>([]);
   const [bet, setBet] = useState<number>(2.0);
-  const [balance, setBalance] = useState<number>(100.0);
-  const [winningCells, setWinningCells] = useState<number[]>([]);
   const [lastWin, setLastWin] = useState<number>(0);
+  const [winningCells, setWinningCells] = useState<number[]>([]);
+  const [roundInProgress, setRoundInProgress] = useState(false);
 
   const presetGrid: number[][] = [
     [1, 2, 3, 4, 5],
@@ -85,12 +92,24 @@ function Slots() {
     [16, 1, 2, 3, 4],
   ];
 
-  const spin = () => {
-    if (bet > balance) {
+  useEffect(() => {
+    setGrid(presetGrid);
+  }, []);
+
+  const spin = async (betInBase: number) => {
+    if (betInBase > balance) {
       alert("Insufficient balance for this bet.");
       return;
     }
 
+    setRoundInProgress(true);
+    setLastWin(0);
+
+    // Record the bet
+    await placeBet(user.uid, betInBase, 1, "slots");
+    await refreshBalance();
+
+    // Generate spin result
     const newGrid = spinSlots();
     setGrid(newGrid);
 
@@ -105,26 +124,32 @@ function Slots() {
 
     setWinningCells(matches);
 
-    setBalance((prev) => prev - bet + bet * totalMultiplier);
-    const winAmount = bet * totalMultiplier;
+    const winAmount = betInBase * totalMultiplier;
+    if (winAmount > 0) {
+      setLastWin(winAmount);
+      await recordWinTx(user.uid, winAmount, 1, "slots");
+    } else {
+      await recordLossTx(user.uid, betInBase, 1, "slots");
+    }
 
-    setLastWin(winAmount > 0 ? winAmount : 0);
+    await refreshBalance();
+    setRoundInProgress(false);
   };
 
-  const increaseBet = () => setBet((prev) => prev + 1);
-  const decreaseBet = () => setBet((prev) => Math.max(1, prev - 1));
-
-  useEffect(() => {
-    setGrid(presetGrid);
-  }, []);
-
   return (
-    <div className="app-container">
-      <br />
-      <br />
-      <br />
-      <br />
+ <BackgroundLayout>
+ <div className="game-container">
+      <CurrencyProvider base="NZD" DefaultCurrency="NZD">
 
+        <h1>♠ Slots ♣</h1>
+
+        {/* Bet Input & Spin */}
+        {!roundInProgress && (
+          <BetControls balance={balance} bet={bet} setBet={setBet} startGame={spin} />
+        )}
+      </CurrencyProvider>
+
+      {/* Slot Grid */}
       <div className="slot-grid">
         {grid.map((row, rowIndex) => (
           <div key={rowIndex} className="slot-row">
@@ -144,31 +169,17 @@ function Slots() {
           </div>
         ))}
       </div>
-      <div className="balance-display">Balance: ${balance.toFixed(2)}</div>
-      <div className="controls-row">
-        <div className="bet-controls">
-          <button className="bet-button" onClick={decreaseBet}>
-            -
-          </button>
-          <span className="bet-value">${bet.toFixed(2)}</span>
-          <button className="bet-button" onClick={increaseBet}>
-            +
-          </button>
-        </div>
 
-        <button className="spin-button" onClick={spin}>
-          SPIN
-        </button>
-
-        <div className="win-display">
-          {lastWin > 0 ? (
-            <span className="win-amount">+ ${lastWin.toFixed(2)}</span>
-          ) : (
-            <span>&nbsp;</span>
-          )}
-        </div>
+      {/* Win Display */}
+      <div className="win-display">
+        {lastWin > 0 ? (
+          <span className="win-amount">+ ${bet.toFixed(2)}</span>
+        ) : (
+          <span>&nbsp;</span>
+        )}
       </div>
     </div>
+    </BackgroundLayout>
   );
 }
 
