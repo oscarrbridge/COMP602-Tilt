@@ -2,11 +2,13 @@ import { db } from './firebaseConfig';
 import { doc, collection, runTransaction, serverTimestamp, increment } from 'firebase/firestore';
 
 export type transactionType = 'bet' | 'win' | 'loss' | 'deposit' | 'withdraw';
+export type balanceType = 'balance' | 'unibalance';
 
 export async function userTransaction(
   uid: string,
   amount: number,
   type: transactionType,
+  balanceType: balanceType = 'balance',
   optional?: { gameId?: string; gameType?: string; round?: number }
 ) {
   const userDoc = doc(db, 'users', uid);
@@ -16,7 +18,7 @@ export async function userTransaction(
     const user = await transaction.get(userDoc);
 
     // Fallback to 0 if balance is undefined
-    const before = user.exists() ? (user.data()?.balance ?? 0) : 0;
+    const before = user.exists() ? (user.data()?.[balanceType] ?? 0) : 0;
     // Balance after transaction
     const after = before + amount;
 
@@ -26,25 +28,39 @@ export async function userTransaction(
     const win = affectsStats && amount > 0 ? amount : 0;
     const loss = affectsStats && amount < 0 ? Math.abs(amount) : 0;
 
+    // Determine field names based on balance type
+    const totalWinningsField = balanceType === 'unibalance' ? 'uniTotalWinnings' : 'totalWinnings';
+    const totalLossesField = balanceType === 'unibalance' ? 'uniTotalLosses' : 'totalLosses';
+    const netProfitField = balanceType === 'unibalance' ? 'uniNetProfit' : 'netProfit';
+
     // Initilise transaction collection on first write ie: a user's first transaction
     if (!user.exists()) {
       transaction.set(userDoc, {
-        balance: after,
-        totalWinnings: win,
-        totalLosses: loss,
-        netProfit: affectsStats ? amount : 0,
+        balance: balanceType === 'balance' ? after : 0,
+        unibalance: balanceType === 'unibalance' ? after : 0,
+        totalWinnings: balanceType === 'balance' ? win : 0,
+        totalLosses: balanceType === 'balance' ? loss : 0,
+        netProfit: balanceType === 'balance' && affectsStats ? amount : 0,
+        uniTotalWinnings: balanceType === 'unibalance' ? win : 0,
+        uniTotalLosses: balanceType === 'unibalance' ? loss : 0,
+        uniNetProfit: balanceType === 'unibalance' && affectsStats ? amount : 0,
         createdAt: serverTimestamp(),
         lastUpdated: serverTimestamp(),
       });
     } else {
       // Updates balance and history to user documents
-      transaction.update(userDoc, {
-        balance: after,
-        totalWinnings: increment(win),
-        totalLosses: increment(loss),
-        ...(affectsStats ? { netProfit: increment(amount) } : {}),
+      const updateData: any = {
+        [balanceType]: after,
+        [totalWinningsField]: increment(win),
+        [totalLossesField]: increment(loss),
         lastUpdated: serverTimestamp(),
-      });
+      };
+
+      if (affectsStats) {
+        updateData[netProfitField] = increment(amount);
+      }
+
+      transaction.update(userDoc, updateData);
     }
 
     // Updates fields to transaction documents
@@ -52,6 +68,7 @@ export async function userTransaction(
     transaction.set(transactionDoc, {
       amount,
       type,
+      balanceType,
       gameId: optional?.gameId ?? null,
       gameType: optional?.gameType ?? null,
       round: optional?.round ?? null,
@@ -62,12 +79,27 @@ export async function userTransaction(
   });
 }
 
+// Regular balance functions
 export const recordBet = (uid: string, amt: number, o?: any) =>
-  userTransaction(uid, -Math.abs(amt), 'bet', o);
+
+  userTransaction(uid, -Math.abs(amt), 'bet', o); // Deduct on bet
 export const recordWin = (uid: string, amt: number, o?: any) =>
-  userTransaction(uid, Math.abs(amt), 'win', o);
+  userTransaction(uid, Math.abs(amt), 'win', 'balance', o);
 export const recordLoss = (uid: string, amt: number, o?: any) =>
-  userTransaction(uid, -Math.abs(amt), 'loss', o);
-export const deposit = (uid: string, amt: number) => userTransaction(uid, Math.abs(amt), 'deposit');
+  userTransaction(uid, 0, 'loss', o); // Changed to not deduct when loss just record they lost.
+export const deposit = (uid: string, amt: number) => 
+  userTransaction(uid, Math.abs(amt), 'deposit');
 export const withdraw = (uid: string, amt: number) =>
-  userTransaction(uid, -Math.abs(amt), 'withdraw');
+  userTransaction(uid, -Math.abs(amt), 'withdraw', 'balance');
+
+// Unibalance functions
+export const recordUniBet = (uid: string, amt: number, o?: any) =>
+  userTransaction(uid, -Math.abs(amt), 'bet', 'unibalance', o);
+export const recordUniWin = (uid: string, amt: number, o?: any) =>
+  userTransaction(uid, Math.abs(amt), 'win', 'unibalance', o);
+export const recordUniLoss = (uid: string, amt: number, o?: any) =>
+  userTransaction(uid, -Math.abs(amt), 'loss', 'unibalance', o);
+export const uniDeposit = (uid: string, amt: number) => 
+  userTransaction(uid, Math.abs(amt), 'deposit', 'unibalance');
+export const uniWithdraw = (uid: string, amt: number) =>
+  userTransaction(uid, -Math.abs(amt), 'withdraw', 'unibalance');

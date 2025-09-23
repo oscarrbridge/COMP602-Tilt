@@ -32,6 +32,7 @@ async function profileData(user: User) {
         totalLosses: 0,
         netProfit: 0,
         createdAt: serverTimestamp(),
+        uniBalance: 0,
       },
       // Add merge to prevent override
       { merge: true }
