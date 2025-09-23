@@ -85,8 +85,9 @@ export const recordBet = (uid: string, amt: number, o?: any) =>
 export const recordWin = (uid: string, amt: number, o?: any) =>
   userTransaction(uid, Math.abs(amt), 'win','balance' ,o);
 export const recordLoss = (uid: string, amt: number, o?: any) =>
-  userTransaction(uid, 0, 'loss', o); // Changed to not deduct when loss just record they lost.
-export const deposit = (uid: string, amt: number) => userTransaction(uid, Math.abs(amt), 'deposit','balance');
+  userTransaction(uid, 0, 'loss','balance', o); // Changed to not deduct when loss just record they lost.
+export const deposit = (uid: string, amt: number) => 
+  userTransaction(uid, Math.abs(amt), 'deposit','balance');
 export const withdraw = (uid: string, amt: number) =>
   userTransaction(uid, -Math.abs(amt), 'withdraw','balance');
 
