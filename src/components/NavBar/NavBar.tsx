@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
+import { CurrencyProvider } from "../CurrencySwitcher/currencyswitcher.tsx"; 
 
 import { auth, db } from '../../../Backend/firebase/firebaseConfig';
 
@@ -14,6 +15,8 @@ import UserBalance from '../UserBalance/UserBalance';
 // import TestTransactions from './transactionTest';
 
 export default function NavBar() {
+
+
   const navigate = useNavigate();
 
   const [NavActive, SetNavActive] = useState(false);
@@ -71,6 +74,7 @@ export default function NavBar() {
 
   return (
     <>
+      <CurrencyProvider base="NZD" DefaultCurrency="NZD">
       <div className='NavBarContainer'>
         <div className='Logo' onClick={() => navigate('/')}>
           <img src='src/assets/Tilt.png' width={80} />
@@ -122,6 +126,8 @@ export default function NavBar() {
       <RegisterUser open={SignUpActive} onClose={() => SetSignUp(false)} />
       <SignInPopup open={LoginActive} onClose={() => SetLogin(false)} />
       {/* {user && <TestTransactions user={user} />} */}
+      </CurrencyProvider>
     </>
+    
   );
 }

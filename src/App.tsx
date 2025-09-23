@@ -11,7 +11,6 @@ import { AppProvider } from "@toolpad/core/AppProvider";
 import { createTheme } from "@mui/material/styles";
 import { useMemo } from "react";
 import { useLocalStorage } from "./hooks/StoreSpecialEvent";
-import { CurrencyProvider } from "./components/CurrencySwitcher/currencyswitcher.tsx"; 
 
 // Carousel imports
 import "slick-carousel/slick/slick.css";
@@ -163,7 +162,6 @@ export default function Dashboard() {
     setEvents(DEFAULT_EVENTS); 
   };
   return (
-    <CurrencyProvider base="NZD" DefaultCurrency="NZD">
     <AppProvider theme={theme}>
         <NavBar />
 
@@ -225,6 +223,5 @@ export default function Dashboard() {
 
       <FilterBar />
     </AppProvider>
-    </CurrencyProvider>
   );
 }
