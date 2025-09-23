@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import type { User } from 'firebase/auth';
 import { recordBet, recordWin, recordLoss } from '@myfirebase/transactions';
+import { addUniBalance, subtractUniBalance } from '../../../Backend/transactions';
 
 type Props = { user: User | null };
 
 export default function TestTransactions({ user }: Props) {
-  const [pending, setPending] = useState<null | 'bet' | 'win' | 'loss'>(null);
+  const [pending, setPending] = useState<null | 'bet' | 'win' | 'loss' | 'addUni' | 'subtractUni'>(null);
 
   async function testBet() {
     if (!user) return console.error('Not logged in');
@@ -50,6 +51,34 @@ export default function TestTransactions({ user }: Props) {
     }
   }
 
+  async function testAddUniBalance() {
+    if (!user) return console.error('Not logged in');
+    try {
+      setPending('addUni');
+      console.log('Adding uni balance...');
+      await addUniBalance(user.uid, 100);
+      console.log('Uni balance added');
+    } catch (err) {
+      console.error('Failed to add uni balance:', err);
+    } finally {
+      setPending(null);
+    }
+  }
+
+  async function testSubtractUniBalance() {
+    if (!user) return console.error('Not logged in');
+    try {
+      setPending('subtractUni');
+      console.log('Subtracting uni balance...');
+      await subtractUniBalance(user.uid, 25);
+      console.log('Uni balance subtracted');
+    } catch (err) {
+      console.error('Failed to subtract uni balance:', err);
+    } finally {
+      setPending(null);
+    }
+  }
+
   const disabled = !user || pending !== null;
 
   return (
@@ -62,6 +91,12 @@ export default function TestTransactions({ user }: Props) {
       </button>
       <button onClick={testLoss} disabled={disabled}>
         {pending === 'loss' ? 'Recording…' : 'Test Loss (15)'}
+      </button>
+      <button onClick={testAddUniBalance} disabled={disabled}>
+        {pending === 'addUni' ? 'Adding…' : 'Add Uni Balance (100)'}
+      </button>
+      <button onClick={testSubtractUniBalance} disabled={disabled}>
+        {pending === 'subtractUni' ? 'Subtracting…' : 'Subtract Uni Balance (25)'}
       </button>
     </div>
   );
