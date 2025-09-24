@@ -2,20 +2,28 @@ import React from "react";
 import { useCurrency } from "../components/CurrencySwitcher/currencyswitcher";
 
 type BetControlsProps = {
-  balance: number;
-  bet: number;
+  balance: number; // balance is still in cents (int)
+  bet: number;     // bet is in NZD (whole dollars)
   setBet: React.Dispatch<React.SetStateAction<number>>;
-  startGame: (betInBase: number) => void;
+  startGame: (betInBase: number) => void; // betInBase should be in cents
 };
 
 export default function BetControls({ balance, bet, setBet, startGame }: BetControlsProps) {
   const { convertFromBase, convert, code, base } = useCurrency();
-  const balanceInCurrency = Math.floor(convertFromBase(balance));
-  
+
+  // Convert cents → dollars in the active currency
+  const balanceInCurrency = Math.floor(convertFromBase(balance / 100));
+
   const handleStart = () => {
-    const betInBase = convert(bet, code, base); // active currency → NZD
-    startGame(betInBase);                       // pass NZD to Blackjack
+    // bet is in dollars, so scale back to cents
+    const betInCents = bet * 100;
+
+    // Convert to NZD base (still in cents)
+    const betInBase = convert(betInCents / 100, code, base) * 100;
+
+    startGame(betInBase);
   };
+
   return (
     <div style={{ color: "white" }}>
       <label htmlFor="bet-input">Bet Amount:</label>
