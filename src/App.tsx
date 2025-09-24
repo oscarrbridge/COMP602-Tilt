@@ -70,22 +70,22 @@ const DEFAULT_EVENTS: SpecialEventItem[] = [
 export const PopularGames = [
   {
     Text: 'Slots',
-    Image: 'src/assets/Tilt.png',
+    Image: 'src/assets/icon-slots.png',
     LinkTo: '/slots',
   },
   {
     Text: 'Blackjack',
-    Image: 'src/assets/Tilt.png',
+    Image: 'src/assets/icon-blackjack.png',
     LinkTo: '/blackjack',
   },
   {
     Text: 'Mines',
-    Image: 'src/assets/Tilt.png',
+    Image: 'src/assets/icon-bomb.png',
     LinkTo: '/mines',
   },
   {
-    Text: 'Coming Soon',
-    Image: 'src/assets/Future.png',
+    Text: 'Coin Toss',
+    Image: 'src/assets/Tilt.png',
   },
 ];
 
