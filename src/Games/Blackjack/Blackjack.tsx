@@ -112,6 +112,7 @@ export default function Blackjack() {
 
   const stand = async()  => {
     setDealerRevealed(true);
+    setRoundInProgress(false);
     let dealerHand = [...dealerCards];
 
     setDealerCards(dealerHand);
@@ -122,8 +123,6 @@ export default function Blackjack() {
       setDealerCards([...dealerHand]); 
       await sleep(800); // delay between draws
   }
-
-    
 
     const playerScore = calcScore(playerCards);
     const dealerScore = calcScore(dealerHand);
@@ -146,8 +145,6 @@ export default function Blackjack() {
       await refreshBalance();
       setRoundResult("win");
     }
-
-    setRoundInProgress(false);
   };
 
   return (

@@ -5,6 +5,9 @@ import { placeBet, recordWinTx, recordLossTx } from "../../../Backend/transactio
 import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
 import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx";
 import BetControls from "../BetControls.tsx";
+import coinBase from "../../assets/coin.png";
+import coinHead from "../../assets/coin-head.png";
+import coinTail from "../../assets/Tilt-icon.png";
 
 export default function CoinFlip() {
   const { user, balance, refreshBalance } = useUser();
@@ -20,49 +23,50 @@ export default function CoinFlip() {
   const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const startGame = async (newBetInBase: number) => {
-    if (newBetInBase > balance) {
-      alert("Not enough balance!");
-      return;
-    }
+  if (newBetInBase > balance) {
+    alert("Not enough balance!");
+    return;
+  }
 
-    // reset state
+    // reset state for new round
     setBetInBase(newBetInBase);
     setLastWin(0);
     setRoundResult("");
     setPlayerChoice(null);
-    setFlipResult(null);
+    setFlipResult(null); // ✅ clear only when starting new round
     setIsFlipping(false);
     setRoundInProgress(true);
 
     await placeBet(user.uid, newBetInBase, 1, "coinflip");
     await refreshBalance();
-  };
+    };
 
-  const chooseSide = async (choice: "heads" | "tails") => {
+    const chooseSide = async (choice: "heads" | "tails") => {
     setPlayerChoice(choice);
     setIsFlipping(true);
-    setFlipResult(null);
 
     await sleep(2000); // spin for 2s
 
     const result = Math.random() < 0.5 ? "heads" : "tails";
-    setFlipResult(result);
+    setFlipResult(result); // ✅ coin stays rendered after result
     setIsFlipping(false);
 
     if (choice === result) {
-      setLastWin(bet);
-      await recordWinTx(user.uid, betInBase * 2, 1, "coinflip");
-      await refreshBalance();
-      setRoundResult("win");
+        setLastWin(bet);
+        await recordWinTx(user.uid, betInBase * 2, 1, "coinflip");
+        await refreshBalance();
+        setRoundResult("win");
     } else {
-      setLastWin(0);
-      await recordLossTx(user.uid, betInBase, 1, "coinflip");
-      await refreshBalance();
-      setRoundResult("loss");
+        setLastWin(0);
+        await recordLossTx(user.uid, betInBase, 1, "coinflip");
+        await refreshBalance();
+        setRoundResult("loss");
     }
 
+    // ✅ just mark round as finished, don't clear flipResult
     setRoundInProgress(false);
-  };
+    };
+
 
   return (
     <BackgroundLayout>
@@ -71,9 +75,9 @@ export default function CoinFlip() {
           <h1>🪙 Coin Flip 🪙</h1>
 
           {/* Show bet controls when no round is active */}
-            {!roundInProgress && (
+          {!roundInProgress && (
             <BetControls balance={balance} bet={bet} setBet={setBet} startGame={startGame} />
-            )}
+          )}
         </CurrencyProvider>
 
         {/* Let player choose side */}
@@ -85,26 +89,42 @@ export default function CoinFlip() {
           </div>
         )}
 
-        {/* Coin while spinning */}
+        {/* Coin spinning during toss */}
         {roundInProgress && isFlipping && (
           <div className="coin flipping">
-            <div className="coin-face heads">H</div>
-            <div className="coin-face tails">T</div>
+            <div className="coin-face coin-head">
+              <img src={coinBase} alt="Coin base" className="coin-base" />
+              <img src={coinHead} alt="Heads" className="coin-overlay" />
+            </div>
+            <div className="coin-face coin-tail">
+              <img src={coinBase} alt="Coin base" className="coin-base" />
+              <img src={coinTail} alt="Tails" className="coin-overlay" />
+            </div>
           </div>
         )}
 
-        {/* Coin result after spin */}
-        {!roundInProgress && flipResult && (
-        <div className="result-section">
-            <div className={`coin result`}>
-            <div className="coin-face">{flipResult === "heads" ? "H" : "T"}</div>
+        {/* Coin result after toss */}
+        {flipResult && (
+        <div className="coin">
+            <div
+            className={`coin-face coin-head ${flipResult === "heads" ? "show" : "hide"}`}
+            style={{ transform: "rotateY(0deg)" }}
+            >
+            <img src={coinBase} alt="Coin base" className="coin-base" />
+            <img src={coinHead} alt="Heads" className="coin-overlay" />
             </div>
-            <div className="result-text">
-            <h2>You picked: {playerChoice?.toUpperCase()}</h2>
-            <h2>Coin landed on: {flipResult.toUpperCase()}</h2>
+            <div
+            className={`coin-face coin-tail ${flipResult === "tails" ? "show" : "hide"}`}
+            style={{ transform: "rotateY(0deg)" }}
+            >
+            <img src={coinBase} alt="Coin base" className="coin-base" />
+            <img src={coinTail} alt="Tails" className="coin-overlay" />
             </div>
         </div>
         )}
+
+
+
 
         {/* Win / Loss Display */}
         {!roundInProgress && roundResult && (

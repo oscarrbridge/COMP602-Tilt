@@ -1,92 +1,77 @@
-.game-container {
-  text-align: center;
-  color: white;
-  padding: 20px;
-}
-
-.controls button {
-  margin: 10px;
-  padding: 12px 24px;
-  font-size: 18px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: 0.2s ease-in-out;
-}
-
-.controls button:hover {
-  transform: scale(1.05);
-}
-
-.result-section {
-  margin-top: 20px;
-}
-
-.result-text h2 {
-  margin: 8px 0;
-}
-
-/* Coin styles */
 .coin {
-  width: 120px;
-  height: 120px;
-  margin: 20px auto;
-  perspective: 1000px;
   position: relative;
+  width: 140px;
+  height: 140px;
+  margin: 20px auto;
+  transform-style: preserve-3d;
+  perspective: 1000px;
 }
 
 .coin-face {
+  position: absolute;
   width: 100%;
   height: 100%;
-  border-radius: 50%;
-  background: gold;
+  backface-visibility: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
-  font-weight: bold;
-  color: black;
-  backface-visibility: hidden;
-  position: absolute;
-  top: 0;
-  left: 0;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
 }
 
-.coin-face.heads {
-  background: radial-gradient(circle at 30% 30%, #ffd700, #c9a200);
+/* Base always fills the coin */
+.coin-base {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Overlay sits above the base */
+.coin-overlay {
+  position: absolute;
+  width: 70%; /* adjust size */
+  height: 70%;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+/* Heads face */
+.coin-head {
   transform: rotateY(0deg);
 }
 
-.coin-face.tails {
-  background: radial-gradient(circle at 70% 70%, #ffb700, #8a6f00);
+/* Tails face */
+.coin-tail {
   transform: rotateY(180deg);
 }
 
-/* Animation */
-.flipping {
-  animation: flip 1s infinite linear;
+/* Spinning animation */
+.coin.flipping {
+  animation: flip 2.1s ease-in-out forwards;
 }
+/* Add smooth transition for static result */
+.coin-face {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* Hidden face */
+.coin-face.hide {
+  opacity: 0;
+  transform: scale(0.8); /* optional: shrink slightly */
+}
+
+/* Visible face */
+.coin-face.show {
+  opacity: 1;
+  transform: scale(1);
+}
+
+
 
 @keyframes flip {
-  from {
+  0% {
     transform: rotateY(0deg);
   }
-  to {
-    transform: rotateY(720deg);
+  100% {
+    transform: rotateY(1800deg); /* 5 full flips */
   }
-}
-
-/* Win/Loss */
-.win-display {
-  margin-top: 15px;
-  font-size: 22px;
-  font-weight: bold;
-}
-
-.win-amount {
-  color: lightgreen;
-}
-
-.loss-amount {
-  color: red;
 }
