@@ -22,6 +22,9 @@ export default function PanelMenu() {
           <li>
             <Link to="/mines">🎡 Mines</Link>
           </li>
+          <li>
+            <Link to="/cointoss">🪙 Coin Flip</Link>
+          </li>
         </ul>
       </div>
     </div>

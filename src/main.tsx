@@ -7,7 +7,8 @@ import Wallet from './pages/Wallet/Wallet.tsx';
 import Statistics from './pages/Statistics/Statistics.tsx';
 import Blackjack from './Games/Blackjack/Blackjack.tsx';
 import Slots from './Games/Slots/slots.tsx';
-import Mines from './Games/mines/mines.tsx';
+import Mines from './Games/Mines/mines.tsx';
+import CoinFlip from './Games/CoinToss/CoinToss.tsx';
 import Leaderboard from './pages/Leaderboard/Leaderboard.tsx';
 import { CurrencyProvider } from './components/CurrencySwitcher/currencyswitcher';
 
@@ -23,6 +24,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path='/slots' element={<Slots />} />
           <Route path='/blackjack' element={<Blackjack />} />
           <Route path='/mines' element={<Mines />} />
+          <Route path='/cointoss' element={<CoinFlip />} />
         </Routes>
       </BrowserRouter>
     </CurrencyProvider>
