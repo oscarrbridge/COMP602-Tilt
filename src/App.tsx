@@ -63,6 +63,7 @@ const DEFAULT_EVENTS: SpecialEventItem[] = [
     EventDescription: "Description",
     EventImage: "src/assets/Tilt.png",
     EventLink: "/",
+    createdAt: Date.now(),
   },
 ]; 
 
