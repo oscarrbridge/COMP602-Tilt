@@ -1,11 +1,10 @@
-import { useState, useEffect } from "react";
-import "./Slots.css";
-import { placeBet, recordWinTx, recordLossTx } from "../../../Backend/transactions";
-import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
-import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx"; 
-import BetControls from "../BetControls.tsx";
-import BackgroundLayout from "../../components/BackgroundLayout/BackgroundLayout";
-
+import { useState, useEffect } from 'react';
+import './Slots.css';
+import { placeBet, recordWinTx, recordLossTx } from '../../../Backend/transactions';
+import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
+import { CurrencyProvider } from '../../components/CurrencySwitcher/currencyswitcher.tsx';
+import BetControls from '../BetControls.tsx';
+import BackgroundLayout from '../../components/BackgroundLayout/BackgroundLayout';
 
 // ---------------- Slot Logic ----------------
 function generateNum(): number {
@@ -98,7 +97,7 @@ function Slots() {
 
   const spin = async (betInBase: number) => {
     if (betInBase > balance) {
-      alert("Insufficient balance for this bet.");
+      alert('Insufficient balance for this bet.');
       return;
     }
 
@@ -106,7 +105,7 @@ function Slots() {
     setLastWin(0);
 
     // Record the bet
-    await placeBet(user.uid, betInBase, 1, "slots");
+    await placeBet(user.uid, betInBase, 1, 'slots');
     await refreshBalance();
 
     // Generate spin result
@@ -117,19 +116,16 @@ function Slots() {
     const matches = winningData.map((row) => row.match);
     const multipliers = winningData.map((row) => row.multiplier);
 
-    let totalMultiplier = multipliers.reduce(
-      (acc, val) => (val > 0 ? acc + val : acc),
-      0
-    );
+    let totalMultiplier = multipliers.reduce((acc, val) => (val > 0 ? acc + val : acc), 0);
 
     setWinningCells(matches);
 
     const winAmount = betInBase * totalMultiplier;
     if (winAmount > 0) {
       setLastWin(winAmount);
-      await recordWinTx(user.uid, winAmount, 1, "slots");
+      await recordWinTx(user.uid, winAmount, 1, 'slots');
     } else {
-      await recordLossTx(user.uid, betInBase, 1, "slots");
+      await recordLossTx(user.uid, betInBase, 1, 'slots');
     }
 
     await refreshBalance();
@@ -137,48 +133,51 @@ function Slots() {
   };
 
   return (
- <BackgroundLayout>
- <div className="game-container">
-      <CurrencyProvider base="NZD" DefaultCurrency="NZD">
+    <BackgroundLayout>
+      <div className='game-container'>
+        <CurrencyProvider base='NZD' DefaultCurrency='NZD'>
+          <h1>♠ Slots ♣</h1>
 
-        <h1>♠ Slots ♣</h1>
+          {/* Bet Input & Spin */}
+          {!roundInProgress && (
+            <BetControls
+              balance={balance}
+              bet={bet}
+              setBet={setBet}
+              startGame={spin}
+              style={{ color: 'white' }}
+            />
+          )}
+        </CurrencyProvider>
 
-        {/* Bet Input & Spin */}
-        {!roundInProgress && (
-          <BetControls balance={balance} bet={bet} setBet={setBet} startGame={spin} />
-        )}
-      </CurrencyProvider>
+        {/* Slot Grid */}
+        <div className='slot-grid'>
+          {grid.map((row, rowIndex) => (
+            <div key={rowIndex} className='slot-row'>
+              {row.map((cell, cellIndex) => {
+                const isWinning = winningCells[rowIndex] !== 0 && cell === winningCells[rowIndex];
 
-      {/* Slot Grid */}
-      <div className="slot-grid">
-        {grid.map((row, rowIndex) => (
-          <div key={rowIndex} className="slot-row">
-            {row.map((cell, cellIndex) => {
-              const isWinning =
-                winningCells[rowIndex] !== 0 && cell === winningCells[rowIndex];
-
-              return (
-                <img
-                  key={cellIndex}
-                  src={`/assets/${cell}.png`}
-                  alt={`Slot ${cell}`}
-                  className={`slot-cell ${isWinning ? "winning" : ""}`}
-                />
-              );
-            })}
-          </div>
-        ))}
+                return (
+                  <img
+                    key={cellIndex}
+                    src={`/assets/${cell}.png`}
+                    alt={`Slot ${cell}`}
+                    className={`slot-cell ${isWinning ? 'winning' : ''}`}
+                  />
+                );
+              })}
+            </div>
+          ))}
+        </div>
+        {/* Win / Loss Display */}
+        <div className='win-display'>
+          {lastWin > 0 ? (
+            <span className='win-amount'>+ ${lastWin.toFixed(2)}</span>
+          ) : (
+            <span className='win-amount'>- ${bet.toFixed(2)}</span>
+          )}
+        </div>
       </div>
-
-      {/* Win Display */}
-      <div className="win-display">
-        {lastWin > 0 ? (
-          <span className="win-amount">+ ${bet.toFixed(2)}</span>
-        ) : (
-          <span>&nbsp;</span>
-        )}
-      </div>
-    </div>
     </BackgroundLayout>
   );
 }

@@ -25,7 +25,7 @@ export default function BetControls({ balance, bet, setBet, startGame }: BetCont
   };
 
   return (
-    <div style={{ color: 'black' }}>
+    <div>
       <label htmlFor='bet-input'>Bet Amount:</label>
       <input
         id='bet-input'
