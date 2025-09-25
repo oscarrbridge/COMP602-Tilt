@@ -1,25 +1,23 @@
-
 // src/App.tsx
-import NavBar from "./components/NavBar/NavBar";
-import SpecialEvent from "./components/SpecialEvent/SpecialEvent";
-import SpecialEventCreateButton from "./components/SpecialEvent/SpecialEventCreateButton";
-import type { SpecialEventItem } from "./components/SpecialEvent/ComponentType";
-import GameCard from "./components/GameCard/GameCard";
-import SearchBar from "./components/SearchBar/SearchBar";
-import FilterBar from "./components/FilterBar/FilterBar";
-import { AppProvider } from "@toolpad/core/AppProvider";
-import { createTheme } from "@mui/material/styles";
-import { useMemo } from "react";
-import { useLocalStorage } from "./hooks/StoreSpecialEvent";
+import NavBar from './components/NavBar/NavBar';
+import SpecialEvent from './components/SpecialEvent/SpecialEvent';
+import SpecialEventCreateButton from './components/SpecialEvent/SpecialEventCreateButton';
+import type { SpecialEventItem } from './components/SpecialEvent/ComponentType';
+import GameCard from './components/GameCard/GameCard';
+import SearchBar from './components/SearchBar/SearchBar';
+import FilterBar from './components/FilterBar/FilterBar';
+import { AppProvider } from '@toolpad/core/AppProvider';
+import { createTheme } from '@mui/material/styles';
+import { useMemo } from 'react';
+import { useLocalStorage } from './hooks/StoreSpecialEvent';
 
 // Carousel imports
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-import Slider from "react-slick";
-import type { Settings } from "react-slick";
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
+import Slider from 'react-slick';
+import type { Settings } from 'react-slick';
 
-
-import "./App.css";
+import './App.css';
 
 // Styling theme
 const theme = createTheme({
@@ -53,19 +51,19 @@ const SpecialEvents = [
     EventDescription: 'Description',
     EventImage: 'src/assets/Tilt.png',
     EventLink: '/',
-   }
-  ];  
+  },
+];
 // Special Events data
 const DEFAULT_EVENTS: SpecialEventItem[] = [
   {
-    EventHook: "Hook",
-    EventTitle: "Title",
-    EventDescription: "Description",
-    EventImage: "src/assets/Tilt.png",
-    EventLink: "/",
+    EventHook: 'Hook',
+    EventTitle: 'Title',
+    EventDescription: 'Description',
+    EventImage: 'src/assets/Tilt.png',
+    EventLink: '/',
     createdAt: Date.now(),
   },
-]; 
+];
 
 // Popular games data
 export const PopularGames = [
@@ -87,18 +85,15 @@ export const PopularGames = [
   {
     Text: 'Coin Toss',
     Image: 'src/assets/Tilt.png',
+    LinkTo: '/cointoss',
   },
 ];
 
 export default function Dashboard() {
   // Events fomr local storage
-  const [events, setEvents] = useLocalStorage<SpecialEventItem[]>(
-    "specialEvents",
-    DEFAULT_EVENTS
-  );
+  const [events, setEvents] = useLocalStorage<SpecialEventItem[]>('specialEvents', DEFAULT_EVENTS);
 
-  const addEvent = (item: SpecialEventItem) =>
-    setEvents((prev) => [item, ...prev]);
+  const addEvent = (item: SpecialEventItem) => setEvents((prev) => [item, ...prev]);
 
   // Sorts events
   const sorted = useMemo(
@@ -107,7 +102,7 @@ export default function Dashboard() {
   );
 
   // Carousel
-  const baseToShow = 3; 
+  const baseToShow = 3;
   const count = sorted.length;
   const slidesToShow = Math.min(baseToShow, count);
 
@@ -157,23 +152,23 @@ export default function Dashboard() {
 
   // Clear button handler
   const handleClearAll = () => {
-    if (!confirm("Clear all special events?")) return;
-    localStorage.removeItem("specialEvents");
-    setEvents(DEFAULT_EVENTS); 
+    if (!confirm('Clear all special events?')) return;
+    localStorage.removeItem('specialEvents');
+    setEvents(DEFAULT_EVENTS);
   };
   return (
     <AppProvider theme={theme}>
-        <NavBar />
+      <NavBar />
 
-      <div className="SpecialEventsContainer">
+      <div className='SpecialEventsContainer'>
         <h2>Special Events</h2>
 
         {/* Controls row */}
         <div
           style={{
-            display: "flex",
+            display: 'flex',
             gap: 12,
-            alignItems: "center",
+            alignItems: 'center',
             marginBottom: 12,
           }}
         >
@@ -181,12 +176,12 @@ export default function Dashboard() {
           <button
             onClick={handleClearAll}
             style={{
-              padding: "6px 12px",
+              padding: '6px 12px',
               borderRadius: 6,
-              border: "1px solid #888",
-              background: "#222",
-              color: "#fff",
-              cursor: "pointer",
+              border: '1px solid #888',
+              background: '#222',
+              color: '#fff',
+              cursor: 'pointer',
             }}
           >
             Clear All Events
@@ -194,11 +189,11 @@ export default function Dashboard() {
         </div>
 
         {/* Carousel */}
-        <section className="SpecialEventsFull">
-          <div className="SpecialEventsInside">
+        <section className='SpecialEventsFull'>
+          <div className='SpecialEventsInside'>
             <Slider key={sliderKey} {...sliderSettings}>
               {itemsForSlider.map((event, i) => (
-                <div key={`${event.EventTitle}-${i}`} className="SpecialEventsSlide">
+                <div key={`${event.EventTitle}-${i}`} className='SpecialEventsSlide'>
                   <SpecialEvent {...event} />
                 </div>
               ))}
@@ -207,18 +202,18 @@ export default function Dashboard() {
         </section>
       </div>
 
-      <div className="GamesContainer">
+      <div className='GamesContainer'>
         <h2>Popular Games</h2>
-        <div className="Games">
+        <div className='Games'>
           {PopularGames.map((game, i) => (
             <GameCard key={i} {...game} />
           ))}
         </div>
       </div>
 
-      <div className="HomeSearchBarContainer">
+      <div className='HomeSearchBarContainer'>
         <h2>Looking for a game?</h2>
-        <SearchBar Placeholder="Search for a game..." />
+        <SearchBar Placeholder='Search for a game...' />
       </div>
 
       <FilterBar />
