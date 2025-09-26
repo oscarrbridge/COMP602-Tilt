@@ -1,0 +1,188 @@
+/* mines.css */
+
+/* Main app container */
+.app {
+  display: grid;
+  grid-template-columns: 250px 1fr; /* panel left, board right */
+  grid-template-rows: auto auto auto auto; /* header, panel+board, results, status */
+  grid-template-areas:
+    "header header"
+    "panel board"
+    "results results"
+    "status status";
+  gap: 10px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 5px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #222;
+}
+
+/* Header */
+.app h1 {
+  grid-area: header;
+  font-size: 2.5rem;
+  text-align: center;
+  color: #d32f2f;
+  margin: 0;
+}
+
+/* Panel */
+.panel {
+  grid-area: panel;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;  /* keep items aligned */
+  gap: 12px;
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  background-color: #f5f5f5;
+  min-height: 220px; /* keep size stable even if buttons disappear */
+}
+
+.panel label {
+  display: flex;
+  flex-direction: column;
+  font-weight: bold;
+}
+
+.panel input[type="number"],
+.panel select {
+  margin-top: 7px;
+  margin-bottom: 7px;
+  padding: 6px 10px;
+  font-size: 1rem;
+  border: 1px solid #aaa;
+  border-radius: 5px;
+}
+
+.panel input:disabled,
+.panel select:disabled {
+  background-color: #e0e0e0; /* light gray background */
+  color: #888888;            /* darker gray text */
+  border: 1px solid #ccc;    /* optional border */
+  cursor: not-allowed;       /* show disabled cursor */
+}
+
+
+
+/* Buttons */
+.panel button {
+  padding: 8px 16px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.panel button.primary {
+  background-color: #1976d2;
+  color: #fff;
+}
+
+.panel button.primary:hover {
+  background-color: #115293;
+  transform: scale(1.05);
+}
+
+.panel button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Non-primary buttons ( Cash out) */
+.panel button:not(.primary) {
+  background-color: #1976d2;  /* darker blue */
+  color: #fff;
+  font-weight: bold;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.panel button:not(.primary):hover {
+  background-color: #115293;  /* slightly darker on hover */
+  transform: scale(1.05);
+}
+
+
+/* Results */
+.results {
+  grid-area: results;
+  display: flex;
+  flex-wrap: nowrap;      /* prevent wrapping */
+  justify-content: flex-start; /* align left */
+  gap: 5px;               /* spacing between results */
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+
+.results .result {
+  font-weight: bold;
+  background-color: #f0f0f0;
+  padding: 5px 6px;
+  border-radius: 6px;
+  min-width: 140px;
+}
+
+/* Status */
+.status {
+  grid-area: status;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-top: 5px;
+ font-weight: bold;
+  background-color: #f0f0f0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  min-width: 140px;
+}
+
+/* Board */
+.board {
+  grid-area: board;
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  max-width: 350px;
+  grid-template-columns: repeat(var(--size), 1fr);
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  padding: 4px;
+  background-color: #aaa8a8;
+  border-radius: 10px;
+}
+
+/* Cells */
+.cell {
+  width: 98%;
+  aspect-ratio: 1 / 1; /* keep cell square */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #eee;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  box-sizing: border-box; /* include border in size */
+  text-align: center;
+  line-height: 1;
+  font-size: 1.5rem; /* fixed font size to avoid stretching */
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.cell:hover {
+  background-color: #ddd;
+  transform: scale(1.05);
+}
+
+.cell.revealed {
+  background-color: #fff;
+  cursor: default;
+}
+
+.cell.mine {
+  background-color: #d32f2f;
+  color: #fff;
+}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
+import { CurrencyProvider } from '../CurrencySwitcher/currencyswitcher.tsx';
 
 import { auth, db } from '../../../Backend/firebase/firebaseConfig';
 
@@ -11,7 +12,7 @@ import NavWindow from '../NavWindow/NavWindow.tsx';
 import RegisterUser from '../../components/Auth/RegisterUser';
 import SignInPopup from '../../components/Auth/SignInUser';
 import UserBalance from '../UserBalance/UserBalance';
-// import TestTransactions from './transactionTest';
+import TestTransactions from './transactionTest';
 
 export default function NavBar() {
   const navigate = useNavigate();
@@ -71,57 +72,59 @@ export default function NavBar() {
 
   return (
     <>
-      <div className='NavBarContainer'>
-        <div className='Logo' onClick={() => navigate('/')}>
-          <img src='src/assets/Tilt.png' width={80} />
-        </div>
+      <CurrencyProvider base='NZD' DefaultCurrency='NZD'>
+        <div className='NavBarContainer'>
+          <div className='Logo' onClick={() => navigate('/')}>
+            <img src='src/assets/Tilt.png' width={80} />
+          </div>
 
-        <div className='UserBalance'>
-          <div className='UserBalanceContainer'>
-            <div className='UserIcon'>
-              <img src='src/assets/user-icon.png' width={25} />
-            </div>
-            <UserBalance balance={balance} />
-            <div
-              className='DropArrow'
-              onMouseEnter={() => SetNavActive(true)}
-              onMouseLeave={() => SetNavActive(false)}
-            >
-              <img src='src/assets/caret-icon.png' width={25} />
+          <div className='UserBalance'>
+            <div className='UserBalanceContainer'>
+              <div className='UserIcon'>
+                <img src='src/assets/user-icon.png' width={25} />
+              </div>
+              <UserBalance balance={balance} />
+              <div
+                className='DropArrow'
+                onMouseEnter={() => SetNavActive(true)}
+                onMouseLeave={() => SetNavActive(false)}
+              >
+                <img src='src/assets/caret-icon.png' width={25} />
 
-              {NavActive && <NavWindow />}
+                {NavActive && <NavWindow />}
+              </div>
             </div>
           </div>
+          <div className='LoginControls'>
+            {/* If user is logged in, show their info and logout */}
+            {user ? (
+              <div className='LoggedInBox'>
+                <span>{user.displayName || user.email || 'Logged in!'}</span>
+                <button onClick={() => signOut(auth)}>Logout</button>
+              </div>
+            ) : (
+              // If no user logged in, show login/register buttons
+              <>
+                <button onClick={HandleLoginClick} disabled={SignUpActive}>
+                  Login
+                </button>
+                <button onClick={HandleRegisterClick} disabled={LoginActive}>
+                  Register
+                </button>
+              </>
+            )}
+          </div>
         </div>
-        <div className='LoginControls'>
-          {/* If user is logged in, show their info and logout */}
-          {user ? (
-            <div className='LoggedInBox'>
-              <span>{user.displayName || user.email || 'Logged in!'}</span>
-              <button onClick={() => signOut(auth)}>Logout</button>
-            </div>
-          ) : (
-            // If no user logged in, show login/register buttons
-            <>
-              <button onClick={HandleLoginClick} disabled={SignUpActive}>
-                Login
-              </button>
-              <button onClick={HandleRegisterClick} disabled={LoginActive}>
-                Register
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-      {/* <div className='LoginMiniWindow'>
+        {/* <div className='LoginMiniWindow'>
         {LoginActive && <LoginWindow />}
         {SignUpActive && <RegisterWindow />}
       </div> */}
 
-      {/* Popups when clicked on*/}
-      <RegisterUser open={SignUpActive} onClose={() => SetSignUp(false)} />
-      <SignInPopup open={LoginActive} onClose={() => SetLogin(false)} />
-      {/* {user && <TestTransactions user={user} />} */}
+        {/* Popups when clicked on*/}
+        <RegisterUser open={SignUpActive} onClose={() => SetSignUp(false)} />
+        <SignInPopup open={LoginActive} onClose={() => SetLogin(false)} />
+        {/*user && <TestTransactions user={user} />*/}
+      </CurrencyProvider>
     </>
   );
 }

@@ -1,76 +1,112 @@
-## GitHub Setup
+# Tilt Project
 
-### **1. Download and install Github desktop**
-https://desktop.github.com/download/
+## Structure
+The repository has the following structure:
 
-### **2. Click File (Top Left) and 'Clone Repository', navigate to our one: GitHub\COMP602-Tilt and select your folder destination to clone (desktop or documents)**
+- **[Backend/](Backend/)** — backend server
+  - **[firebase/](Backend/firebase/)** — Firebase setup and admin SDK
+  - **[routers/](Backend/routers/)** — FastAPI routers (incl. Stripe endpoints)
+- **[public/](public/)** — static assets
+- **[src/](src/)** — frontend and game components
 
-### **3. Select Branch: Currently there's only main**
+---
 
-### **3. Open in Visual Studio Code**
+## Environment Variables
 
+Stripe functionality (deposits/withdrawals) requires local environment files.
+`.gitignore` excludes `.env` files, so create them locally:
 
-## **Installation Steps**
+**Root `.env` (server):**
+```dotenv
+STRIPE_SECRET_KEY=sk_test_xxx
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+```
+## **Build Scripts**
 
-### **1. Install Node.js:**
-React development relies on Node.js and its package manager, npm. If you don't have Node.js installed, download and install the LTS (Long Term Support) version from the official Node.js website. Verify the installation by opening your terminal or command prompt and running:
+### **Frontend localhost**
 
+cd to COMP602-Tilt> 
+  ```npm run dev ```
+  
+### **Backend server**
 
-  ```bash
-  node -v
-  npm -v
-  ```
-
-This should display the installed versions of Node.js and npm.
-
-### **2. Navigate to Your Project and Install Dependencies:**
-Change into your newly created project directory:
-
-Code
-
-  ```bash
-  cd my-react-app
-  ```
-
-OR
-
-Open Folder in VS Code
-
-### **3. Then, install the necessary project dependencies:**
-
-  ```bash 
-  npm install
-  ```
-
-### **4. Start the Development Server:**
-
-Finally, start the local development server to run your React application
-
-  ```bash 
-  npm run dev
-  ```
-
-This command will typically open your React app in your default browser at a local address (e.g., http://localhost:5173). You can stop the server by pressing Ctrl + C in the terminal.
+cd to COMP602-Tilt> 
+```pip install -r requirements.txt```
+cd to COMP602-Tilt> 
+```py -m uvicorn Backend.main:app --reload --port 4000```
 
 
+### **Stripe listener**
+After running backend server, note: .env file must be created
 
-## **Formatting (OPTIONAL, format on save helps with readability)**
-The last thing you want to do when sharing your code with another contributor is get into a discussion about tabs vs spaces! Fortunately, Prettier will clean up your code by reformatting it to conform to preset, configurable rules. Run Prettier, and all your tabs will be converted to spaces—and your indentation, quotes, etc will also all be changed to conform to the configuration. In the ideal setup, Prettier will run when you save your file, quickly making these edits for you.
+```stripe listen --forward-to localhost:4000/payments/webhook ```
 
-You can install the Prettier extension in VSCode by following these steps:
+## **Included Packages**
 
-1. Launch VS Code
-2. Use Quick Open (press Ctrl/Cmd+P)
-3. Paste in ext install esbenp.prettier-vscode
-4. Press Enter
-5. Formatting on save 
-6. Ideally, you should format your code on every save. VS Code has settings for this!
+**Python packages (requirements.txt)**
+fastapi==0.116.1
 
-7. In VS Code, press CTRL/CMD + SHIFT + P.
-8. Type “settings”
-9. Hit Enter
-10. In the search bar, type “format on save”
-11. Be sure the “format on save” option is ticked!
+uvicorn==0.35.0
 
-If your ESLint preset has formatting rules, they may conflict with Prettier. We recommend disabling all formatting rules in your ESLint preset using eslint-config-prettier so that ESLint is only used for catching logical mistakes. If you want to enforce that files are formatted before a pull request is merged, use prettier --check for your continuous integration.
+firebase-admin==7.1.0
+
+google-cloud-firestore==2.21.0
+
+pydantic==2.11.7
+
+---
+
+**Typescript packages (package.json)**
+
+Dependencies
+
+@emotion/react — ^11.14.0
+
+@emotion/styled — ^11.14.1
+
+@mui/icons-material — ^7.3.1
+
+@mui/material — ^7.3.1
+
+@stripe/stripe-js — ^7.9.0
+
+@toolpad/core — ^0.16.0
+
+firebase — ^12.1.0
+
+react — ^19.1.0
+
+react-dom — ^19.1.0
+
+react-router-dom — ^7.8.2
+
+react-slick — ^0.31.0
+
+slick-carousel — ^1.8.1
+
+Dev Dependencies
+
+@eslint/js — ^9.30.1
+
+@types/react — ^19.1.8
+
+@types/react-dom — ^19.1.6
+
+@types/react-slick — ^0.23.13
+
+@vitejs/plugin-react — ^4.6.0
+
+eslint — ^9.30.1
+
+eslint-plugin-react-hooks — ^5.2.0
+
+eslint-plugin-react-refresh — ^0.4.20
+
+globals — ^16.3.0
+
+typescript — ~5.8.3
+
+typescript-eslint — ^8.35.1
+
+vite — ^7.0.4
 
