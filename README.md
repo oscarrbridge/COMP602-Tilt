@@ -57,6 +57,7 @@ pydantic==2.11.7
 ---
 
 **Typescript packages (package.json)**
+
 Dependencies
 
 @emotion/react — ^11.14.0
