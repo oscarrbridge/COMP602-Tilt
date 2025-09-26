@@ -136,12 +136,15 @@ export default function Blackjack() {
       
     }
     else if (playerScore == dealerScore){
+      await recordWinTx(user.uid, betInBase, 1, "blackjack"); // Give balance back when Tie
+      await refreshBalance();
       setRoundResult("tie");
+
     }
     else if (playerScore > dealerScore || dealerScore > 21) {
       setLastWin(bet);
 
-      await recordWinTx(user.uid, betInBase*2, 1, "blackjack"); // Double bet to accomadate  
+      await recordWinTx(user.uid, betInBase*2, 1, "blackjack"); // Double bet to accomadate for winnings
       await refreshBalance();
       setRoundResult("win");
     }
