@@ -2,10 +2,10 @@ import type { ReactNode } from "react";
 import React from "react";
 import "./BackgroundLayout.css";
 import NavBar from "../NavBar/NavBar";
-import PanelMenu from "./PanelMenu/PanelMenu.tsx";
-import InfoPanel from "./InfoPanel/InfoPanel.tsx";
+import PanelMenu from "../PanelMenu/PanelMenu.tsx";
+import InfoPanel from "../InfoPanel/InfoPanel.tsx";
 import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx";
-import UniCreditsPanel from "./UniCreditsPanel/UniCreditsPanel";
+import GameRankingPanel from "./gameRankingPanel/gameRankingPanel.tsx";
 import BettingHistoryPanel from "./BettingHistoryPanel/BettingHistoryPanel";
 
 interface BackgroundLayoutProps {
@@ -25,7 +25,7 @@ const BackgroundLayout: React.FC<BackgroundLayoutProps> = ({ children }) => {
 
       <div className="content-wrapper">
         <div className="uni-credits-menu">
-          <UniCreditsPanel />
+          <GameRankingPanel />
         </div>
         <div className="game-container">{children}</div>
 

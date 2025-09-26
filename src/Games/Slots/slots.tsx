@@ -1,10 +1,14 @@
-import { useState, useEffect } from 'react';
-import './Slots.css';
-import { placeBet, recordWinTx, recordLossTx } from '../../../Backend/transactions';
-import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
-import { CurrencyProvider } from '../../components/CurrencySwitcher/currencyswitcher.tsx';
-import BetControls from '../BetControls.tsx';
-import BackgroundLayout from '../../components/BackgroundLayout/BackgroundLayout';
+import { useState, useEffect } from "react";
+import "./Slots.css";
+import {
+  placeBet,
+  recordWinTx,
+  recordLossTx,
+} from "../../../Backend/transactions";
+import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
+import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx";
+import BetControls from "../BetControls.tsx";
+import BackgroundLayout from "../../components/BackgroundLayout/BackgroundLayout";
 
 // ---------------- Slot Logic ----------------
 function generateNum(): number {
@@ -43,28 +47,38 @@ function calculateWinnings(slotGrid: number[][]): RowResult[] {
   const result: RowResult[] = [];
 
   for (const row of slotGrid) {
-    const duplicates = getDuplicates(row);
+    const counts: Record<number, number> = {};
+
+    // Count frequency of each symbol in this row
+    for (const symbol of row) {
+      counts[symbol] = (counts[symbol] || 0) + 1;
+    }
+
     let rowMultiplier = 0;
     let matchValue = 0;
 
-    if (duplicates.length > 0) {
-      const amount = duplicates.length + 1;
-      if (amount >= 3) {
-        matchValue = duplicates[0];
+    // Check for the highest streak in this row
+    for (const [symbolStr, count] of Object.entries(counts)) {
+      const symbol = parseInt(symbolStr, 10);
 
-        if (amount === 3) rowMultiplier = 1;
-        else if (amount === 4) rowMultiplier = 2;
-        else if (amount === 5) rowMultiplier = 5;
+      if (count >= 3) {
+        matchValue = symbol;
+
+        if (count === 3) rowMultiplier = 1;
+        else if (count === 4) rowMultiplier = 2;
+        else if (count === 5) rowMultiplier = 5;
 
         if (rowMultiplier > 0) {
-          if (matchValue <= 8) rowMultiplier *= 2;
-          else if (matchValue <= 12) rowMultiplier *= 3;
-          else if (matchValue <= 13) rowMultiplier *= 4;
-          else if (matchValue <= 14) rowMultiplier *= 5;
-          else if (matchValue <= 15) rowMultiplier *= 10;
-          else if (matchValue <= 16) rowMultiplier *= 15;
-          else if (matchValue <= 17) rowMultiplier *= 20;
+          if (symbol <= 8) rowMultiplier *= 2;
+          else if (symbol <= 12) rowMultiplier *= 3;
+          else if (symbol <= 13) rowMultiplier *= 4;
+          else if (symbol <= 14) rowMultiplier *= 5;
+          else if (symbol <= 15) rowMultiplier *= 10;
+          else if (symbol <= 16) rowMultiplier *= 15;
+          else if (symbol <= 17) rowMultiplier *= 20;
         }
+
+        break; // stop after first valid match
       }
     }
 
@@ -97,7 +111,7 @@ function Slots() {
 
   const spin = async (betInBase: number) => {
     if (betInBase > balance) {
-      alert('Insufficient balance for this bet.');
+      alert("Insufficient balance for this bet.");
       return;
     }
 
@@ -105,7 +119,7 @@ function Slots() {
     setLastWin(0);
 
     // Record the bet
-    await placeBet(user.uid, betInBase, 1, 'slots');
+    await placeBet(user.uid, betInBase, 1, "slots");
     await refreshBalance();
 
     // Generate spin result
@@ -116,16 +130,19 @@ function Slots() {
     const matches = winningData.map((row) => row.match);
     const multipliers = winningData.map((row) => row.multiplier);
 
-    let totalMultiplier = multipliers.reduce((acc, val) => (val > 0 ? acc + val : acc), 0);
+    let totalMultiplier = multipliers.reduce(
+      (acc, val) => (val > 0 ? acc + val : acc),
+      0
+    );
 
     setWinningCells(matches);
 
     const winAmount = betInBase * totalMultiplier;
     if (winAmount > 0) {
       setLastWin(winAmount);
-      await recordWinTx(user.uid, winAmount, 1, 'slots');
+      await recordWinTx(user.uid, winAmount, 1, "slots");
     } else {
-      await recordLossTx(user.uid, betInBase, 1, 'slots');
+      await recordLossTx(user.uid, betInBase, 1, "slots");
     }
 
     await refreshBalance();
@@ -134,8 +151,8 @@ function Slots() {
 
   return (
     <BackgroundLayout>
-      <div className='game-container'>
-        <CurrencyProvider base='NZD' DefaultCurrency='NZD'>
+      <div className="game-container">
+        <CurrencyProvider base="NZD" DefaultCurrency="NZD">
           <h1>♠ Slots ♣</h1>
 
           {/* Bet Input & Spin */}
@@ -145,24 +162,25 @@ function Slots() {
               bet={bet}
               setBet={setBet}
               startGame={spin}
-              style={{ color: 'white' }}
             />
           )}
         </CurrencyProvider>
 
         {/* Slot Grid */}
-        <div className='slot-grid'>
+        <div className="slot-grid">
           {grid.map((row, rowIndex) => (
-            <div key={rowIndex} className='slot-row'>
+            <div key={rowIndex} className="slot-row">
               {row.map((cell, cellIndex) => {
-                const isWinning = winningCells[rowIndex] !== 0 && cell === winningCells[rowIndex];
+                const isWinning =
+                  winningCells[rowIndex] !== 0 &&
+                  cell === winningCells[rowIndex];
 
                 return (
                   <img
                     key={cellIndex}
                     src={`/assets/${cell}.png`}
                     alt={`Slot ${cell}`}
-                    className={`slot-cell ${isWinning ? 'winning' : ''}`}
+                    className={`slot-cell ${isWinning ? "winning" : ""}`}
                   />
                 );
               })}
@@ -170,11 +188,11 @@ function Slots() {
           ))}
         </div>
         {/* Win / Loss Display */}
-        <div className='win-display'>
+        <div className="win-display">
           {lastWin > 0 ? (
-            <span className='win-amount'>+ ${lastWin.toFixed(2)}</span>
+            <span className="win-amount">+ ${(lastWin / 100).toFixed(2)}</span>
           ) : (
-            <span className='win-amount'>- ${bet.toFixed(2)}</span>
+            <span className="loss-amount">- ${bet.toFixed(2)}</span>
           )}
         </div>
       </div>

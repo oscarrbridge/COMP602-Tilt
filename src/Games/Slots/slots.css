@@ -80,28 +80,6 @@
 }
 
 /* Winning animation */
-@keyframes popWin {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  25% {
-    transform: scale(1.2);
-    opacity: 0.8;
-  }
-  50% {
-    transform: scale(0.9);
-    opacity: 1;
-  }
-  75% {
-    transform: scale(1.1);
-    opacity: 0.9;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
 
 .winning {
   animation: popWin 0.8s ease-in-out infinite;
@@ -193,3 +171,4 @@
   opacity: 1;
   animation: popGold 2s ease-in-out infinite;
 }
+
