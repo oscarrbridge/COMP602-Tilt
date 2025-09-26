@@ -31,7 +31,7 @@ cd to COMP602-Tilt>
 ### **Backend server**
 
 cd to COMP602-Tilt> 
-```pip install requirements.txt```
+```pip install -r requirements.txt```
 cd to COMP602-Tilt> 
 ```py -m uvicorn Backend.main:app --reload --port 4000```
 
