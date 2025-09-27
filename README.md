@@ -41,9 +41,29 @@ cd to COMP602-Tilt>
 
 
 ### **Stripe listener**
-After running backend server, note: .env file must be created
+To receive Stripe webhook events locally, you need the Stripe CLI.
 
-```stripe listen --forward-to localhost:4000/payments/webhook ```
+```
+# 1. Install Scoop (if not installed)
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned -Force
+iwr -useb get.scoop.sh | iex
+
+# 2. Add the Stripe bucket
+scoop bucket add stripe https://github.com/stripe/scoop-stripe-cli
+scoop update
+
+# 3. Install Stripe CLI
+scoop install stripe
+
+# 4. Verify installation
+stripe --version
+
+# 5. Authenticate with Stripe (opens browser for login)
+stripe login
+
+# 6. Forward webhook events to your backend
+stripe listen --forward-to http://localhost:4000/payments/webhook
+```
 
 ## **Included Packages**
 
