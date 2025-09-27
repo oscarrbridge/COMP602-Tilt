@@ -26,13 +26,17 @@ STRIPE_WEBHOOK_SECRET=whsec_xxx
 ### **Frontend localhost**
 
 cd to COMP602-Tilt> 
+
   ```npm install```
+  
   ```npm run dev ```
   
 ### **Backend server**
 
 cd to COMP602-Tilt> 
+
 ```pip install -r requirements.txt```
+
 ```py -m uvicorn Backend.main:app --reload --port 4000```
 
 
