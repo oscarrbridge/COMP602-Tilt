@@ -1,0 +1,32 @@
+/* InfoPanel.css */
+.info-panel {
+ position: fixed;
+  top: 80px; /* below navbar */
+  right: 0;
+  bottom: 0;
+  width: 15vw;
+  background: #1a1818;
+  border-left: 3px solid #333;
+  border-top: 3px solid #333;
+  overflow-y: auto; /* allow scroll */
+  
+  
+  padding: 10px;
+}
+
+.info-panel-title {
+  padding: 16px;
+  border-bottom: 1px solid #444;
+  font-size: 18px;
+}
+
+.info-panel-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+@media (max-width: 1200px) {
+  .info-panel {
+    display: none;
+  }
+}

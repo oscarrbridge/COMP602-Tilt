@@ -1,6 +1,5 @@
 // RegisterUser.tsx contains the register form with email/password fields and calls authService.js
 
-import { createTheme } from '@mui/material/styles';
 import { registerUser, signInWithGoogle } from '../../services/authService';
 import {
   Dialog,
@@ -14,16 +13,10 @@ import {
   InputAdornment,
 } from '@mui/material';
 import { Google as GoogleIcon, Visibility, VisibilityOff } from '@mui/icons-material';
-import { AppProvider } from '@toolpad/core/AppProvider';
 import * as React from 'react';
-
-// Theme for Register
-const theme = createTheme({
-  palette: {
-    primary: { main: '#000000ff' },
-    secondary: { main: '#000000' },
-  },
-});
+import { INTERNATIONAL_UNIS, NZ_UNIS } from './Universities';
+import ListSubheader from '@mui/material/ListSubheader';
+import MenuItem from '@mui/material/MenuItem';
 
 type RegisterPopupProps = {
   open: boolean;
@@ -44,6 +37,16 @@ export default function RegisterUser({ open, onClose }: RegisterPopupProps) {
 
   // Password check for matching
   const passwordsMatch = confirm === '' || password === confirm;
+  // University registration
+  const [university, setUniversity] = React.useState('');
+  const [uniTouched, setUniTouched] = React.useState(false);
+
+  // Derive the label for the selected university (use both groups)
+  const ALL_UNIS = React.useMemo(() => [...INTERNATIONAL_UNIS, ...NZ_UNIS], []);
+  const uniLabel = React.useMemo(
+    () => ALL_UNIS.find((u) => u.value === university)?.label ?? university,
+    [ALL_UNIS, university]
+  );
 
   // Check for:
   // Email entered
@@ -53,6 +56,7 @@ export default function RegisterUser({ open, onClose }: RegisterPopupProps) {
     email.trim().length > 0 &&
     password.length >= 6 &&
     (passwordsMatch || confirm.length === 0) &&
+    university.trim().length > 0 &&
     !submitting;
 
   // Handle registration with email + password
@@ -69,7 +73,9 @@ export default function RegisterUser({ open, onClose }: RegisterPopupProps) {
       // Show loading state and disable buttons
       setSubmitting(true);
       // Call Firebase auth
-      await registerUser(email.trim(), password);
+      await registerUser(email.trim(), password, {
+        university: { value: university, label: uniLabel },
+      });
       // Close popup
       onClose();
     } catch (err: any) {
@@ -84,10 +90,18 @@ export default function RegisterUser({ open, onClose }: RegisterPopupProps) {
     // Clear any previous errors
     setError(null);
 
+    // Require a university selection before Google sign-in too
+    if (!university.trim()) {
+      setError('Please select your university before continuing with Google.');
+      return;
+    }
+
     try {
       setSubmitting(true);
       // Call Firebase auth
-      await signInWithGoogle();
+      await signInWithGoogle({
+        university: { value: university, label: uniLabel },
+      });
       // Close popup
       onClose();
     } catch (err: any) {
@@ -98,8 +112,7 @@ export default function RegisterUser({ open, onClose }: RegisterPopupProps) {
   }
 
   return (
-    // Provide MUI theme via AppProvider
-    <AppProvider theme={theme}>
+    <>
       <Dialog open={open} onClose={onClose} maxWidth='xs' fullWidth>
         {/* Dialog popup for sign-in */}
         <DialogTitle>Create your account</DialogTitle>
@@ -118,6 +131,36 @@ export default function RegisterUser({ open, onClose }: RegisterPopupProps) {
             </Button>
 
             <div style={{ opacity: 0.6, textAlign: 'center' }}>Or</div>
+
+            {/* University dropdown */}
+            <TextField
+              select
+              label='University'
+              value={university}
+              onChange={(e) => setUniversity(e.target.value)}
+              onBlur={() => setUniTouched(true)}
+              required
+              fullWidth
+              error={uniTouched && !university}
+              helperText={uniTouched && !university ? 'Select your university' : ' '}
+              SelectProps={{
+                MenuProps: { PaperProps: { style: { maxHeight: 360 } } }, // optional: limit menu height
+              }}
+            >
+              <ListSubheader disableSticky>International</ListSubheader>
+              {INTERNATIONAL_UNIS.map((u) => (
+                <MenuItem key={u.value} value={u.value}>
+                  {u.label}
+                </MenuItem>
+              ))}
+
+              <ListSubheader disableSticky>New Zealand</ListSubheader>
+              {NZ_UNIS.map((u) => (
+                <MenuItem key={u.value} value={u.value}>
+                  {u.label}
+                </MenuItem>
+              ))}
+            </TextField>
 
             {/* Email input field */}
             <TextField
@@ -193,6 +236,6 @@ export default function RegisterUser({ open, onClose }: RegisterPopupProps) {
           </Stack>
         </DialogContent>
       </Dialog>
-    </AppProvider>
+    </>
   );
 }

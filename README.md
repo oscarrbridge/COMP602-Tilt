@@ -1,76 +1,149 @@
-## GitHub Setup
+# Tilt Project
 
-### **1. Download and install Github desktop**
-https://desktop.github.com/download/
+## Structure
+The repository has the following structure:
 
-### **2. Click File (Top Left) and 'Clone Repository', navigate to our one: GitHub\COMP602-Tilt and select your folder destination to clone (desktop or documents)**
+- **[Backend/](Backend/)** — backend server
+  - **[firebase/](Backend/firebase/)** — Firebase setup and admin SDK
+  - **[routers/](Backend/routers/)** — FastAPI routers (incl. Stripe endpoints)
+- **[public/](public/)** — static assets
+- **[src/](src/)** — frontend and game components
 
-### **3. Select Branch: Currently there's only main**
+---
 
-### **3. Open in Visual Studio Code**
+## Environment Variables
 
+Stripe functionality (deposits/withdrawals) requires local environment files.
+`.gitignore` excludes `.env` files, so create them locally:
 
-## **Installation Steps**
+**Root `.env` (server):**
+```dotenv
+STRIPE_SECRET_KEY=sk_test_xxx
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+```
+## **Build Scripts**
 
-### **1. Install Node.js:**
-React development relies on Node.js and its package manager, npm. If you don't have Node.js installed, download and install the LTS (Long Term Support) version from the official Node.js website. Verify the installation by opening your terminal or command prompt and running:
+### **Frontend localhost**
 
+cd to COMP602-Tilt> 
 
-  ```bash
-  node -v
-  npm -v
-  ```
+  ```npm install```
+  
+  ```npm run dev ```
+  
+### **Backend server**
 
-This should display the installed versions of Node.js and npm.
+cd to COMP602-Tilt> 
 
-### **2. Navigate to Your Project and Install Dependencies:**
-Change into your newly created project directory:
+```pip install -r requirements.txt```
 
-Code
-
-  ```bash
-  cd my-react-app
-  ```
-
-OR
-
-Open Folder in VS Code
-
-### **3. Then, install the necessary project dependencies:**
-
-  ```bash 
-  npm install
-  ```
-
-### **4. Start the Development Server:**
-
-Finally, start the local development server to run your React application
-
-  ```bash 
-  npm run dev
-  ```
-
-This command will typically open your React app in your default browser at a local address (e.g., http://localhost:5173). You can stop the server by pressing Ctrl + C in the terminal.
+```py -m uvicorn Backend.main:app --reload --port 4000```
 
 
+### **Stripe listener**
+To receive Stripe webhook events locally, you need the Stripe CLI.
 
-## **Formatting (OPTIONAL, format on save helps with readability)**
-The last thing you want to do when sharing your code with another contributor is get into a discussion about tabs vs spaces! Fortunately, Prettier will clean up your code by reformatting it to conform to preset, configurable rules. Run Prettier, and all your tabs will be converted to spaces—and your indentation, quotes, etc will also all be changed to conform to the configuration. In the ideal setup, Prettier will run when you save your file, quickly making these edits for you.
+**Installation**
+```
+# 1. Download the latest Stripe CLI ZIP (done once)
+$Headers = @{ "User-Agent" = "ps1-installer" }
+$release = Invoke-RestMethod -Headers $Headers -Uri "https://api.github.com/repos/stripe/stripe-cli/releases/latest"
+$asset = $release.assets | Where-Object { $_.name -match "windows.*x86_64.*\.zip$" } | Select-Object -First 1
+$zip = Join-Path $env:TEMP "stripe-cli.zip"
+Invoke-WebRequest -Headers $Headers -Uri $asset.browser_download_url -OutFile $zip
 
-You can install the Prettier extension in VSCode by following these steps:
+# 2. Extract to a user-local folder
+$dest = Join-Path $env:LOCALAPPDATA "Programs\StripeCLI"
+New-Item -ItemType Directory -Force -Path $dest | Out-Null
+Expand-Archive -Path $zip -DestinationPath $dest -Force
 
-1. Launch VS Code
-2. Use Quick Open (press Ctrl/Cmd+P)
-3. Paste in ext install esbenp.prettier-vscode
-4. Press Enter
-5. Formatting on save 
-6. Ideally, you should format your code on every save. VS Code has settings for this!
+# 3. Put stripe.exe in $dest
+$exe = Get-ChildItem -Path $dest -Recurse -Filter "stripe.exe" | Select-Object -First 1
+if ($exe.DirectoryName -ne $dest) { Copy-Item $exe.FullName -Destination (Join-Path $dest "stripe.exe") -Force }
 
-7. In VS Code, press CTRL/CMD + SHIFT + P.
-8. Type “settings”
-9. Hit Enter
-10. In the search bar, type “format on save”
-11. Be sure the “format on save” option is ticked!
+# 4. Add to PATH (current + persist)
+if ($env:Path -notlike "*$dest*") { $env:Path = "$dest;$env:Path" }
+$existing = [Environment]::GetEnvironmentVariable("Path","User")
+if ($existing -notlike "*$dest*") { [Environment]::SetEnvironmentVariable("Path","$dest;$existing","User") }
 
-If your ESLint preset has formatting rules, they may conflict with Prettier. We recommend disabling all formatting rules in your ESLint preset using eslint-config-prettier so that ESLint is only used for catching logical mistakes. If you want to enforce that files are formatted before a pull request is merged, use prettier --check for your continuous integration.
+# 5. Verify installation
+stripe --version
+```
+**Running**
+```
+# Authenticate with Stripe (opens browser)
+stripe login
+
+# Forward webhook events to FastAPI backend
+stripe listen --forward-to http://localhost:4000/payments/webhook
+```
+
+## **Included Packages**
+
+**Python packages (requirements.txt)**
+fastapi==0.116.1
+
+uvicorn==0.35.0
+
+firebase-admin==7.1.0
+
+google-cloud-firestore==2.21.0
+
+pydantic==2.11.7
+
+---
+
+**Typescript packages (package.json)**
+
+Dependencies
+
+@emotion/react — ^11.14.0
+
+@emotion/styled — ^11.14.1
+
+@mui/icons-material — ^7.3.1
+
+@mui/material — ^7.3.1
+
+@stripe/stripe-js — ^7.9.0
+
+@toolpad/core — ^0.16.0
+
+firebase — ^12.1.0
+
+react — ^19.1.0
+
+react-dom — ^19.1.0
+
+react-router-dom — ^7.8.2
+
+react-slick — ^0.31.0
+
+slick-carousel — ^1.8.1
+
+Dev Dependencies
+
+@eslint/js — ^9.30.1
+
+@types/react — ^19.1.8
+
+@types/react-dom — ^19.1.6
+
+@types/react-slick — ^0.23.13
+
+@vitejs/plugin-react — ^4.6.0
+
+eslint — ^9.30.1
+
+eslint-plugin-react-hooks — ^5.2.0
+
+eslint-plugin-react-refresh — ^0.4.20
+
+globals — ^16.3.0
+
+typescript — ~5.8.3
+
+typescript-eslint — ^8.35.1
+
+vite — ^7.0.4
 

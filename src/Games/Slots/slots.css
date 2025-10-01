@@ -1,0 +1,174 @@
+/* App.css */
+
+/* Main window (fixed size, centered) */
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+
+  width: 100%;
+  height: 100%;
+
+  
+  background-color: #1a1818;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+
+/* Balance display */
+.balance-display {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  position: absolute;
+  top: 15px;
+  right: 20px;
+}
+
+/* Slot grid */
+.slot-grid {
+  display: grid;
+  grid-template-rows: repeat(5, auto);
+  gap: 8px; /* smaller spacing */
+  margin: 10px auto;
+  padding: 8px;
+  background: radial-gradient(circle at center, #222 0%, #000 100%);
+  border: 4px solid #c0c0c0;
+  border-radius: 12px;
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.7),
+    inset 0 0 10px rgba(255, 255, 255, 0.15);
+}
+
+.slot-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px; /* tighter grid */
+}
+
+.slot-cell {
+  width: 70px;
+  height: 70px;
+  background: #111;
+  border: 2px solid #444;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    inset 0 0 5px rgba(255, 255, 255, 0.1),
+    0 3px 5px rgba(0, 0, 0, 0.6);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.slot-cell img {
+  width: 65%;
+  height: 65%;
+  object-fit: contain;
+}
+
+.slot-cell:hover {
+  transform: scale(1.05);
+  box-shadow:
+    inset 0 0 8px rgba(255, 255, 255, 0.2),
+    0 5px 10px rgba(0, 0, 0, 0.8);
+}
+
+/* Winning animation */
+
+.winning {
+  animation: popWin 0.8s ease-in-out infinite;
+  border-color: gold !important;
+  box-shadow:
+    0 0 15px gold,
+    0 0 30px rgba(255, 215, 0, 0.7);
+}
+
+/* Controls row */
+.controls-row {
+  display: flex;
+  align-items: center; /* vertical alignment */
+  justify-content: center; /* horizontal centering */
+  gap: 20px; /* space between items */
+  width: 100%;
+  max-width: 900px;
+  margin-top: 15px;
+  flex-wrap: nowrap; /* prevent wrapping */
+}
+
+/* Ensure items do not stretch */
+.bet-controls,
+.win-display,
+.spin-button {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center; /* vertically center each control */
+  justify-content: center; /* center content inside */
+}
+
+/* Spin button */
+.spin-button {
+  padding: 10px 20px;
+  font-size: 18px;
+  border-radius: 8px;
+  border: none;
+  background-color: #ffcc00;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.spin-button:hover {
+  transform: scale(1.1);
+}
+
+/* Bet controls */
+.bet-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.bet-value {
+  font-size: 20px;
+  font-weight: bold;
+  min-width: 50px;
+  text-align: center;
+}
+
+.bet-button {
+  padding: 8px 16px;
+  font-size: 18px;
+  border-radius: 10px;
+  border: none;
+  background-color: #ffcc00;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.bet-button:hover {
+  transform: scale(1.1);
+}
+
+/* Win display */
+.win-display {
+  font-size: 24px;
+  font-weight: bold;
+  color: gold;
+  min-width: 120px;
+  text-align: center;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.win-amount {
+  opacity: 1;
+  animation: popGold 2s ease-in-out infinite;
+}
+

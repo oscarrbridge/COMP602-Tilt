@@ -1,0 +1,27 @@
+.betting-history-panel {
+
+  background: #1f1c1c;
+ padding: 10px;
+  transition: width 0.3s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+   
+  width: 10vw;
+  white-space: nowrap;      /* prevent wrapping */
+  overflow: hidden;         /* hide overflow */
+  text-overflow: ellipsis;  /* show "..." if text is too long */
+}
+
+
+.betting-history-panel-content {
+  padding: 10px;
+  flex-grow: 1;
+  font-size: 0.9rem;
+}
+
+.betting-history-panel-header {
+  padding: 15px;
+  border-bottom: 1px solid #444;
+  font-size: 12px;
+}

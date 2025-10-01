@@ -1,0 +1,133 @@
+[33mdd2d86c[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfrontpage_backend[m[33m, [m[1;31morigin/frontpage_backend[m[33m)[m Merge branch 'main' into frontpage_backend
+[33m7078721[m Added filter to statistics by time and type. Currency conversion for stripe, uni registration.
+[33m613becf[m Merge branch 'main' of https://github.com/oscarrbridge/COMP602-Tilt
+[33mc6b8d51[m Removed testing navbar
+[33m6b63cb3[m fixed small navbar bug
+[33m3c806c9[m Merge branch 'main' of https://github.com/oscarrbridge/COMP602-Tilt
+[33meb7cef9[m Merge pull request #32 from oscarrbridge/frontpage
+[33mbf9c293[m Adding uni balance and betting history panel to background
+[33m3539bb5[m[33m ([m[1;31morigin/background-for-games[m[33m)[m Added uni credit and betting history panels
+[33mac015ff[m[33m ([m[1;31morigin/frontpage[m[33m, [m[1;32mfrontpage[m[33m)[m Created a form to redeem uni balance
+[33m5eb7211[m Merge branch 'main' of https://github.com/oscarrbridge/COMP602-Tilt
+[33m38257e3[m Update NavBar.tsx
+[33m9154f84[m Added functions for uni balance to increase and subtract
+[33m6ce36af[m Currency Fix, Implemented into NavBar
+[33m16edc8d[m Fixed front page
+[33m7bb4072[m removed created at for specialEventItem
+[33mbff9b70[m Merge branch 'main' of https://github.com/oscarrbridge/COMP602-Tilt
+[33mef769c7[m Fix for currency converter
+[33mbf5751d[m Merge pull request #31 from oscarrbridge/frontpage_backend
+[33ma22a3bc[m Merge branch 'main' into frontpage_backend
+[33mb605423[m Transaction functions fixed
+[33ma9de86b[m update betting functions
+[33m348d1f8[m Updating transactions
+[33m43481ab[m Fixed main page style
+[33m30871e5[m Merge pull request #30 from oscarrbridge/specialevents
+[33ma157384[m[33m ([m[1;31morigin/specialevents[m[33m)[m Merge branch 'main' into specialevents
+[33mdf2c0ce[m Merge pull request #28 from oscarrbridge/frontpage
+[33mcaf2da8[m Merge branch 'main' into frontpage
+[33m4d16537[m Merge branch 'frontpage' of https://github.com/oscarrbridge/COMP602-Tilt into frontpage
+[33md7765f3[m Merge branch 'main' into frontpage
+[33m014d729[m Special Events Form, Carousel
+[33mc2a6de2[m stripe finalization
+[33m9069212[m Merge pull request #27 from oscarrbridge/currency-converter
+[33m56f1fed[m[33m ([m[1;31morigin/currency-converter[m[33m)[m Fixed games
+[33mb97f484[m Consolidate mines -> Mines to fix case conflict
+[33mb262d37[m Blackjack and slots fixed
+[33m0e9ba60[m Merge pull request #26 from oscarrbridge/main
+[33m238fd76[m Merge pull request #25 from oscarrbridge/background-for-games
+[33me1a0d2c[m Merge pull request #24 from oscarrbridge/currency-converter
+[33m9dde512[m Merge branch 'main' into currency-converter
+[33mad37673[m Fixed navbar balance showing
+[33m71da471[m Fixing Navbar (In progress)
+[33mf060a6d[m Merge pull request #23 from oscarrbridge/main
+[33m36d3d09[m Temporary fix to main games css are broken
+[33m423735e[m Merge branch 'background-for-games'
+[33m35d5fd9[m mines changes
+[33m694fac8[m Merge branch 'slots' into background-for-games
+[33m17927e5[m fixed background layout issues
+[33m8d3d45c[m Start work on navbar and currency
+[33m9383b7e[m saving changes to mines
+[33m4f58bf8[m adding background to blackjack Please enter the commit message for your changes. Lines starting
+[33mc300d14[m[33m ([m[1;31morigin/slots[m[33m)[m pulling main
+[33mf04dff7[m Updated transactions to support unibalance
+[33m2de7396[m Merge pull request #22 from oscarrbridge/currency-converter
+[33m131a6ab[m Merge pull request #21 from oscarrbridge/main
+[33m44707c4[m Comment
+[33m865da72[m Merge pull request #20 from oscarrbridge/blackjack
+[33m8ac8469[m Carousel Special Events
+[33m056098d[m[33m ([m[1;31morigin/blackjack[m[33m, [m[1;32mblackjack[m[33m)[m Fixed Currency, Made betcontrols.tsx for games
+[33mcafb938[m Fixed navbar for blackjac currency converter
+[33m0afc6a0[m Merge pull request #19 from oscarrbridge/main
+[33mfddf96d[m Fixed styling from merge
+[33ma839cf0[m Merge branch 'currency-converter'
+[33m9ac1730[m changed some css elements
+[33m1ae243c[m Final Currency Converter
+[33m14f6e20[m Added hover styling to buttons on home page
+[33m8da1624[m Added icons for games
+[33m2e6846c[m Merge pull request #18 from oscarrbridge/frontpage_backend
+[33m6055e82[m Updated button styling on wallet page
+[33mf999ccd[m Updated wallet page layout + styling
+[33mab8e449[m Created simple withdraw / deposit page
+[33m13762eb[m Changed 'Deposit' page to 'Wallet'
+[33md809d9f[m Revert "Merge branch 'frontpage'"
+[33ma24aaab[m leaderboard
+[33m72f5aa7[m leaderboard
+[33m79454a9[m leaderboard
+[33m5f3d45c[m leaderboard
+[33m4b07316[m Merge branch 'frontpage'
+[33m9bc7891[m Revert "Merge branch 'frontpage' of https://github.com/oscarrbridge/COMP602-Tilt into frontpage"
+[33m94af4b9[m Merge branch 'frontpage' of https://github.com/oscarrbridge/COMP602-Tilt into frontpage
+[33mca97c86[m Merge pull request #17 from oscarrbridge/frontpage
+[33m31f002a[m Added new pages, updated nav window
+[33m9068f2f[m Created Currency Converter File
+[33m1ef3e8f[m Set up local leaderboard front end
+[33mf4f578d[m Made small changes to statistics page
+[33mb9e93c1[m User statistics front end complete
+[33me264b3d[m Started on Statistics page Created summy userStatistics component Created front end for History Component
+[33m429ea92[m Added FilterBar to home page Created new pages within NavBar
+[33ma58df0c[m Fixed nav window styling Added linking to navigation
+[33mf6d5754[m Merge branch 'main' into frontpage
+[33mfd4de5e[m Edited transaction functions and Blackjack
+[33mdb77433[m Created Transactions with user balance
+[33mf377fcb[m Merge pull request #16 from oscarrbridge/main
+[33m8fec3e1[m Fixing file format pt 2
+[33mdbbe019[m Fixing file format pt 2
+[33m258d386[m Fixing file format
+[33mc4c2d5a[m Merge updated slots logic to main
+[33m6b11167[m Disconnected python backend, moved game logic to typescript file, fixed display issues
+[33m7171a84[m Disconnected python backend, moved game logic to typescript file, fixed display issues
+[33m558c914[m Update nav bar for games
+[33m01a43a9[m[33m ([m[1;32mstripe[m[33m)[m Merge pull request #14 from oscarrbridge/mines
+[33m8795040[m[33m ([m[1;31morigin/mines[m[33m)[m Merge branch 'main' into mines
+[33mf9e2468[m Merge pull request #13 from oscarrbridge/main
+[33m98cfd1a[m Merge pull request #12 from oscarrbridge/blackjack
+[33mce2cb5c[m Made game folders in src
+[33m89a20ea[m Merge pull request #11 from oscarrbridge/blackjack
+[33meec5cc2[m Merge branch 'main' into blackjack
+[33mf54d5f8[m Merge pull request #10 from oscarrbridge/slots
+[33m5e5ad13[m Updated for blackjack implementation main.tsx
+[33ma28f6dd[m Created Blackjack.tsx
+[33m2ecb535[m Rename Blackjack.css to src/Blackjack.css
+[33m9a1d223[m Created Blackjack.css
+[33m338262e[m Making camel case, and trying to figure out how to implement mines to main page
+[33m1b66cfe[m transactions files added
+[33m1e28087[m Comments for connecting new pages
+[33m03c5e25[m Connect slots to main
+[33mebd61fc[m Merge branch 'main' of https://github.com/oscarrbridge/COMP602-Tilt into slots
+[33m4234c4e[m Slots frontend and backend
+[33m5688646[m Merge pull request #9 from oscarrbridge/blackjack
+[33m21ee2b2[m cleanup
+[33m1065aa3[m CSS commits, and slight changes to some of the class names. With the UI working with minor changes still needed.
+[33mb2c750c[m blackjack multiplayer routing
+[33m6bd5137[m UI commits, For making the game run. Not Including CSS changes, Just funcitonality
+[33m9bdea2f[m gitignore and requirements.txt
+[33m7031588[m updates to backend main.py
+[33m42c516a[m added database
+[33m105dcaa[m Added filter bar to home screen
+[33m3869c54[m Merge pull request #8 from oscarrbridge/main
+[33m07e64c8[m Merge pull request #7 from oscarrbridge/blackjack
+[33m12c05b2[m Fixed background theme
+[33ma9af60e[m Updated clash with register and signin
+[33mfc39473[m Merge pull request #6 from oscarrbridge/main
+[33m936b597[m Merge pull request #5 from oscarrbridge/blackjack
