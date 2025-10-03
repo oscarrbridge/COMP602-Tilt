@@ -10,9 +10,10 @@ import Slots from './Games/Slots/slots.tsx';
 import Mines from './Games/Mines/mines.tsx';
 import CoinFlip from './Games/CoinToss/CoinToss.tsx';
 import Leaderboard from './pages/Leaderboard/Leaderboard.tsx';
-import Admin from './pages/Admin/Admin.tsx'
+import Admin from './pages/Admin/Admin.tsx';
 import Staff from './pages/Staff/Staff.tsx';
 import { CurrencyProvider } from './components/CurrencySwitcher/currencyswitcher';
+import BlackjackM from './Games/Blackjack multiplayer/BlackjackM.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -29,6 +30,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path='/cointoss' element={<CoinFlip />} />
           <Route path='/admin' element={<Admin />} />
           <Route path='/staff' element={<Staff />} />
+          <Route path='/blackjackm' element={<BlackjackM />} />
         </Routes>
       </BrowserRouter>
     </CurrencyProvider>
