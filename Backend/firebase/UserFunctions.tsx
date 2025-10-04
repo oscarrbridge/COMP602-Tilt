@@ -12,7 +12,6 @@ export function useUser() {
   const [loading, setLoading] = useState(true);
   const [isToppingUp, setIsToppingUp] = useState(false);
 
-  // --- NEW: State to hold the user's chosen top-up amount ---
   const [autoPayAmount, setAutoPayAmount] = useState(2000); // Default to $20
 
   // Effect to get the current user
@@ -26,18 +25,16 @@ export function useUser() {
 
   // Effect to listen for REAL-TIME changes to the user's document
   useEffect(() => {
-    if (!user) {
-      setBalance(0);
+    if (loading || !user) {
+      setBalance(0); // Set to 0 if logged out/loading
       return;
     }
-
     const userRef = doc(db, 'users', user.uid);
     const unsubscribe = onSnapshot(userRef, (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         setBalance(data.balance ?? 0);
         setAutoPayEnabled(data.autoPayEnabled || false);
-        // --- UPDATE: Read the user's saved amount from Firestore ---
         setAutoPayAmount(data.autoPayAmountCents || 2000); // Fallback to $20
       } else {
         setBalance(0);
@@ -45,9 +42,9 @@ export function useUser() {
     });
 
     return () => unsubscribe();
-  }, [user]);
+  }, [user, loading]);
 
-  // --- AUTO-TOP-UP LOGIC ---
+  // AUTO-TOP-UP LOGIC
   useEffect(() => {
     if (autoPayEnabled && balance < TOP_UP_THRESHOLD_CENTS && !isToppingUp) {
       performAutoTopUp();
@@ -65,7 +62,7 @@ export function useUser() {
       const txRef = doc(db, 'users', user.uid, 'transactions', `autopay-${Date.now()}`);
       const batch = writeBatch(db);
 
-      // --- UPDATE: Use the dynamic amount from state ---
+      // Use the dynamic amount from state
       batch.update(userRef, { balance: increment(autoPayAmount) });
 
       batch.set(txRef, {

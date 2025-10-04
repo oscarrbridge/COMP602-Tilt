@@ -3,25 +3,38 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     match /users/{uid} {
-      // Public read (leaderboard)
       allow read: if true;
 
-      // Owner can create & update their user doc
       allow create, update: if request.auth != null && request.auth.uid == uid;
 
-      // No delete on user doc
       allow delete: if false;
 
-      // Transactions subcollection
       match /transactions/{txId} {
-        // Owner can read and create/update tx docs (no delete)
         allow read: if request.auth != null && request.auth.uid == uid;
         allow create, update: if request.auth != null && request.auth.uid == uid;
-        // allow delete: if false; // implicit since not granted
       }
+      
+      match /friends/{friendId} {
+        allow read: if request.auth != null && request.auth.uid == uid;
+        
+        allow create, update, delete: if request.auth != null; 
+      }
+      
     }
 
-    // Block everything else
+    // FriendRequests collection
+    match /friendRequests/{requestId} {
+      allow create: if request.auth != null 
+                    && request.resource.data.senderId == request.auth.uid
+                    && request.resource.data.status == 'pending';
+
+      allow read: if request.auth != null 
+                  && resource.data.recipientId == request.auth.uid 
+                  && resource.data.status == 'pending';
+                  
+      allow delete: if request.auth != null && requestId.matches(".*" + request.auth.uid + ".*");
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

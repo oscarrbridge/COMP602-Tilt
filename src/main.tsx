@@ -11,6 +11,7 @@ import Mines from './Games/Mines/mines.tsx';
 import CoinFlip from './Games/CoinToss/CoinToss.tsx';
 import Leaderboard from './pages/Leaderboard/Leaderboard.tsx';
 import { CurrencyProvider } from './components/CurrencySwitcher/currencyswitcher';
+import Friends from './pages/Friends/friends.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -25,6 +26,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path='/blackjack' element={<Blackjack />} />
           <Route path='/mines' element={<Mines />} />
           <Route path='/cointoss' element={<CoinFlip />} />
+          <Route path='/friends' element={<Friends />} />
         </Routes>
       </BrowserRouter>
     </CurrencyProvider>
