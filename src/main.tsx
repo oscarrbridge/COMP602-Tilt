@@ -14,6 +14,7 @@ import Admin from './pages/Admin/Admin.tsx';
 import Staff from './pages/Staff/Staff.tsx';
 import { CurrencyProvider } from './components/CurrencySwitcher/currencyswitcher';
 import BlackjackM from './Games/Blackjack multiplayer/BlackjackM.tsx';
+import LobbyTest from './Games/Blackjack multiplayer/lobbytest.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -31,6 +32,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path='/admin' element={<Admin />} />
           <Route path='/staff' element={<Staff />} />
           <Route path='/blackjackm' element={<BlackjackM />} />
+          <Route path='/LobbyTest' element={<LobbyTest />} />
         </Routes>
       </BrowserRouter>
     </CurrencyProvider>

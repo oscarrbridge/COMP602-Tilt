@@ -1,14 +1,4 @@
-import {
-  doc,
-  collection,
-  setDoc,
-  getDoc,
-  addDoc,
-  updateDoc,
-  serverTimestamp,
-  onSnapshot,
-  runTransaction,
-} from 'firebase/firestore';
+import {doc,collection,onSnapshot} from 'firebase/firestore';
 import { db } from '../../../Backend/firebase//firebaseConfig';
 
 // Subscribes to "games" collection
