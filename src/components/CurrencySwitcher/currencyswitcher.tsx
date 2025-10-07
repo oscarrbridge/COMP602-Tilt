@@ -1,3 +1,5 @@
+import './currencySwitcher.css'
+
 import React, {
   createContext,
   useContext,
@@ -143,22 +145,23 @@ export function CurrencySwitcher({
 }: CurrencySwitcherProps) {
   const { code, setCode } = useCurrency();
   return (
-    <label className={`inline-flex items-center gap-2 ${className ?? ""}`}>
-      <span style={{ color: "white" }} className="text-sm">
-        Currency
-      </span>
-      <select
-        value={code}
-        onChange={(e) => setCode(e.target.value as CurrencyCode)}
-        className="rounded-2xl border px-3 py-2 text-sm shadow-sm hover:shadow transition bg-white dark:bg-zinc-900"
-      >
-        {list.map((c) => (
-          <option key={c} value={c}>
-            {compact ? c : `${c} (${currencySymbols[c]})`}
-          </option>
-        ))}
-      </select>
-    </label>
+    <div className='CurrencySwitcher'>
+      <label>
+        <span style={{ color: "white" }}>
+          Currency
+        </span>
+        <select
+          value={code}
+          onChange={(e) => setCode(e.target.value as CurrencyCode)}
+        >
+          {list.map((c) => (
+            <option key={c} value={c}>
+              {compact ? c : `${c} (${currencySymbols[c]})`}
+            </option>
+          ))}
+        </select>
+      </label>
+    </div>
   );
 }
 
