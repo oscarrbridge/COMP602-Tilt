@@ -1,51 +1,91 @@
+import { useState, useEffect } from 'react';
+import { onAuthStateChanged, type User } from 'firebase/auth';
+import { doc, onSnapshot, writeBatch, increment, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from './firebaseConfig';
 
-import { useEffect, useState } from "react";
-import { onAuthStateChanged  } from "firebase/auth";
-import { db, auth} from './firebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
+const TOP_UP_THRESHOLD_CENTS = 1000; // Trigger when balance is below $10.00
 
 export function useUser() {
-  const [user, setUser] = useState<{ uid: string; email?: string | null } | null>(null);
-  const [balance, setBalance] = useState<number>(0);
-  const [loading, setLoading] = useState(true); // wait for auth check
+  const [user, setUser] = useState<User | null>(null);
+  const [balance, setBalance] = useState(0);
+  const [autoPayEnabled, setAutoPayEnabled] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [isToppingUp, setIsToppingUp] = useState(false);
 
-  // Fetch balance from Firestore
-  const fetchBalance = async (uid: string) => {
-    const userRef = doc(db, "users", uid);
-    const snap = await getDoc(userRef);
-    if (snap.exists()) {
-      setBalance(snap.data().balance ?? 0);
-    } else {
-      setBalance(0);
+  const [autoPayAmount, setAutoPayAmount] = useState(2000); // Default to $20
+
+  // Effect to get the current user
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Effect to listen for REAL-TIME changes to the user's document
+  useEffect(() => {
+    if (loading || !user) {
+      setBalance(0); // Set to 0 if logged out/loading
+      return;
+    }
+    const userRef = doc(db, 'users', user.uid);
+    const unsubscribe = onSnapshot(userRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setBalance(data.balance ?? 0);
+        setAutoPayEnabled(data.autoPayEnabled || false);
+        setAutoPayAmount(data.autoPayAmountCents || 2000); // Fallback to $20
+      } else {
+        setBalance(0);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [user, loading]);
+
+  // AUTO-TOP-UP LOGIC
+  useEffect(() => {
+    if (autoPayEnabled && balance < TOP_UP_THRESHOLD_CENTS && !isToppingUp) {
+      performAutoTopUp();
+    }
+  }, [balance, autoPayEnabled, isToppingUp, user]);
+
+  const performAutoTopUp = async () => {
+    if (!user) return;
+
+    console.log(`Balance is low. Simulating a top-up of ${autoPayAmount / 100}.`);
+    setIsToppingUp(true);
+
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      const txRef = doc(db, 'users', user.uid, 'transactions', `autopay-${Date.now()}`);
+      const batch = writeBatch(db);
+
+      // Use the dynamic amount from state
+      batch.update(userRef, { balance: increment(autoPayAmount) });
+
+      batch.set(txRef, {
+        type: 'deposit',
+        amount: autoPayAmount, // Use the dynamic amount
+        source: 'auto-top-up',
+        status: 'succeeded',
+        balanceBefore: balance,
+        balanceAfter: balance + autoPayAmount, // Use the dynamic amount
+        timestamp: serverTimestamp(),
+      });
+
+      await batch.commit();
+    } catch (error) {
+      console.error('Auto top-up simulation failed:', error);
+    } finally {
+      setTimeout(() => setIsToppingUp(false), 3000);
     }
   };
 
-  // Use this after win loss or bet to change the balance
   const refreshBalance = async () => {
-    if (!user) throw new Error("User is not logged in");
-    await fetchBalance(user.uid);
+    console.log('Balance refresh is now handled automatically by onSnapshot.');
   };
 
-  // Get user data
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        const u = { uid: firebaseUser.uid, email: firebaseUser.email };
-        setUser(u);
-        fetchBalance(u.uid).finally(() => setLoading(false));
-      } else {
-        setUser(null);
-        setBalance(0);
-        setLoading(false);
-      }
-    });
-    return () => unsub();
-  }, []);
-
-  // Ensure user is never null
-  if (!loading && !user) {
-    throw new Error("User is not logged in");
-  }
-
-  return { user: user!, balance, refreshBalance }; // non-null assertion
+  return { user, balance, refreshBalance, loading };
 }
