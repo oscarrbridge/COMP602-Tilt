@@ -1,8 +1,8 @@
-// src/pages/Deposit.jsx
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../../../Backend/firebase/firebaseConfig'; // adjust path if needed
+import { auth } from '../../../Backend/firebase/firebaseConfig';
 import './Deposit.css';
+import { useCurrency, CurrencySwitcher } from '../CurrencySwitcher/currencyswitcher.tsx';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:4000';
 
@@ -10,7 +10,7 @@ export default function Deposit() {
   // States for uid, withdraw amount, currency type, submit payment, error
   const [uid, setUid] = useState(auth.currentUser?.uid ?? null);
   const [amount, setAmount] = useState('');
-  const [currency, setCurrency] = useState('nzd');
+  const { code, setCode } = useCurrency();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -22,11 +22,52 @@ export default function Deposit() {
     return () => unsub();
   }, [uid]);
 
-  // Helper to convert a dollar string (e.g. "12.34") to integer cents (1234)
-  function dollarsToCents(dollarsStr: string) {
-    const n = Number(dollarsStr);
-    if (!isFinite(n)) return NaN;
-    return Math.round(n * 100);
+  // keep currency in sync with NavWindow (reads localStorage)
+  useEffect(() => {
+    const KEY = 'currency.code';
+    // Type guard for allowed currency codes
+    const isCurrency = (x: any): x is 'NZD' | 'AUD' | 'USD' | 'EUR' | 'GBP' =>
+      x === 'NZD' || x === 'AUD' || x === 'USD' || x === 'EUR' || x === 'GBP';
+    // Initial sync on mount: read current value from localStorage
+    const initial = localStorage.getItem(KEY);
+    if (isCurrency(initial) && initial !== code) setCode(initial);
+    // Same-tab change detection:
+    // The storage event does not fire in the same tab that wrote the value,
+    let last = initial ?? code;
+    const id = window.setInterval(() => {
+      const cur = localStorage.getItem(KEY);
+      if (cur && cur !== last) {
+        last = cur;
+        if (isCurrency(cur) && cur !== code) setCode(cur);
+      }
+    }, 250);
+    // Also resync when the window regains focus (covers tab switches / minimized)
+    const onFocus = () => {
+      const cur = localStorage.getItem(KEY);
+      if (isCurrency(cur) && cur !== code) setCode(cur);
+    };
+    window.addEventListener('focus', onFocus);
+    // Cross-tab sync:
+    // The 'storage' event fires in *other* tabs when localStorage changes.
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== KEY || e.newValue == null) return;
+      if (isCurrency(e.newValue) && e.newValue !== code) setCode(e.newValue);
+    };
+    window.addEventListener('storage', onStorage);
+    // Cleanup, stop polling and remove listeners on unmount
+    return () => {
+      clearInterval(id);
+      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, [code, setCode]);
+
+  // Convert major units into minor units for active currency
+  function toMinorUnits(valueStr: string, currCode: string) {
+    const n = Number(valueStr);
+    if (!isFinite(n)) return 0;
+    const factor = currCode.toUpperCase() === 'JPY' ? 1 : 100;
+    return Math.round(n * factor);
   }
 
   // Submit helper:
@@ -44,12 +85,11 @@ export default function Deposit() {
     }
 
     // Validate amount in cents, checks for minimum
-    const amount_cents = dollarsToCents(amount);
+    const amount_cents = toMinorUnits(amount, code);
     if (!amount_cents || amount_cents <= 0) {
-      setError('Enter a valid amount greater than 0');
+      setError(`Enter a valid amount greater than 0`);
       return;
     }
-
     try {
       setSubmitting(true);
       // Call backend, currency is normalized to lowercase
@@ -59,7 +99,7 @@ export default function Deposit() {
         body: JSON.stringify({
           uid,
           amount_cents,
-          currency: (currency || 'nzd').toLowerCase(),
+          currency: code.toLowerCase(),
         }),
       });
 
@@ -86,7 +126,7 @@ export default function Deposit() {
   return (
     <div className='DepositPage'>
       <form className='WithdrawForm' onSubmit={onSubmit}>
-        <label>Amount (NZD):</label>
+        <label>Amount ({code}):</label>
         <input
           type='number'
           inputMode='decimal'
@@ -97,21 +137,9 @@ export default function Deposit() {
           onChange={(e) => setAmount(e.target.value)}
           disabled={submitting}
         />
-
-        <label>Currency:</label>
-        <select
-          value={currency}
-          onChange={(e) => setCurrency(e.target.value.toLowerCase())}
-          disabled={submitting}
-        >
-          <option value='nzd'>NZD</option>
-          <option value='usd'>USD</option>
-        </select>
-
         <button type='submit' disabled={submitting || !uid}>
           {submitting ? 'Redirecting…' : 'Deposit'}
         </button>
-
         {!uid && <p className='FormHint'>You must be signed in to deposit.</p>}
         {error && <p className='FormError'>{error}</p>}
       </form>

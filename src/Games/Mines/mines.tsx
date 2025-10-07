@@ -47,11 +47,11 @@ function Board({
 
 // Main App component
 export default function Mines() {
-  const { user, balance, refreshBalance } = useUser();
+  const { user, balance, refreshBalance } = useUser(); // balance is in cents
   const [Size, SetSize] = useState(5);
   const [Mines, SetMines] = useState(5);
-  const [bet, setBet] = useState(10); // Display bet
-  const [betInBase, setBetInBase] = useState(0); // Bet in base currency
+  const [bet, setBet] = useState(10);       // bet shown in whole dollars
+  const [betInBase, setBetInBase] = useState(0); // bet in cents (NZD base)
   const [Cells, SetCells] = useState<Cell[] | null>(null);
   const [Status, SetStatus] = useState<Status>("Idle");
   const [SafeRevealed, SetSafeRevealed] = useState(0);
@@ -60,7 +60,6 @@ export default function Mines() {
 
   // --- Game logic functions ---
 
-  // Create the board
   function BoardCreate(size: number, MineCount: number): Cell[] {
     const total = size * size;
     const mineCount = Math.max(0, Math.min(MineCount, total - 1));
@@ -80,7 +79,6 @@ export default function Mines() {
     }));
   }
 
-  // Calculate current multiplier
   function multiplier(total: number, mines: number, SafeRevealed: number) {
     let m = 1;
     for (let i = 0; i < SafeRevealed; i++) {
@@ -91,7 +89,6 @@ export default function Mines() {
     return Number(m.toFixed(4));
   }
 
-  // Calculate multiplier for next click
   function NextClick(total: number, mines: number, SafeRevealed: number) {
     const CellsRemaining = total - SafeRevealed;
     const SafeRemaining = total - mines - SafeRevealed;
@@ -109,17 +106,19 @@ export default function Mines() {
     [total, Mines, SafeRevealed]
   );
 
-  const PayoutNow = +(betInBase * CurrentMult).toFixed(2);
-  const NextPayout = +(betInBase * CurrentMult * nextFactor).toFixed(2);
+  const PayoutNow = Math.floor(betInBase * CurrentMult); // payout in cents
+  const NextPayout = Math.floor(betInBase * CurrentMult * nextFactor);
 
   // --- Game actions ---
   const startGame = async (newBetInBase: number) => {
+    // newBetInBase is in cents
     if (newBetInBase > balance) {
       alert("Not enough balance!");
       return;
     }
 
     setBetInBase(newBetInBase);
+
     const validMines = Math.max(1, Math.min(Mines, total - 1));
     SetCells(BoardCreate(Size, validMines));
     SetSafeRevealed(0);
@@ -180,12 +179,12 @@ export default function Mines() {
     Revealed: false,
   }));
 
-useEffect(() => {
-  if (Status === "Lost" || Status === "Cash") {
-    const timer = setTimeout(() => SetStatus("Idle"), 2000);
-    return () => clearTimeout(timer);
-  }
-}, [Status]);
+  useEffect(() => {
+    if (Status === "Lost" || Status === "Cash") {
+      const timer = setTimeout(() => SetStatus("Idle"), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [Status]);
 
   // --- UI ---
   return (
@@ -197,10 +196,10 @@ useEffect(() => {
 
             <div className="panel">
               {/* Shared bet controls */}
-            {(Status === "Idle" || Status === "Lost" || Status === "Cash") && (
+              {(Status === "Idle" || Status === "Lost" || Status === "Cash") && (
                 <BetControls
-                  balance={balance}
-                  bet={bet}
+                  balance={balance}   // cents
+                  bet={bet}           // dollars
                   setBet={setBet}
                   startGame={startGame}
                 />
@@ -240,10 +239,12 @@ useEffect(() => {
             <div className="results">
               <span className="result">Safes Found: {SafeRevealed}</span>
               <span className="result">Current Multiplier ×{CurrentMult}</span>
-              <span className="result">Current Payout: ${PayoutNow}</span>
+              <span className="result">
+                Current Payout: ${(PayoutNow / 100).toFixed(2)}
+              </span>
               {Status === "Playing" && (
                 <span className="result">
-                  Next Safe ×{nextFactor} (${NextPayout})
+                  Next Safe ×{nextFactor} (${(NextPayout / 100).toFixed(2)})
                 </span>
               )}
             </div>
@@ -252,7 +253,7 @@ useEffect(() => {
               {Status === "Idle" && <>Press <b>Bet</b> to play.</>}
               {Status === "Playing" && <>Pick Tiles</>}
               {Status === "Lost" && <>💣 Mine Hit. You lost.</>}
-              {Status === "Cash" && <>💰 Cashed Out: ${PayoutNow}</>}
+              {Status === "Cash" && <>💰 Cashed Out: ${(PayoutNow / 100).toFixed(2)}</>}
             </div>
 
             <Board

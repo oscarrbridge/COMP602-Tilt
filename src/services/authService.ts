@@ -10,7 +10,12 @@ import {
   type User,
 } from 'firebase/auth';
 
-async function profileData(user: User) {
+export type ProfileExtras = {
+  university?: { value: string; label: string } | null;
+  friends?: string[];
+};
+
+async function profileData(user: User, extras?: ProfileExtras) {
   // Create Firestore user profile if it doesn't exist
   const userProfile = doc(db, 'users', user.uid);
   // Grabs the profile that was registered
@@ -32,18 +37,27 @@ async function profileData(user: User) {
         totalLosses: 0,
         netProfit: 0,
         createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
         uniBalance: 0,
+        university: extras?.university ?? null,
+        friends: extras?.friends ?? [],
       },
       // Add merge to prevent override
       { merge: true }
     );
+  } else {
+    await setDoc(userProfile, { updatedAt: serverTimestamp() }, { merge: true });
+
+    if (extras?.university) {
+      await setDoc(userProfile, { university: extras.university }, { merge: true });
+    }
   }
 }
 
 // Register with email + password
-export async function registerUser(email: string, password: string) {
+export async function registerUser(email: string, password: string, extras?: ProfileExtras) {
   const { user } = await createUserWithEmailAndPassword(auth, email, password);
-  await profileData(user);
+  await profileData(user, extras);
   return user;
 }
 
@@ -55,9 +69,9 @@ export async function signInUser(email: string, password: string) {
 }
 
 // Sign in with Google
-export async function signInWithGoogle() {
+export async function signInWithGoogle(extras?: ProfileExtras) {
   const { user } = await signInWithPopup(auth, googleProvider);
-  await profileData(user);
+  await profileData(user, extras);
   return user;
 }
 

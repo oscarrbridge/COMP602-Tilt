@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../../../Backend/firebase/firebaseConfig'; // adjust path
+import { auth } from '../../../Backend/firebase/firebaseConfig';
 import './Withdraw.css';
+import { useCurrency, CurrencySwitcher } from '../CurrencySwitcher/currencyswitcher.tsx';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:4000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
 export default function Withdraw() {
   // States for uid, withdraw amount, currency type, submit payment, error
   const [uid, setUid] = useState(auth.currentUser?.uid ?? null);
   const [amount, setAmount] = useState('');
-  const [currency, setCurrency] = useState('nzd');
+  const { code, format, convert } = useCurrency();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [ok, setOk] = useState('');
@@ -21,12 +22,6 @@ export default function Withdraw() {
     const unsub = onAuthStateChanged(auth, (u) => setUid(u?.uid ?? null));
     return () => unsub();
   }, [uid]);
-
-  // Helper to convert a dollar string (e.g. "12.34") to integer cents (1234)
-  function dollarsToCents(dollarsStr: string) {
-    const n = Number(dollarsStr);
-    return Math.round(n * 100);
-  }
 
   // Submit helper:
   // Validates minimum amount: $0.50
@@ -43,13 +38,23 @@ export default function Withdraw() {
       return;
     }
 
-    // Validate amount in cents, checks for minimum
-    const amount_cents = dollarsToCents(amount);
-    if (!amount_cents || amount_cents < 50) {
-      setError('Minimum withdrawal is $0.50');
+    // 1) Parse typed major units
+    const typedMajor = Number(amount);
+    if (!isFinite(typedMajor) || typedMajor <= 0) {
+      setError('Enter a valid amount greater than 0');
       return;
     }
 
+    // 2) Convert typed amount to NZD major using the SAME UI rates
+    const nzdMajor = convert(typedMajor, code as any, 'NZD' as any);
+    // 3) Round to NZD cents
+    const nzdCents = Math.round(nzdMajor * 100);
+    // 4) Enforce backend minimum: 50 NZD cents
+    if (nzdCents < 50) {
+      const minActive = convert(0.5, 'NZD' as any, code as any);
+      setError(`Minimum withdrawal is ${format(minActive)}`);
+      return;
+    }
     try {
       setSubmitting(true);
       // Call backend, currency is normalized to lowercase
@@ -58,8 +63,8 @@ export default function Withdraw() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           uid,
-          amount_cents,
-          currency: (currency || 'nzd').toLowerCase(),
+          amount_cents: nzdCents,
+          currency: 'nzd',
         }),
       });
 
@@ -81,7 +86,7 @@ export default function Withdraw() {
     <div>
       <br />
       <form className='WithdrawForm' onSubmit={onSubmit}>
-        <label>Amount:</label>
+        <label>Amount ({code}):</label>
         <input
           type='number'
           inputMode='decimal'
@@ -92,15 +97,6 @@ export default function Withdraw() {
           onChange={(e) => setAmount(e.target.value)}
           disabled={submitting}
         />
-        <label>Currency:</label>
-        <select
-          value={currency}
-          onChange={(e) => setCurrency(e.target.value.toLowerCase())}
-          disabled={submitting}
-        >
-          <option value='nzd'>NZD</option>
-          <option value='usd'>USD</option>
-        </select>
         <button type='submit' disabled={submitting || !uid}>
           {submitting ? 'Processing…' : 'Submit'}
         </button>
