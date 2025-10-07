@@ -214,9 +214,8 @@ export default function Dashboard() {
       <div className='HomeSearchBarContainer'>
         <h2>Looking for a game?</h2>
         <SearchBar Placeholder='Search for a game...' />
+        <FilterBar />
       </div>
-
-      <FilterBar />
     </AppProvider>
   );
 }
