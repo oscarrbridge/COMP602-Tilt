@@ -26,7 +26,7 @@ export default function NavBar() {
   // const [user, setUser] = useState<User | null>(null);
   // // Balance state
   // const [balance, setBalance] = useState<number | null>(null);
-  const { user, balance } = useUser();
+  const { user, balance, userProfile } = useUser();
 
   // useEffect(() => {
   //   const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -73,6 +73,17 @@ export default function NavBar() {
 
   return (
     <>
+      <div className='floating-admin-controls'>
+        {/* Show Admin button if roles include 'admin' */}
+        {userProfile?.roles?.includes('admin') && (
+          <button onClick={() => navigate('/admin')}>Admin Dashboard</button>
+        )}
+
+        {/* Show Staff button if roles include 'staff' */}
+        {userProfile?.roles?.includes('staff') && (
+          <button onClick={() => navigate('/staff')}>Staff Dashboard</button>
+        )}
+      </div>
       <CurrencyProvider base='NZD' DefaultCurrency='NZD'>
         <div className='NavBarContainer'>
           <div className='Logo' onClick={() => navigate('/')}>

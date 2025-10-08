@@ -5,12 +5,21 @@ import { auth, db } from './firebaseConfig';
 
 const TOP_UP_THRESHOLD_CENTS = 1000; // Trigger when balance is below $10.00
 
+interface UserProfile {
+  roles: string[];
+  balance: number;
+  email: string;
+  autoPayEnabled?: boolean;
+  autoPayAmountCents?: number;
+}
+
 export function useUser() {
   const [user, setUser] = useState<User | null>(null);
   const [balance, setBalance] = useState(0);
   const [autoPayEnabled, setAutoPayEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isToppingUp, setIsToppingUp] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   const [autoPayAmount, setAutoPayAmount] = useState(2000); // Default to $20
 
@@ -36,8 +45,10 @@ export function useUser() {
         setBalance(data.balance ?? 0);
         setAutoPayEnabled(data.autoPayEnabled || false);
         setAutoPayAmount(data.autoPayAmountCents || 2000); // Fallback to $20
+        setUserProfile(data as UserProfile);
       } else {
         setBalance(0);
+        setUserProfile(null);
       }
     });
 
@@ -87,5 +98,5 @@ export function useUser() {
     console.log('Balance refresh is now handled automatically by onSnapshot.');
   };
 
-  return { user, balance, refreshBalance, loading };
+  return { user, balance, userProfile, refreshBalance, loading };
 }
