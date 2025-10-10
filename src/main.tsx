@@ -12,6 +12,8 @@ import CoinFlip from './Games/CoinToss/CoinToss.tsx';
 import Leaderboard from './pages/Leaderboard/Leaderboard.tsx';
 import Admin from './pages/Admin/Admin.tsx'
 import Staff from './pages/Staff/Staff.tsx';
+import Settings from './pages/Settings/Settings.tsx'
+
 import { CurrencyProvider } from './components/CurrencySwitcher/currencyswitcher';
 
 createRoot(document.getElementById('root')!).render(
@@ -29,6 +31,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path='/cointoss' element={<CoinFlip />} />
           <Route path='/admin' element={<Admin />} />
           <Route path='/staff' element={<Staff />} />
+          <Route path='/settings' element={<Settings />} />
         </Routes>
       </BrowserRouter>
     </CurrencyProvider>
