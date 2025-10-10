@@ -17,6 +17,7 @@
     border-right: 1px solid var(--text-colour);
     flex: 1;
     text-align: center;
+    cursor: pointer;
 }
 
 .FilterConatiner p:last-child {
