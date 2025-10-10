@@ -12,6 +12,7 @@ import {
 
 export type ProfileExtras = {
   university?: { value: string; label: string } | null;
+  friends?: string[];
 };
 
 async function profileData(user: User, extras?: ProfileExtras) {
@@ -39,6 +40,8 @@ async function profileData(user: User, extras?: ProfileExtras) {
         updatedAt: serverTimestamp(),
         uniBalance: 0,
         university: extras?.university ?? null,
+        role: 'user',
+        friends: extras?.friends ?? [],
       },
       // Add merge to prevent override
       { merge: true }

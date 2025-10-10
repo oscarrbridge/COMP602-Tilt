@@ -15,6 +15,7 @@ import Staff from './pages/Staff/Staff.tsx';
 import Settings from './pages/Settings/Settings.tsx'
 
 import { CurrencyProvider } from './components/CurrencySwitcher/currencyswitcher';
+import Friends from './pages/Friends/friends.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -29,6 +30,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path='/blackjack' element={<Blackjack />} />
           <Route path='/mines' element={<Mines />} />
           <Route path='/cointoss' element={<CoinFlip />} />
+          <Route path='/friends' element={<Friends />} />
           <Route path='/admin' element={<Admin />} />
           <Route path='/staff' element={<Staff />} />
           <Route path='/settings' element={<Settings />} />
