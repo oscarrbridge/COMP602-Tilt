@@ -118,9 +118,42 @@ export default function NavBar() {
           <div className='LoginControls'>
             {/* If user is logged in, show their info and logout */}
             {user ? (
-              <div className='LoggedInBox'>
+              <div
+                className='LoggedInBox'
+                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+              >
+                {/* Display user name/email */}
                 <span>{user.displayName || user.email || 'Logged in!'}</span>
-                <button onClick={() => signOut(auth)}>Logout</button>
+
+                {/* Settings button */}
+                <button
+                  onClick={() => navigate('/settings')}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: 6,
+                    border: '1px solid #888',
+                    background: '#444',
+                    color: '#fff',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Settings
+                </button>
+
+                {/* Logout button */}
+                <button
+                  onClick={() => signOut(auth)}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: 6,
+                    border: '1px solid #888',
+                    background: '#222',
+                    color: '#fff',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Logout
+                </button>
               </div>
             ) : (
               // If no user logged in, show login/register buttons
