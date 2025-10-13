@@ -136,7 +136,7 @@ export default function Roulette(): JSX.Element {
 
   useEffect(() => {
     if (status === "Result") {
-      const timer = setTimeout(() => reset(), 8000);
+      const timer = setTimeout(() => reset(), 6000);
       return () => clearTimeout(timer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -230,7 +230,10 @@ export default function Roulette(): JSX.Element {
 
                 <button
                   className={`bet-btn ${selectedBet === "Number" ? "active" : ""}`}
-                  onClick={() => setSelectedBet("Number")}
+                  onClick={() => {
+                    setSelectedBet("Number");
+                    setChosenNumber(0);
+                  }}
                   disabled={status === "Spinning"}
                 >
                   Custom
