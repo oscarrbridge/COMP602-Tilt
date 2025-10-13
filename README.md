@@ -26,20 +26,57 @@ STRIPE_WEBHOOK_SECRET=whsec_xxx
 ### **Frontend localhost**
 
 cd to COMP602-Tilt> 
+
+  ```npm install```
+  
   ```npm run dev ```
   
 ### **Backend server**
 
 cd to COMP602-Tilt> 
+
 ```pip install -r requirements.txt```
-cd to COMP602-Tilt> 
+
 ```py -m uvicorn Backend.main:app --reload --port 4000```
 
 
 ### **Stripe listener**
-After running backend server, note: .env file must be created
+To receive Stripe webhook events locally, you need the Stripe CLI.
 
-```stripe listen --forward-to localhost:4000/payments/webhook ```
+**Installation**
+```
+# 1. Download the latest Stripe CLI ZIP (done once)
+$Headers = @{ "User-Agent" = "ps1-installer" }
+$release = Invoke-RestMethod -Headers $Headers -Uri "https://api.github.com/repos/stripe/stripe-cli/releases/latest"
+$asset = $release.assets | Where-Object { $_.name -match "windows.*x86_64.*\.zip$" } | Select-Object -First 1
+$zip = Join-Path $env:TEMP "stripe-cli.zip"
+Invoke-WebRequest -Headers $Headers -Uri $asset.browser_download_url -OutFile $zip
+
+# 2. Extract to a user-local folder
+$dest = Join-Path $env:LOCALAPPDATA "Programs\StripeCLI"
+New-Item -ItemType Directory -Force -Path $dest | Out-Null
+Expand-Archive -Path $zip -DestinationPath $dest -Force
+
+# 3. Put stripe.exe in $dest
+$exe = Get-ChildItem -Path $dest -Recurse -Filter "stripe.exe" | Select-Object -First 1
+if ($exe.DirectoryName -ne $dest) { Copy-Item $exe.FullName -Destination (Join-Path $dest "stripe.exe") -Force }
+
+# 4. Add to PATH (current + persist)
+if ($env:Path -notlike "*$dest*") { $env:Path = "$dest;$env:Path" }
+$existing = [Environment]::GetEnvironmentVariable("Path","User")
+if ($existing -notlike "*$dest*") { [Environment]::SetEnvironmentVariable("Path","$dest;$existing","User") }
+
+# 5. Verify installation
+stripe --version
+```
+**Running**
+```
+# Authenticate with Stripe (opens browser)
+stripe login
+
+# Forward webhook events to FastAPI backend
+stripe listen --forward-to http://localhost:4000/payments/webhook
+```
 
 ## **Included Packages**
 

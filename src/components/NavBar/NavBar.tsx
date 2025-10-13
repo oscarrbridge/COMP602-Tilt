@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { CurrencyProvider } from '../CurrencySwitcher/currencyswitcher.tsx';
 
 import { auth, db } from '../../../Backend/firebase/firebaseConfig';
-
+import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
 import './NavBar.css';
 
 import NavWindow from '../NavWindow/NavWindow.tsx';
@@ -22,19 +22,20 @@ export default function NavBar() {
   const [LoginActive, SetLogin] = useState(false);
   // State for showing register popup (Boolean)
   const [SignUpActive, SetSignUp] = useState(false);
-  // Firebase auth state, (null if logged out, User firebase Auth object if logged in)
-  const [user, setUser] = useState<User | null>(null);
-  // Balance state
-  const [balance, setBalance] = useState<number | null>(null);
+  // // Firebase auth state, (null if logged out, User firebase Auth object if logged in)
+  // const [user, setUser] = useState<User | null>(null);
+  // // Balance state
+  // const [balance, setBalance] = useState<number | null>(null);
+  const { user, balance, userProfile } = useUser();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      // Whenever user logs in or out, update user state to current user
-      setUser(currentUser);
-    });
-    // Remove listener when NavBar unmounts
-    return () => unsubscribe();
-  }, []);
+  // useEffect(() => {
+  //   const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+  //     // Whenever user logs in or out, update user state to current user
+  //     setUser(currentUser);
+  //   });
+  //   // Remove listener when NavBar unmounts
+  //   return () => unsubscribe();
+  // }, []);
 
   function HandleLoginClick() {
     if (SignUpActive) {
@@ -53,25 +54,36 @@ export default function NavBar() {
   }
 
   // Sets null balance if user not signed in
-  useEffect(() => {
-    if (!user) {
-      setBalance(null);
-      return;
-    }
+  // useEffect(() => {
+  //   if (!user) {
+  //     setBalance(null);
+  //     return;
+  //   }
 
-    const data = doc(db, 'users', user.uid);
-    // Updates with user balance with the database value
-    const unsubscribeDoc = onSnapshot(data, (user) => {
-      if (user.exists()) {
-        setBalance(user.data().balance ?? 0);
-      }
-    });
-    // Cleanup the Firestore listener when the user logs out or switches
-    return unsubscribeDoc;
-  }, [user]);
+  //   const data = doc(db, 'users', user.uid);
+  //   // Updates with user balance with the database value
+  //   const unsubscribeDoc = onSnapshot(data, (user) => {
+  //     if (user.exists()) {
+  //       setBalance(user.data().balance ?? 0);
+  //     }
+  //   });
+  //   // Cleanup the Firestore listener when the user logs out or switches
+  //   return unsubscribeDoc;
+  // }, [user]);
 
   return (
     <>
+      <div className='floating-admin-controls'>
+        {/* Show Admin button if roles include 'admin' */}
+        {userProfile?.roles?.includes('admin') && (
+          <button onClick={() => navigate('/admin')}>Admin Dashboard</button>
+        )}
+
+        {/* Show Staff button if roles include 'staff' */}
+        {userProfile?.roles?.includes('staff') && (
+          <button onClick={() => navigate('/staff')}>Staff Dashboard</button>
+        )}
+      </div>
       <CurrencyProvider base='NZD' DefaultCurrency='NZD'>
         <div className='NavBarContainer'>
           <div className='Logo' onClick={() => navigate('/')}>
@@ -80,27 +92,68 @@ export default function NavBar() {
 
           <div className='UserBalance'>
             <div className='UserBalanceContainer'>
-              <div className='UserIcon'>
-                <img src='src/assets/user-icon.png' width={25} />
-              </div>
-              <UserBalance balance={balance} />
-              <div
-                className='DropArrow'
-                onMouseEnter={() => SetNavActive(true)}
-                onMouseLeave={() => SetNavActive(false)}
-              >
-                <img src='src/assets/caret-icon.png' width={25} />
-
-                {NavActive && <NavWindow />}
-              </div>
+              {user ? (
+                <>
+                  <div className='UserIcon'>
+                    <img src='src/assets/user-icon.png' width={25} />
+                  </div>
+                  <UserBalance balance={balance} />
+                  <div
+                    className='DropArrow'
+                    onMouseEnter={() => SetNavActive(true)}
+                    onMouseLeave={() => SetNavActive(false)}
+                  >
+                    <img src='src/assets/caret-icon.png' width={25} />
+                    {NavActive && <NavWindow />}
+                  </div>
+                </>
+              ) : (
+                // Display a simpler icon or message when logged out
+                <div className='UserIcon'>
+                  <img src='src/assets/user-icon.png' width={25} />
+                </div>
+              )}
             </div>
           </div>
           <div className='LoginControls'>
             {/* If user is logged in, show their info and logout */}
             {user ? (
-              <div className='LoggedInBox'>
+              <div
+                className='LoggedInBox'
+                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+              >
+                {/* Display user name/email */}
                 <span>{user.displayName || user.email || 'Logged in!'}</span>
-                <button onClick={() => signOut(auth)}>Logout</button>
+
+                {/* Settings button */}
+                <button
+                  onClick={() => navigate('/settings')}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: 6,
+                    border: '1px solid #888',
+                    background: '#444',
+                    color: '#fff',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Settings
+                </button>
+
+                {/* Logout button */}
+                <button
+                  onClick={() => signOut(auth)}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: 6,
+                    border: '1px solid #888',
+                    background: '#222',
+                    color: '#fff',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Logout
+                </button>
               </div>
             ) : (
               // If no user logged in, show login/register buttons

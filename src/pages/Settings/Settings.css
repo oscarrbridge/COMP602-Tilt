@@ -1,0 +1,86 @@
+.pageContainer {
+    background-color: var(--primary-colour);
+
+    width: 100%;
+    height: 92%;
+
+    display: flex;
+    flex-direction: row;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.innerComponents {
+    display: flex;
+    
+    align-items: center;
+    justify-content: center;
+
+    width: 95%;
+    height: 90%;
+
+    background-color: rgba(255, 255, 255, 0.062);
+
+    border-radius: 18px;
+    box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.11);
+
+    gap: 20px
+}
+
+.leftMenu {
+    height: 96%;
+    width: 22%;
+
+}
+
+.rightMenu {
+    height: 96%;
+    width: 72%;
+
+}
+
+.leftMenu, .rightMenu {
+    display: flex;
+    flex-direction: column;
+
+    background-color: var(--primary-colour);
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.178);
+
+    padding-top: 10px;
+    padding-left: 10px;
+
+    align-items: center;
+}
+
+.settingItems{
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+
+    width: 80%;
+
+    gap: 10px;
+
+}
+
+.settingItems p:hover {
+    cursor: pointer;
+    transform: scale(1.03);
+    background-color: var(--primary-colour);
+    box-shadow: inset 0px 0px 10px rgba(255, 255, 255, 0.219);
+}
+
+.settingItems p{
+    border-radius: 18px;
+    border: 1px solid white;
+    padding: 5px 0px;
+
+    transition: 0.1s all;
+
+}
+
+.settingItems p:first-child{
+    margin-top: 10px;
+}

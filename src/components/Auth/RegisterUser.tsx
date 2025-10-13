@@ -75,6 +75,7 @@ export default function RegisterUser({ open, onClose }: RegisterPopupProps) {
       // Call Firebase auth
       await registerUser(email.trim(), password, {
         university: { value: university, label: uniLabel },
+        friends: [],
       });
       // Close popup
       onClose();
