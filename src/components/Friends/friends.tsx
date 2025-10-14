@@ -11,8 +11,9 @@ import {
   getDoc,
   deleteDoc,
 } from 'firebase/firestore';
-import { db } from '../../../Backend/firebase/firebaseConfig';
+import { db } from '../../../Backend/firebase/firebaseConfig.ts';
 import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
+import { getUsersByIds } from '../../../Backend/firebase/firestoreBatch.ts';
 
 interface FriendRequest {
   id: string;
@@ -58,6 +59,12 @@ export function useFriends() {
     } catch (error) {
       console.error('Failed to send request:', error);
     }
+    const friendsCollectionRef = collection(db, 'users', userId, 'friends');
+    const unsubscribe = onSnapshot(friendsCollectionRef, async (snapshot) => {
+      const friendIDs = snapshot.docs.map((d) => d.id);
+      const detailedFriends = await getUsersByIds(friendIDs);
+      setFriends(detailedFriends);
+    });
   };
 
   const acceptFriendRequest = async (senderUid: string) => {

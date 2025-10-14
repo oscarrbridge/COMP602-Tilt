@@ -1,0 +1,179 @@
+.friends-dock {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.friends-dock.open .friends-dock-card,
+.friends-dock .friends-pillar {
+  pointer-events: auto;
+}
+
+.friends-dock-collapsed {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 9999;
+}
+
+.friends-pillar {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--accent-colour);
+  background: var(--accent-colour);
+  color: var(--text-colour);
+  cursor: pointer;
+}
+
+.friends-dock-card {
+  width: 340px;
+  max-height: 60vh;
+  background: var(--secondary-colour);
+  color: var(--text-colour);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.dock-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--primary-colour);
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+}
+.tabs button {
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-colour);
+  cursor: pointer;
+}
+.tabs button.active {
+  background: var(--accent-colour);
+  border-color: var(--accent-colour);
+  color: #fff;
+}
+
+.dock-close {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: var(--text-colour);
+  border-radius: 6px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+.dock-body {
+  padding: 8px;
+  overflow: auto;
+  max-height: 48vh;
+  overflow-x: hidden;
+}
+
+.list {
+  display: grid;
+  gap: 8px;
+}
+
+.friend-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  border-radius: 8px;
+  flex-wrap: wrap;
+  overflow: hidden;
+}
+.friend-row:hover {
+  background: var(--primary-colour);
+}
+
+.userbits {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primary-colour);
+  color: var(--accent-colour);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+.name {
+  font-weight: 600;
+}
+.small {
+  font-size: 0.85rem;
+  color: #bfbfbf;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.status-online {
+  background: #22c55e;
+}
+.status-offline {
+  background: #6b7280;
+}
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.btn {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--accent-colour);
+  background: var(--accent-colour);
+  color: #fff;
+  cursor: pointer;
+}
+.btn.outline {
+  background: transparent;
+  color: var(--accent-colour);
+}
+
+.dock-footer {
+  padding: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--primary-colour);
+}
+
+.badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 12px;
+  line-height: 18px;
+  text-align: center;
+}

@@ -27,10 +27,12 @@ async function profileData(user: User, extras?: ProfileExtras) {
       userProfile,
       {
         email: user.email,
+        emailLower: user.email?.toLowerCase() ?? null,
         // Username becomes the email address before '@'
         // eg: email = tilt_account@gmail.com,
         //     username = tilt_account
         username: user.email?.split('@')[0],
+        usernameLower: user.email?.split('@')[0].toLowerCase(),
         // Balance and history initilised to 0
         balance: 0,
         totalWinnings: 0,
