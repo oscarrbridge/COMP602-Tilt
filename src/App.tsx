@@ -33,10 +33,13 @@ const DEFAULT_CARD = {
 
 
 export const PopularGames = [
-  { Text: 'Slots',     Image: 'src/assets/icon-slots.png',  LinkTo: '/slots' },
-  { Text: 'Blackjack', Image: 'src/assets/icon-blackjack.png', LinkTo: '/blackjack' },
-  { Text: 'Mines',     Image: 'src/assets/icon-bomb.png',   LinkTo: '/mines' },
-  { Text: 'Coin Toss', Image: 'src/assets/Tilt.png',        LinkTo: '/cointoss' },
+  { Text: 'Slots',     Image: 'src/assets/slots.png',  LinkTo: '/slots' },
+  { Text: 'Blackjack', Image: 'src/assets/blackjack.png', LinkTo: '/blackjack' },
+  { Text: 'Mines',     Image: 'src/assets/mines.png',   LinkTo: '/mines' },
+  { Text: 'Coin Toss', Image: 'src/assets/coins.png',        LinkTo: '/cointoss' },
+  { Text: 'Roulette', Image: 'src/assets/roulette.png',        LinkTo: '/roulette' },
+  { Text: 'Soon', Image: 'src/assets/comingsoon.png',        LinkTo: '/' },
+  { Text: 'Soon', Image: 'src/assets/comingsoon.png',        LinkTo: '/' },
 ];
 
 type SpecialEventRender = {
