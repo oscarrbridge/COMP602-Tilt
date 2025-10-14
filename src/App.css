@@ -5,7 +5,6 @@ h2 {
 }
 
 /*  Special Events */
-
 .SpecialEventsContainer {
   display: flex;
   flex-direction: column;
@@ -21,21 +20,6 @@ h2 {
   width: 100%;
 }
 
-/* Game Cards */
-
-.PopularGamesContainer {
-  display: flex;
-  flex-direction: column;
-
-  gap: 10px;
-}
-
-.PopularGames {
-  display: flex;
-  gap: 20px;
-  
-  padding-bottom: 10px;
-}
 
 /* Search bar */
 .HomeSearchBarContainer {
@@ -45,8 +29,10 @@ h2 {
   gap: 10px;
 }
 
-
+/* Game Cards */
 .GamesContainer{
+  margin: 0px 40px;
+
   display: flex;
   flex-direction: column;
 
@@ -58,4 +44,12 @@ h2 {
   gap: 20px;
 
   padding-bottom: 10px;
+
 }
+
+
+
+.HomeSearchBarContainer {
+  margin: 0px 40px
+}
+
