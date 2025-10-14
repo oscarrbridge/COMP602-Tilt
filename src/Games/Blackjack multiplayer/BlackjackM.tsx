@@ -70,6 +70,7 @@ export default function Blackjackm({ gameId = "testGame" }: { gameId?: string })
     let aces = 0;
     cards.forEach((c) => {
       total += cardValue(c);
+
       if (c.rank === "A") aces++;
     });
     while (total > 21 && aces > 0) {

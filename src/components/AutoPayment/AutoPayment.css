@@ -1,0 +1,57 @@
+.AutoPaySetup {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.ToggleControl {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.ToggleControl input[type='checkbox'] {
+  transform: scale(1.5); /* Makes the toggle bigger */
+  cursor: pointer;
+}
+
+.SettingsControl {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border-top: 1px solid #eee;
+  padding-top: 1rem;
+}
+
+.SettingsControl input {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.SettingsControl button {
+  padding: 10px 16px;
+  font-weight: bold;
+  border-radius: 6px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.SettingsControl button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+
+.SettingsControl button:hover:not(:disabled) {
+  background-color: #0056b3;
+}

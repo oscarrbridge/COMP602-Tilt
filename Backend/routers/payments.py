@@ -8,28 +8,16 @@ from dotenv import load_dotenv
 from pathlib import Path
 from google.cloud import firestore
 
-
-# Load the .env
+# (All the code at the top of your file remains the same)
+# ...
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
-
-# Load_dotenv()
 router = APIRouter(prefix="/payments", tags=["payments"])
-
-# Initilise keys, frontend URL, and currency
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 print("Stripe key loaded:", bool(stripe.api_key))
 FRONTEND_URL = (os.getenv("FRONTEND_URL", "http://localhost:5173")).rstrip("/")
 DEFAULT_CURRENCY = (os.getenv("CURRENCY") or "nzd").lower()
-
-
-FX_RATES = {
-    "nzd": 1.0,
-    "aud": 0.90,
-    "usd": 0.59,
-    "eur": 0.50,
-    "gbp": 0.44,
-}
-ZERO_DECIMAL = {"jpy"}  # future-proof
+FX_RATES = {"nzd": 1.0, "aud": 0.90, "usd": 0.59, "eur": 0.50, "gbp": 0.44}
+ZERO_DECIMAL = {"jpy"}
 
 
 def _norm(c: str | None) -> str:
@@ -58,7 +46,6 @@ def _minor_to_nzd_cents(minor_in_src: int, src_cur: str) -> int:
     return int(round(nzd_major * _factor("nzd")))
 
 
-# Pydantic model for validation, ensures field: string, amount in cents: integer, currency: string
 class DepositBody(BaseModel):
     uid: str = Field(..., description="Firebase Auth UID")
     amount_cents: int = Field(
@@ -69,7 +56,18 @@ class DepositBody(BaseModel):
     )
 
 
-# Withdraw request body: same shape as deposit
+class SetupSessionBody(BaseModel):
+    uid: str = Field(..., description="Firebase Auth UID")
+
+
+class UpdateAutoPayBody(BaseModel):
+    uid: str = Field(..., description="Firebase Auth UID")
+    autoPayEnabled: bool
+    autoPayAmountCents: int = Field(
+        ..., gt=49, description="Top-up amount in NZD cents (min 50)"
+    )
+
+
 class WithdrawBody(BaseModel):
     uid: str = Field(..., description="Firebase Auth UID")
     amount_cents: int = Field(
@@ -81,18 +79,12 @@ class WithdrawBody(BaseModel):
 
 
 @router.post("/deposit")
-# creates a stripe checkout session for a deposit
-# return session url redirect and session ID
 async def create_deposit_checkout(body: DepositBody):
-
+    # ... (This function is fine, leave as is)
     if not stripe.api_key:
         raise HTTPException(status_code=500, detail="Stripe not configured")
-
-    # Default currency if missing
     currency = (body.currency or DEFAULT_CURRENCY).lower()
-
     try:
-        # Make a one-time payment session in Stripe (card, single line item)
         session = stripe.checkout.Session.create(
             mode="payment",
             payment_method_types=["card"],
@@ -110,20 +102,17 @@ async def create_deposit_checkout(body: DepositBody):
                     },
                 }
             ],
-            # stripe redirect after successful or canceled payment
             success_url=f"{FRONTEND_URL}/wallet?session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=f"{FRONTEND_URL}/wallet?cancelled=1",
             metadata={"type": "deposit", "uid": body.uid},
         )
-        # Send the URL back to the frontend so it can redirect the user
         return {"url": session.url, "sessionId": session.id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# prevents duplicate stripe events
 def _record_stripe_event_once(event_id: str) -> bool:
-
+    # ... (This function is fine, leave as is)
     marker_ref = db.collection("stripe_events").document(event_id)
     snap = marker_ref.get()
     if snap.exists:
@@ -132,37 +121,28 @@ def _record_stripe_event_once(event_id: str) -> bool:
     return True
 
 
-# Add money to the user's balance and write a transaction record.
 def _credit_user_and_log_transaction(
     uid: str, amount_cents: int, currency: str, session_id: str
 ):
+    # ... (This function is fine, leave as is)
     user_ref = db.collection("users").document(uid)
     tx_ref = user_ref.collection("transactions").document(session_id)
 
     @firestore.transactional
     def run_in_transaction(transaction):
-        # Read current balance
         user_snap = user_ref.get(transaction=transaction)
-
         current_balance = 0
         if user_snap.exists:
             data = user_snap.to_dict() or {}
             current_balance = int(data.get("balance", 0))
-
-        # use amount_cents as units
         delta = amount_cents
-
         new_balance = current_balance + delta
-
-        # Update user balance
         transaction.set(user_ref, {"balance": new_balance}, merge=True)
-
-        # Write a transaction doc
         transaction.set(
             tx_ref,
             {
                 "type": "deposit",
-                "amount": amount_cents,  # raw cents
+                "amount": amount_cents,
                 "currency": currency.lower(),
                 "source": "stripe",
                 "sessionId": session_id,
@@ -175,36 +155,26 @@ def _credit_user_and_log_transaction(
             },
         )
 
-    # Run the Firestore transaction
     run_in_transaction(db.transaction())
 
 
-# Subtract money from the user's balance and write a transaction record
 def _debit_user_and_log_transaction(uid: str, amount_cents: int, currency: str):
+    # ... (This function is fine, leave as is)
     user_ref = db.collection("users").document(uid)
     tx_ref = user_ref.collection("transactions").document()
 
     @firestore.transactional
     def run_in_transaction(transaction):
-        # Read current balance
         user_data = user_ref.get(transaction=transaction)
         current_balance = 0
         if user_data.exists:
             data = user_data.to_dict() or {}
             current_balance = int(data.get("balance", 0))
-
-        # Keep units consistent with deposit (currently 'cents as units')
         delta = amount_cents
-
         if current_balance < delta:
             raise HTTPException(status_code=400, detail="Insufficient balance")
-
         new_balance = current_balance - delta
-
-        # Update user balance
         transaction.set(user_ref, {"balance": new_balance}, merge=True)
-
-        # Write a transaction doc
         transaction.set(
             tx_ref,
             {
@@ -221,54 +191,48 @@ def _debit_user_and_log_transaction(uid: str, amount_cents: int, currency: str):
             },
         )
 
-    # Run and return the id of the transaction doc
     run_in_transaction(db.transaction())
     return tx_ref.id
 
 
 @router.post("/webhook")
 async def stripe_webhook(request: Request):
-    # reads payload from stripe
+    # ... (This function is fine, leave as is)
     payload = await request.body()
     sig = request.headers.get("stripe-signature")
     wh_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
     if not wh_secret:
         raise HTTPException(status_code=500, detail="Webhook not configured")
-
-    # Let Stripe SDK verify the signature
     try:
         event = stripe.Webhook.construct_event(
             payload=payload, sig_header=sig, secret=wh_secret
         )
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Webhook error: {e}")
-
-    # Duplication check
     if not _record_stripe_event_once(event["id"]):
         return {"received": True, "duplicate": True}
-
     etype = event["type"]
-
-    # Credit on successful payment
     if etype == "checkout.session.completed":
         session = event["data"]["object"]
         session_id = session["id"]
         uid = (session.get("metadata") or {}).get("uid")
-        amount_minor = int(
-            session.get("amount_total") or 0
-        )  # minor units in session currency
+        amount_minor = int(session.get("amount_total") or 0)
         charge_cur = (session.get("currency") or DEFAULT_CURRENCY).lower()
-
         if uid and amount_minor > 0:
-            # Convert charged currency -> NZD cents for the ledger
             nzd_cents = _minor_to_nzd_cents(amount_minor, charge_cur)
             _credit_user_and_log_transaction(uid, nzd_cents, "nzd", session_id)
-
     return {"received": True}
 
 
+#
+# --- THIS IS THE FUNCTION TO REPLACE ---
+#
 @router.post("/withdraw")
 async def create_withdrawal(body: WithdrawBody):
+    # --- DEBUGGING LINE 1 ---
+    # Log the exact value received from the frontend
+    print(f"DEBUG: Received withdrawal request for amount_cents = {body.amount_cents}")
+
     # Basic checks
     if not body.uid:
         raise HTTPException(status_code=400, detail="Missing uid")
@@ -289,5 +253,54 @@ async def create_withdrawal(body: WithdrawBody):
         # Pass through known errors (e.g., insufficient balance)
         raise
     except Exception as e:
-        # Other errors
-        raise HTTPException(status_code=500, detail="Internal server error")
+        # --- DEBUGGING LINE 2 ---
+        # Re-raise the original exception to get the full traceback
+        print(f"DEBUG: An unexpected error occurred. Re-raising to get traceback.")
+        raise e
+
+
+#
+# --- (The rest of the file is the same) ---
+#
+@router.post("/create-setup-session")
+async def create_setup_session(body: SetupSessionBody):
+    # ... (This function is fine, leave as is)
+    if not stripe.api_key:
+        raise HTTPException(status_code=500, detail="Stripe not configured")
+    try:
+        user_ref = db.collection("users").document(body.uid)
+        user_snap = user_ref.get()
+        user_data = user_snap.to_dict() or {}
+        stripe_customer_id = user_data.get("stripeCustomerId")
+        if not stripe_customer_id:
+            customer = stripe.Customer.create(metadata={"firebaseUID": body.uid})
+            stripe_customer_id = customer.id
+            user_ref.set({"stripeCustomerId": stripe_customer_id}, merge=True)
+        session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            mode="setup",
+            customer=stripe_customer_id,
+            success_url=f"{FRONTEND_URL}/wallet?setup_success=true",
+            cancel_url=f"{FRONTEND_URL}/wallet?setup_cancel=true",
+            metadata={"uid": body.uid},
+        )
+        return {"url": session.url}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/update-autopay-settings")
+async def update_autopay_settings(body: UpdateAutoPayBody):
+    # ... (This function is fine, leave as is)
+    try:
+        user_ref = db.collection("users").document(body.uid)
+        user_ref.set(
+            {
+                "autoPayEnabled": body.autoPayEnabled,
+                "autoPayAmountCents": body.autoPayAmountCents,
+            },
+            merge=True,
+        )
+        return {"ok": True, "message": "Settings updated successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to update settings.")

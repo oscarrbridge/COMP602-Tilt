@@ -9,7 +9,7 @@ export default function SearchBar({Placeholder}:SearchBarProps)
 {
     return (
         <>
-        <div className='SearchBarContaier'>
+        <div className='SearchBarContainer'>
             <input type='text' placeholder={Placeholder} className='SearchBar'></input>
         </div>
         </>

@@ -1,7 +1,6 @@
-// src/pages/Deposit.jsx
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../../../Backend/firebase/firebaseConfig'; // adjust path if needed
+import { auth } from '../../../Backend/firebase/firebaseConfig';
 import './Deposit.css';
 import { useCurrency, CurrencySwitcher } from '../CurrencySwitcher/currencyswitcher.tsx';
 
@@ -11,7 +10,7 @@ export default function Deposit() {
   // States for uid, withdraw amount, currency type, submit payment, error
   const [uid, setUid] = useState(auth.currentUser?.uid ?? null);
   const [amount, setAmount] = useState('');
-  const { code, format, setCode } = useCurrency();
+  const { code, setCode } = useCurrency();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
