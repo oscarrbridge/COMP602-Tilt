@@ -1,22 +1,24 @@
-// src/App.tsx
-import { useEffect, useMemo, useState } from 'react';
-import { AppProvider } from '@toolpad/core/AppProvider';
-import { createTheme } from '@mui/material/styles';
-import NavBar from './components/NavBar/NavBar';
-import SpecialEvent from './components/SpecialEvent/SpecialEvent';
-import SpecialEventCreateButton from './components/SpecialEvent/SpecialEventCreateButton';
-import GameCard from './components/GameCard/GameCard';
-import SearchBar from './components/SearchBar/SearchBar';
-import FilterBar from './components/FilterBar/FilterBar';
-
+import NavBar from "./components/NavBar/NavBar";
+import SpecialEvent from "./components/SpecialEvent/SpecialEvent";
+import SpecialEventCreateButton from "./components/SpecialEvent/SpecialEventCreateButton";
+import type { SpecialEventItem } from "./components/SpecialEvent/ComponentType";
+import GameCard from "./components/GameCard/GameCard";
+import SearchBar from "./components/SearchBar/SearchBar";
+import FilterBar from "./components/FilterBar/FilterBar";
+import { AppProvider } from "@toolpad/core/AppProvider";
+import { createTheme } from "@mui/material/styles";
+import { useEffect, useMemo, useState } from "react";
+import { useLocalStorage } from "./hooks/StoreSpecialEvent";
+        
 import { listenApprovedEvents, submitSpecialEvent, type NewEventInput } from '../Backend/firebase/events'; 
 
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
-import Slider from 'react-slick';
-import type { Settings } from 'react-slick';
+// Carousel imports
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import Slider from "react-slick";
+import type { Settings } from "react-slick";
 
-import './App.css';
+import "./App.css";
 
 const theme = createTheme({ palette: { background: { default: 'var(--background)' } } });
 
@@ -28,6 +30,7 @@ const DEFAULT_CARD = {
   EventImage: 'src/assets/Tilt.png',
   EventLink: '/',
 };
+
 
 export const PopularGames = [
   { Text: 'Slots',     Image: 'src/assets/icon-slots.png',  LinkTo: '/slots' },
@@ -45,6 +48,17 @@ type SpecialEventRender = {
   EventLink: string;
   createdAt?: number;
 };
+
+
+export default function Dashboard() {
+  // Events fomr local storage
+  const [events, setEvents] = useLocalStorage<SpecialEventItem[]>(
+    "specialEvents",
+    DEFAULT_EVENTS
+  );
+
+  const addEvent = (item: SpecialEventItem) =>
+    setEvents((prev) => [item, ...prev]);
 
 export default function Dashboard() {
   const [events, setEvents] = useState<SpecialEventRender[]>([]);

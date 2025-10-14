@@ -4,7 +4,7 @@ import { auth } from '../../../Backend/firebase/firebaseConfig';
 import './Withdraw.css';
 import { useCurrency, CurrencySwitcher } from '../CurrencySwitcher/currencyswitcher.tsx';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:4000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
 export default function Withdraw() {
   // States for uid, withdraw amount, currency type, submit payment, error
