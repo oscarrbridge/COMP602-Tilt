@@ -50,15 +50,15 @@ type SpecialEventRender = {
 };
 
 
-export default function Dashboard() {
-  // Events fomr local storage
-  const [events, setEvents] = useLocalStorage<SpecialEventItem[]>(
-    "specialEvents",
-    DEFAULT_EVENTS
-  );
+// export default function Dashboard() {
+//   // Events fomr local storage
+//   const [events, setEvents] = useLocalStorage<SpecialEventItem[]>(
+//     "specialEvents",
+//     DEFAULT_EVENTS
+//   );
 
-  const addEvent = (item: SpecialEventItem) =>
-    setEvents((prev) => [item, ...prev]);
+//   const addEvent = (item: SpecialEventItem) =>
+//     setEvents((prev) => [item, ...prev]);
 
 export default function Dashboard() {
   const [events, setEvents] = useState<SpecialEventRender[]>([]);
