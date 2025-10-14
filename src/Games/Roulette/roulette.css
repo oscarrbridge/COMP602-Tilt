@@ -1,0 +1,306 @@
+/* =========================================================
+   PAGE LAYOUT
+   ========================================================= */
+.casino-container {
+  display: flex;
+  justify-content: center;
+  padding: 28px;
+  min-height: 100vh;
+  color: #fff;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* =========================================================
+   APP SHELL
+   ========================================================= */
+.roulette-app {
+  width: 100%;
+  max-width: 1100px;
+  text-align: center;
+}
+
+/* =========================================================
+   BETTING PANEL
+   ========================================================= */
+.roulette-panel {
+  margin-top: -16px;
+  background: #086917;  /* casino green felt */
+  border: 2px solid #dfd226;
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+}
+
+
+/* =========================================================
+   BETTING BOX & CONTROLS
+   ========================================================= */
+
+/* ===================== Betting Box ===================== */
+.betting-box {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  background: #134107;
+  padding: 10px;
+  border-radius: 10px;
+  border: 2px solid #b9b989;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ===================== Buttons ===================== */
+.bet-btn {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  border: 1px solid #555;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #fff;
+  background: #222;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border 0.15s ease, background 0.15s ease;
+  min-width: 60px; /* consistent width */
+  
+  text-align: center;
+}
+
+.bet-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
+
+.bet-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Active / last clicked button */
+.bet-btn.active {
+  border: 2px solid #e2dfd3; /* gold border */
+  box-shadow: 0 0 10px #e2dfd3, inset 0 0 6px rgba(153, 152, 145, 0.6);
+  background: #333;
+}
+
+/* ===================== Number Input ===================== */
+.number-grid-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Zero row spans full width */
+.zero-row {
+  display: flex;
+  justify-content: center; /* center if the grid width < total width */
+}
+
+.number-item.zero {
+  flex: 1;                 /* take full available width */
+  max-width: 100%;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  background: #0a7d1c;
+  color: #fff;
+  font-weight: bold;
+  border: 1px solid #555;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border 0.15s ease;
+}
+
+/* Numbers grid: 3 rows x 12 columns */
+.number-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 40px);
+  grid-auto-rows: 25px;
+  gap: 6px;
+}
+
+/* Standard number items */
+.number-item {
+  width: 40px;
+  height: 25px;
+  line-height: 25px;
+  text-align: center;
+  border: 1px solid #555;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border 0.15s ease;
+}
+
+/* Colors */
+.number-item.red { background: #b71c1c; }
+.number-item.black { background: #111; }
+
+/* Hover */
+.number-item:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 8px rgba(255,255,255,0.3);
+}
+
+/* Selected */
+.number-item.active {
+  border: 2px solid #e2dfd3; /* gold border */
+  box-shadow: 0 0 10px #e2dfd3, inset 0 0 6px rgba(153, 152, 145, 0.6);
+}
+
+
+
+
+
+/* =========================================================
+   WHEEL CONTAINER
+   ========================================================= */
+.wheel-viewport {
+  top: 25px;
+    width: 400px;
+  height: 400px;
+  position: relative;
+  display: inline-block;
+}
+
+/* =========================================================
+   WHEEL SVG & ROTATION
+   ========================================================= */
+.wheel-svg {
+    width: 100%;  /* ensures it scales with viewport */
+    height: 100%;
+    display: block;
+    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.8));
+}
+
+.wheel-g {
+  transition: transform 5.2s cubic-bezier(0.33, 1, 0.68, 1);
+  transform-origin: 50% 50%;
+}
+
+/* =========================================================
+   WHEEL RIM & HUB
+   ========================================================= */
+.rim {
+  fill: #111;
+  stroke: #b8860b;
+  stroke-width: 6;
+}
+
+.hub {
+  fill: #0b0b0b;
+  stroke: #2b2b2b;
+  stroke-width: 2;
+}
+
+.hub-text {
+  fill: #ffd54f;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+/* =========================================================
+   WHEEL SLICES
+   ========================================================= */
+.slice.red {
+  fill: #b71c1c;
+}
+
+.slice.black {
+  fill: #111111;
+}
+
+.slice.green {
+  fill: #0a7d1c;
+}
+
+/* =========================================================
+   WHEEL NUMBER LABELS
+   ========================================================= */
+.slot-label {
+  font-size: 12px;
+  font-weight: 700;
+  fill: #fff;
+  paint-order: stroke;
+  stroke: rgba(0,0,0,0.6);
+  stroke-width: 0.7px;
+
+  text-anchor: middle;   /* ✅ center text horizontally */
+  dominant-baseline: middle; /* ✅ center text vertically */
+}
+
+.slot-label.red {
+  fill: #fff;
+}
+
+.slot-label.black {
+  fill: #fff;
+}
+
+.slot-label.green {
+  fill: #fff;
+}
+
+/* =========================================================
+   POINTER (FIXED INDICATOR)
+   ========================================================= */
+.pointer {
+  position: absolute;
+  top: -18px; /* adjust if needed */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-top: 22px solid #ffd54f; /* changed from border-bottom to border-top */
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+
+/* =========================================================
+   RESULTS PANEL
+   ========================================================= */
+.roulette-results {
+  margin-top: 40px;
+  padding: 8px 8px;
+  background: #134107;       /* casino green */
+  border: 2px solid #b4b4a4; /* subtle gold-ish border */
+  border-radius: 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #fff;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+/* Individual result spans */
+.roulette-result {
+  display: block;
+  font-weight: 600;
+}
+
+/* Win highlight */
+.roulette-result.win {
+  color: #ffd54f;            /* gold */
+  font-weight: 700;
+  text-shadow: 0 0 4px rgba(255, 215, 0, 0.7);
+}
+
+/* Lose highlight */
+.roulette-result.lose {
+  color: #ff5252;            /* red */
+  font-weight: 700;
+  text-shadow: 0 0 3px rgba(255, 0, 0, 0.6);
+}

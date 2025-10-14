@@ -26,7 +26,7 @@ export default function NavBar() {
   // const [user, setUser] = useState<User | null>(null);
   // // Balance state
   // const [balance, setBalance] = useState<number | null>(null);
-  const { user, balance } = useUser();
+  const { user, balance, userProfile } = useUser();
 
   // useEffect(() => {
   //   const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -73,6 +73,17 @@ export default function NavBar() {
 
   return (
     <>
+      <div className='floating-admin-controls'>
+        {/* Show Admin button if roles include 'admin' */}
+        {userProfile?.roles?.includes('admin') && (
+          <button onClick={() => navigate('/admin')}>Admin Dashboard</button>
+        )}
+
+        {/* Show Staff button if roles include 'staff' */}
+        {userProfile?.roles?.includes('staff') && (
+          <button onClick={() => navigate('/staff')}>Staff Dashboard</button>
+        )}
+      </div>
       <CurrencyProvider base='NZD' DefaultCurrency='NZD'>
         <div className='NavBarContainer'>
           <div className='Logo' onClick={() => navigate('/')}>
@@ -107,9 +118,42 @@ export default function NavBar() {
           <div className='LoginControls'>
             {/* If user is logged in, show their info and logout */}
             {user ? (
-              <div className='LoggedInBox'>
+              <div
+                className='LoggedInBox'
+                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+              >
+                {/* Display user name/email */}
                 <span>{user.displayName || user.email || 'Logged in!'}</span>
-                <button onClick={() => signOut(auth)}>Logout</button>
+
+                {/* Settings button */}
+                <button
+                  onClick={() => navigate('/settings')}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: 6,
+                    border: '1px solid #888',
+                    background: '#444',
+                    color: '#fff',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Settings
+                </button>
+
+                {/* Logout button */}
+                <button
+                  onClick={() => signOut(auth)}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: 6,
+                    border: '1px solid #888',
+                    background: '#222',
+                    color: '#fff',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Logout
+                </button>
               </div>
             ) : (
               // If no user logged in, show login/register buttons

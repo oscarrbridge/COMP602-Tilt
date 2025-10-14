@@ -40,6 +40,7 @@ async function profileData(user: User, extras?: ProfileExtras) {
         updatedAt: serverTimestamp(),
         uniBalance: 0,
         university: extras?.university ?? null,
+        role: 'user',
         friends: extras?.friends ?? [],
       },
       // Add merge to prevent override
