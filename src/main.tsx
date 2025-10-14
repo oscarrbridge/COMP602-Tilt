@@ -1,8 +1,10 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import "./index.css";
-import { CurrencyProvider } from "./components/CurrencySwitcher/currencyswitcher";
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import './index.css';
+import { CurrencyProvider } from './components/CurrencySwitcher/currencyswitcher';
+import BlackjackM from './Games/Blackjack multiplayer/BlackjackM.tsx';
+import LobbyTest from './Games/Blackjack multiplayer/lobbytest.tsx';
 
 // Navbar pages
 import Home from "./App.tsx";
@@ -43,6 +45,8 @@ createRoot(document.getElementById("root")!).render(
           <Route path="/mines" element={<Mines />} />
           <Route path="/cointoss" element={<CoinFlip />} />
           <Route path="/roulette" element={<Roulette />} />
+          <Route path='/blackjackm' element={<BlackjackM />} />
+          <Route path='/LobbyTest' element={<LobbyTest />} />
 
           <Route path="/admin" element={<Admin />} />
           <Route path="/staff" element={<Staff />} />
