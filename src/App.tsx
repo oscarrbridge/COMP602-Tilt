@@ -9,6 +9,7 @@ import { AppProvider } from "@toolpad/core/AppProvider";
 import { createTheme } from "@mui/material/styles";
 import { useEffect, useMemo, useState } from "react";
 import { useLocalStorage } from "./hooks/StoreSpecialEvent";
+import Footer from "@components/Footer/footer";
         
 import { listenApprovedEvents, submitSpecialEvent, type NewEventInput } from '../Backend/firebase/events'; 
 
@@ -163,7 +164,10 @@ export default function Dashboard() {
         <i className="fa fa-search"></i>
         <input type="text" placeholder="Search your game" />
       </div>
-    </div>
+
+      <div className="Footer">
+          <Footer />
+      </div>
     </AppProvider>
   );
 }

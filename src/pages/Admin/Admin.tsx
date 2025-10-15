@@ -6,6 +6,9 @@ import { db } from "../../../Backend/firebase/firebaseConfig";
 import { approveEvent, rejectEvent } from "../../../Backend/firebase/events";
 import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
 
+import Footer from "@components/Footer/footer";
+
+
 // --- Types ---
 type Event = {
   id: string;
@@ -198,6 +201,7 @@ export default function Admin() {
           </tbody>
         </table>
       </div>
+      <Footer />
     </>
   );
 }
