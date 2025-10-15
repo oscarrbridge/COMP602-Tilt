@@ -62,7 +62,9 @@ export default function Dashboard() {
         EventHook: d.EventHook ?? '',
         EventTitle: d.EventTitle ?? '',
         EventDescription: d.EventDescription ?? '',
-        EventImage: d.EventImage ?? '',
+        EventImage: d.EventImage && d.EventImage.trim() !== ""
+        ? d.EventImage
+        : "src/assets/Tilt.png",
         EventLink: d.EventLink ?? '/',
         createdAt: typeof d.createdAt?.toMillis === 'function'
           ? d.createdAt.toMillis()
