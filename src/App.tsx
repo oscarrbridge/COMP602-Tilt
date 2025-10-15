@@ -9,6 +9,7 @@ import { AppProvider } from "@toolpad/core/AppProvider";
 import { createTheme } from "@mui/material/styles";
 import { useEffect, useMemo, useState } from "react";
 import { useLocalStorage } from "./hooks/StoreSpecialEvent";
+import Footer from "@components/Footer/footer";
         
 import { listenApprovedEvents, submitSpecialEvent, type NewEventInput } from '../Backend/firebase/events'; 
 
@@ -162,6 +163,10 @@ export default function Dashboard() {
         <h2>Looking for a game?</h2>
         <SearchBar Placeholder='Search for a game...' />
         <FilterBar />
+      </div>
+
+      <div className="Footer">
+          <Footer />
       </div>
     </AppProvider>
   );

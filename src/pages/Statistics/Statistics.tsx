@@ -4,6 +4,8 @@ import NavBar from '../../components/NavBar/NavBar.tsx';
 import History from '../../components/TransactionHistory/TransactionHistory.tsx';
 import UserStatistics from '../../components/UserStatistics/UserStatistics.tsx';
 
+import Footer from '@components/Footer/footer.tsx';
+
 export default function Statistics() {
   return (
     <>
@@ -18,6 +20,8 @@ export default function Statistics() {
           <UserStatistics />
         </div>
       </div>
+
+      <Footer />
     </>
   );
 }

@@ -6,6 +6,8 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { useUser } from '@backend/firebase/UserFunctions.tsx';
 import { db } from '../../../Backend/firebase/firebaseConfig';
 import { getDoc } from 'firebase/firestore';
+import Footer from "@components/Footer/footer";
+
 
 // Component to show accepted friends
 function FriendsList({ friends, removeFriend }) {
@@ -265,6 +267,7 @@ export default function Friends() {
           />
         </div>
       </div>
+      <Footer />
     </>
   );
 }
