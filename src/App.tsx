@@ -164,6 +164,7 @@ export default function Dashboard() {
         <i className="fa fa-search"></i>
         <input type="text" placeholder="Search your game" />
       </div>
+     </div>
 
       <div className="Footer">
           <Footer />
