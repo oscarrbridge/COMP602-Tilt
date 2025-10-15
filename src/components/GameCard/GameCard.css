@@ -20,7 +20,43 @@
   transition: all 0.3s ease;
 }
 
+
+
+.SearchGames {
+  display: flex;
+  flex-wrap: wrap;      
+  gap: 25px;
+  justify-content: center;
+  margin-top: 0;        
+  padding-top: 0;
+}
+
+.SearchGameCardImage {
+  background: linear-gradient(180deg, #8E5CF7 0%, #A849FF 100%);
+  background-size: 110%;
+  background-repeat: no-repeat;
+  background-position: center;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+
+  width: 175px;
+  height: 260px;
+  border-radius: 18px;
+  padding: 20px 16px 56px;
+
+  position: relative;
+  transition: all 0.3s ease;
+}
+
 .GameCardImage:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.23);
+}
+
+.SearchGameCardImage:hover {
   transform: scale(1.03);
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.23);
 }
@@ -28,6 +64,18 @@
 .GameCardIcon {
   width: 84%;
   max-width: 150px;
+  height: auto;
+  object-fit: contain;
+
+  position: relative;
+  z-index: 1;
+  transform: translateY(30px);
+  transition: transform 0.3s ease;
+}
+
+.SearchGameCardIcon {
+  width: 84%;
+  max-width: 120px;
   height: auto;
   object-fit: contain;
 
@@ -46,7 +94,20 @@
   transition: all 0.3s ease;
 }
 
+.SearchGameCardText {
+  width: 80%;
+  text-align: center;
+  position: absolute;
+  bottom: 5%;
+  color: white;
+  transition: all 0.3s ease;
+}
+
 .GameCardText:hover {
+  transform: scale(1.03);
+}
+
+.SearchGameCardText:hover {
   transform: scale(1.03);
 }
 
@@ -54,6 +115,14 @@
   font-family: 'Poppins', sans-serif;
   font-weight: 900;
   font-size: 35px;
+  letter-spacing: 1px;
+  color: white;
+}
+
+.SearchGameCardText h3 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 900;
+  font-size: 20px;
   letter-spacing: 1px;
   color: white;
 }

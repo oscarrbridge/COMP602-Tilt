@@ -4,6 +4,11 @@ h2 {
   margin: 0px 0px 0px 0px;
 }
 
+h3 {
+  margin: 0 0 8px 0;    /* small gap under heading */
+  color: var(--text-colour);
+}
+
 /*  Special Events */
 .SpecialEventsContainer {
   display: flex;
@@ -46,6 +51,25 @@ h2 {
   padding-left: 40px;
 
 }
+
+.SearchGames {
+  display: flex;
+  gap: 25px;
+
+  padding-bottom: 10px;
+  padding-left: 40px;
+
+}
+
+.SearchGamesContainer{
+  margin: 0px 40px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+}
+
 
 
 
