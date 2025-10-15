@@ -151,12 +151,19 @@ export default function Dashboard() {
           ))}
         </div>
       </div>
+      <br>
+      </br>
 
-      <div className="HomeSearchBarContainer">
-        <h2>Looking for a game?</h2>
-        <SearchBar Placeholder='Search for a game...' />
-        <FilterBar />
+     <div className="search-bar">
+      <div className="search-category">
+        <span>Casino</span>
+        <i className="fa fa-chevron-down"></i>
       </div>
+      <div className="search-input">
+        <i className="fa fa-search"></i>
+        <input type="text" placeholder="Search your game" />
+      </div>
+    </div>
     </AppProvider>
   );
 }

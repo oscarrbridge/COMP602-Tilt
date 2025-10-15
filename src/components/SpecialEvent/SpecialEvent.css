@@ -15,7 +15,7 @@
 
 /* Special Event Card */
 .SpecialEventCard {
-  background: #2b2b2b;
+  background: #0F212E;
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 18px;
   padding: 14px;
@@ -33,7 +33,7 @@
 .EventHook {
   align-self: center;
   padding: 8px 16px;
-  background: #3a3a3a;
+  background: #1A2C38;
   border-radius: 999px;
   font-weight: 600;
   font-size: 0.95rem;
@@ -50,7 +50,7 @@
 
 /* Text panel */
 .EventText {
-  background: #3a3a3a;
+  background: #1A2C38;
   border-radius: 14px;
   padding: 12px;
 }
@@ -85,7 +85,7 @@
   width: 100%;
   padding: 10px 14px;
   border-radius: 999px;
-  background: #3a3a3a;
+  background: #1A2C38;
   color: #eaeaea;
   font-weight: 700;
   border: none;
