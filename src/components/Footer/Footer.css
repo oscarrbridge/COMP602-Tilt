@@ -6,6 +6,8 @@
     padding: 20px 40px;
 
     display: flex;
+
+    justify-content: space-between;
 }
 
 .Footercolumn {
