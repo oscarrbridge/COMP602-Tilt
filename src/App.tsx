@@ -10,6 +10,7 @@ import { createTheme } from "@mui/material/styles";
 import { useEffect, useMemo, useState } from "react";
 import { useLocalStorage } from "./hooks/StoreSpecialEvent";
 import SearchGameCard from "./components/GameCard/SearchGameCard";
+import Footer from "@components/Footer/Footer.tsx";
         
 import { listenApprovedEvents, submitSpecialEvent, type NewEventInput } from '../Backend/firebase/events'; 
 
@@ -210,6 +211,11 @@ export default function Dashboard() {
             <SearchGameCard key={`all-${i}`} {...game} />
           ))}
         </div>
+      </div>
+   
+
+      <div className="Footer">
+          <Footer />
       </div>
     </AppProvider>
   );
