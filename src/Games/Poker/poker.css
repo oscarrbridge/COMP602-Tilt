@@ -1,0 +1,189 @@
+.app-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  width: 100vw;
+  padding: 2%;
+  background: radial-gradient(circle at center, #064f1f 0%, #01210c 80%);
+  color: #fff;
+  font-family: 'Press Start 2P', 'Arial', sans-serif;
+  overflow-x: hidden;
+}
+
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 5px #000;
+  color: #ffcc00;
+  letter-spacing: 2px;
+}
+
+/* Poker Table */
+.table {
+  position: relative;
+  width: 90%;
+  max-width: 900px;
+  background: radial-gradient(ellipse at center, #036d2a 0%, #024d1d 80%);
+  border: 6px solid #65350f;
+  border-radius: 50%;
+  padding: 60px 0;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8), 0 10px 20px rgba(0,0,0,0.7);
+  margin: 30px 0;
+}
+
+/* Dealer (Community Cards) */
+.community-cards {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 40px 0;
+}
+
+.card {
+  width: 70px;
+  height: 100px;
+  background: #fff;
+  color: black;
+  font-weight: bold;
+  font-size: 22px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(-50px);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.card.red {
+  color: red;
+}
+
+.card.dealt {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Player Hands */
+.player-area {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  width: 100%;
+  gap: 20px;
+}
+
+.player {
+  flex: 1;
+  min-width: 220px;
+  text-align: center;
+  background: rgba(0,0,0,0.3);
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 0 8px rgba(255,255,255,0.1);
+}
+
+.player-name {
+  font-size: 1rem;
+  color: gold;
+  margin-bottom: 10px;
+  text-shadow: 1px 1px 2px black;
+}
+
+.player .cards {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.controls button {
+  padding: 12px 24px;
+  font-size: 14px;
+  border: none;
+  border-radius: 10px;
+  background: #ffcc00;
+  color: #000;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-weight: bold;
+}
+
+.controls button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px #ffcc00;
+}
+
+/* Bet Controls */
+.bet-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.bet-controls input {
+  width: 100px;
+  padding: 6px;
+  border: none;
+  border-radius: 8px;
+  text-align: center;
+  background: #ffcc00;
+  color: #000;
+  font-weight: bold;
+}
+
+/* Win/Loss Display */
+.win-display {
+  font-size: 28px;
+  margin-top: 20px;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.win-display.active {
+  opacity: 1;
+}
+
+.win {
+  color: gold;
+  animation: popGold 2s ease-in-out infinite;
+}
+
+.loss {
+  color: red;
+  animation: popRed 1.5s ease-in-out;
+}
+
+.tie {
+  color: gray;
+  animation: popGray 1.5s ease-in-out;
+}
+
+/* Animations */
+@keyframes popGold {
+  0% { transform: scale(1); text-shadow: 0 0 10px gold; }
+  50% { transform: scale(1.1); text-shadow: 0 0 25px white; }
+  100% { transform: scale(1); text-shadow: 0 0 10px gold; }
+}
+
+@keyframes popRed {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes popGray {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}

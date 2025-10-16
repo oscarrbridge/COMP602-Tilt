@@ -50,9 +50,9 @@ export async function deleteGameLobby(gameId: string) {
     // 2. Delete the game document itself
     await deleteDoc(gameRef);
 
-    console.log(`✅ Game lobby ${gameId} and all players deleted successfully.`);
+    console.log(`Game lobby ${gameId} and all players deleted successfully.`);
   } catch (error) {
-    console.error("❌ Error deleting game lobby:", error);
+    console.error("Error deleting game lobby:", error);
     throw error;
   }
 }
@@ -63,7 +63,7 @@ export async function updateGameState(gameId: string, newState: string) {
     state: newState,
     updatedAt: serverTimestamp(),
   });
-  console.log(`🎯 Game ${gameId} state updated to "${newState}"`);
+  console.log(`Game ${gameId} state updated to "${newState}"`);
 }
 
 
@@ -73,7 +73,7 @@ export async function setNextTurn(gameId: string, nextPlayerUid: string) {
     currentTurn: nextPlayerUid,
     updatedAt: serverTimestamp(),
   });
-  console.log(`🔁 It is now ${nextPlayerUid}'s turn in game ${gameId}`);
+  console.log(`It is now ${nextPlayerUid}'s turn in game ${gameId}`);
 }
 
 
@@ -87,5 +87,5 @@ export async function updatePlayerData(
     ...updates,
     updatedAt: serverTimestamp(),
   });
-  console.log(`🃏 Player ${uid} data updated in game ${gameId}`, updates);
+  console.log(`Player ${uid} data updated in game ${gameId}`, updates);
 }
