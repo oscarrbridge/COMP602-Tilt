@@ -28,7 +28,7 @@ export default function InviteButton({
   };
 
   const copyLink = async () => {
-    const url = `${window.location.origin}/game/blackjack/${sessionId}`;
+    const url = `${window.location.origin}/blackjack/${sessionId}`;
     await navigator.clipboard.writeText(url);
     setOpen(false);
   };

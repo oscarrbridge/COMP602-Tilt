@@ -60,7 +60,7 @@ export default function FriendsDock() {
       game: 'blackjack',
     });
 
-    navigate(`/game/blackjack/${newGameId}`);
+    navigate(`/blackjack/${newGameId}`);
   }
 
   // If logged out, show compact pill with sign-in nudge
