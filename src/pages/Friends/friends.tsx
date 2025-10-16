@@ -116,7 +116,10 @@ function FriendRequests({ pendingRequests, acceptFriendRequest, sendFriendReques
         }
       });
 
-      const finalResults = results.filter((u) => u.uid !== currentUid);
+      const finalResults = results.filter(
+        (u) => u.uid !== currentUid && !u.private // Exclude self and private users
+      );
+
       setSearchResults(finalResults);
     } catch (error) {
       console.error('Firestore search failed:', error);
