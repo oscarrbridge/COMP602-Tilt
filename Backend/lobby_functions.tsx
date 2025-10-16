@@ -1,55 +1,104 @@
 import { db } from "./firebase/firebaseConfig";
-import { collection, doc, setDoc, serverTimestamp, deleteDoc, getDocs, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  setDoc,
+  serverTimestamp,
+  deleteDoc,
+  getDocs,
+  updateDoc,
+} from "firebase/firestore";
 
-// User joins an existing lobby by gameId
-export async function joinGameLobby(gameId: string, uid: string, displayName?: string) {
+/**
+ * Join an existing game lobby (works for Blackjack or Poker)
+ */
+export async function joinGameLobby(
+  gameId: string,
+  uid: string,
+  displayName?: string
+) {
   const playerRef = doc(db, "games", gameId, "players", uid);
 
-  await setDoc(playerRef, {
-    displayName: displayName || "Anonymous",
-    bet: 0,
-    cards: [],
-    status: "waiting",
-    joinedAt: serverTimestamp(),
-  }, { merge: true });
+  await setDoc(
+    playerRef,
+    {
+      displayName: displayName || "Anonymous",
+      bet: 0,
+      cards: [],
+      chips: 1000, // poker-style chip balance
+      status: "waiting",
+      joinedAt: serverTimestamp(),
+    },
+    { merge: true }
+  );
 }
 
-// Create a new game lobby and return its ID
+/**
+ * Create a new game lobby.
+ * @param hostUid The UID of the host
+ * @param gameType "blackjack" | "poker"
+ * @param minPlayers Minimum number of players to start
+ * @param maxPlayers Maximum number of players allowed
+ */
 export async function createGameLobby(
   hostUid: string,
+  gameType: "blackjack" | "poker" = "blackjack",
   minPlayers = 2,
-  maxPlayers = 5
+  maxPlayers = 6
 ) {
-  const gameRef = doc(collection(db, "games")); // auto-ID for lobby
+  const gameRef = doc(collection(db, "games")); // auto-generated lobby ID
 
-  await setDoc(gameRef, {
+  const baseGameData = {
     host: hostUid,
     currentTurn: null,
-    dealerHand: [],
-    dealerHidden: null,
-    gameType: "blackjack",
+    state: "waiting", // waiting | in-progress | finished
     minPlayers,
     maxPlayers,
-    state: "waiting",
     createdAt: serverTimestamp(),
-  });
+    updatedAt: serverTimestamp(),
+    gameType,
+  };
 
-  return gameRef.id; // share this with friends
+  if (gameType === "blackjack") {
+    await setDoc(gameRef, {
+      ...baseGameData,
+      dealerHand: [],
+      dealerHidden: null,
+    });
+  } else if (gameType === "poker") {
+    await setDoc(gameRef, {
+      ...baseGameData,
+      communityCards: [],
+      pot: 0,
+      currentBet: 0,
+      dealerPosition: 0,
+      smallBlind: 10,
+      bigBlind: 20,
+      round: "preflop", // preflop | flop | turn | river | showdown
+    });
+  }
+
+  console.log(`Created ${gameType} game lobby: ${gameRef.id}`);
+  return gameRef.id;
 }
 
+/**
+ * Delete a game lobby and its players.
+ */
 export async function deleteGameLobby(gameId: string) {
   try {
     const gameRef = doc(db, "games", gameId);
     const playersRef = collection(db, "games", gameId, "players");
 
-    // 1. Delete all players in the subcollection
+    // Delete all players
     const playersSnap = await getDocs(playersRef);
-    const deletePromises = playersSnap.docs.map((playerDoc) => deleteDoc(playerDoc.ref));
+    const deletePromises = playersSnap.docs.map((playerDoc) =>
+      deleteDoc(playerDoc.ref)
+    );
     await Promise.all(deletePromises);
 
-    // 2. Delete the game document itself
+    // Delete the game itself
     await deleteDoc(gameRef);
-
     console.log(`Game lobby ${gameId} and all players deleted successfully.`);
   } catch (error) {
     console.error("Error deleting game lobby:", error);
@@ -57,6 +106,9 @@ export async function deleteGameLobby(gameId: string) {
   }
 }
 
+/**
+ * Update the overall game state.
+ */
 export async function updateGameState(gameId: string, newState: string) {
   const gameRef = doc(db, "games", gameId);
   await updateDoc(gameRef, {
@@ -66,7 +118,9 @@ export async function updateGameState(gameId: string, newState: string) {
   console.log(`Game ${gameId} state updated to "${newState}"`);
 }
 
-
+/**
+ * Set whose turn it is.
+ */
 export async function setNextTurn(gameId: string, nextPlayerUid: string) {
   const gameRef = doc(db, "games", gameId);
   await updateDoc(gameRef, {
@@ -76,11 +130,18 @@ export async function setNextTurn(gameId: string, nextPlayerUid: string) {
   console.log(`It is now ${nextPlayerUid}'s turn in game ${gameId}`);
 }
 
-
+/**
+ * Update a player's data.
+ */
 export async function updatePlayerData(
   gameId: string,
   uid: string,
-  updates: Partial<{ cards: string[]; bet: number; status: string }>
+  updates: Partial<{
+    cards: string[];
+    bet: number;
+    status: string;
+    chips: number;
+  }>
 ) {
   const playerRef = doc(db, "games", gameId, "players", uid);
   await updateDoc(playerRef, {
@@ -88,4 +149,24 @@ export async function updatePlayerData(
     updatedAt: serverTimestamp(),
   });
   console.log(`Player ${uid} data updated in game ${gameId}`, updates);
+}
+
+/**
+ * Special poker update: Update the pot or community cards.
+ */
+export async function updatePokerRound(
+  gameId: string,
+  updates: Partial<{
+    communityCards: string[];
+    pot: number;
+    currentBet: number;
+    round: "preflop" | "flop" | "turn" | "river" | "showdown";
+  }>
+) {
+  const gameRef = doc(db, "games", gameId);
+  await updateDoc(gameRef, {
+    ...updates,
+    updatedAt: serverTimestamp(),
+  });
+  console.log(`Poker game ${gameId} updated:`, updates);
 }

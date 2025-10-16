@@ -20,12 +20,13 @@ export type Invite = {
   senderName?: string;
   recipientId: string;
   sessionId?: string;
-  game?: string;
+  game?: 'blackjack' | 'poker';
   status: 'pending' | 'accepted' | 'declined' | 'expired';
   createdAt: any;
   hostAck?: boolean;
 };
 
+// Send a new invite
 export function sendInvite({
   senderId,
   senderName,
@@ -38,11 +39,13 @@ export function sendInvite({
     senderName: senderName || null,
     recipientId,
     sessionId: sessionId || null,
-    game: game || null,
+    game: game || 'blackjack', // default to blackjack if not specified
     status: 'pending',
     createdAt: serverTimestamp(),
   });
 }
+
+//  Listen for incoming invites for the current user
 export function listenIncomingInvites(currentUid: string, cb: (invites: Invite[]) => void) {
   const q = query(
     collection(db, 'invites'),
@@ -63,17 +66,20 @@ export function declineInvite(inviteId: string) {
   return updateDoc(doc(db, 'invites', inviteId), { status: 'declined' });
 }
 
+// The invite popup UI component
 export function InvitePopup() {
   const [invites, setInvites] = useState<Invite[]>([]);
   const { user } = useUser();
   const navigate = useNavigate();
 
+  // Listen for new invites
   useEffect(() => {
     if (!user?.uid) return;
     const unsub = listenIncomingInvites(user.uid, setInvites);
     return () => unsub();
   }, [user?.uid]);
 
+  // Watch for accepted invites from others (host acknowledgement)
   useEffect(() => {
     if (!user?.uid) return;
 
@@ -90,18 +96,19 @@ export function InvitePopup() {
         if (!inv.sessionId || inv.hostAck) continue;
 
         try {
-          // join the lobby as the host (inviter) if not already
+          // Join lobby as the host (inviter)
           await joinGameLobby(inv.sessionId, user.uid, user.displayName || user.email || 'Player');
 
           try {
             localStorage.setItem('sessionId', inv.sessionId);
           } catch {}
 
-          // mark acknowledged to avoid duplicate redirects across tabs
+          // Prevent duplicate redirection
           await updateDoc(doc(db, 'invites', inv.id!), { hostAck: true });
 
-          // go to the table (make sure this matches your Route!)
-          navigate(`/blackjack/${inv.sessionId}`, { replace: true });
+          // Redirect based on game type
+          const route = inv.game === 'poker' ? `/poker/${inv.sessionId}` : `/blackjack/${inv.sessionId}`;
+          navigate(route, { replace: true });
         } catch (e) {
           console.error('Host redirect/join failed:', e);
         }
@@ -115,32 +122,34 @@ export function InvitePopup() {
     if (!user) return;
 
     try {
-      // 1) ensure session id exists
+      // Ensure session ID exists
       let sessionId = inv.sessionId;
       if (!sessionId) {
-        sessionId = await createGameLobby(inv.senderId, 2, 5);
+        sessionId = await createGameLobby(inv.senderId, inv.game || 'blackjack', 2, 5);
         await updateDoc(doc(db, 'invites', inv.id!), { sessionId, status: 'accepted' });
       } else {
         await updateDoc(doc(db, 'invites', inv.id!), { status: 'accepted' });
       }
 
-      // 2) join the lobby
+      // Join the lobby
       await joinGameLobby(sessionId, user.uid, user.displayName || user.email || 'Player');
 
-      // 3) remember last session
+      // Remember session locally
       try {
         localStorage.setItem('sessionId', sessionId);
       } catch {}
 
-      // 4) hide the invite card right away (snappy UX)
+      // Remove from UI
       setInvites((prev) => prev.filter((i) => i.id !== inv.id));
 
-      // 5) navigate to the table (match your route!)
-      navigate(`/blackjack/${sessionId}`, { replace: true });
+      // Navigate based on game type
+      const route = inv.game === 'poker' ? `/poker/${sessionId}` : `/blackjack/${sessionId}`;
+      navigate(route, { replace: true });
     } catch (err) {
       console.error('Accept invite failed:', err);
     }
   };
+
   const onDecline = async (inv: Invite) => {
     await declineInvite(inv.id!);
   };
@@ -164,7 +173,7 @@ export function InvitePopup() {
           }}
         >
           <div style={{ fontWeight: 700, marginBottom: 6 }}>
-            {inv.senderName || 'Friend'} invited you to {inv.game || 'Blackjack'}
+            {inv.senderName || 'Friend'} invited you to play {inv.game || 'Blackjack'}
           </div>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
             <button className='btn' onClick={() => onAccept(inv)}>

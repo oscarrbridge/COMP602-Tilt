@@ -16,7 +16,7 @@ export default function FriendsDock() {
   const friendUids = useMemo(() => friends.map((f: any) => f.uid), [friends]);
   const { onlineByUid } = Online(friendUids);
 
-  const [open, setOpen] = useState(true); // expanded vs collapsed
+  const [open, setOpen] = useState(true);
   const [tab, setTab] = useState<TabKey>('online');
 
   const [sessionId, setSessionId] = useState(
@@ -29,11 +29,14 @@ export default function FriendsDock() {
   }, []);
 
   const pendingCount = pendingRequests.length;
-
   const navigate = useNavigate();
-
   const location = useLocation();
-  const enableInvites = location.pathname.startsWith('/blackjack');
+
+  // ✅ Determine which game we’re currently on based on route
+  const isBlackjack = location.pathname.startsWith('/blackjack');
+  const isPoker = location.pathname.startsWith('/poker');
+  const enableInvites = isBlackjack || isPoker;
+  const gameType = isPoker ? 'poker' : 'blackjack';
 
   const friendsWithOnline = friends.map((f: any) => {
     const p = onlineByUid[f.uid];
@@ -41,29 +44,35 @@ export default function FriendsDock() {
   });
   const onlineFriends = friendsWithOnline.filter((f: any) => f.online);
 
-  // create a new lobby, add host to it, invite friend, then route to table
+  // ✅ Create a new lobby for either Poker or Blackjack
   async function createTableAndInvite(friendUid: string) {
     if (!user) return;
-    const newGameId = await createGameLobby(user.uid, 1, 5);
+
+    // Set player count ranges depending on game type
+    const minPlayers = gameType === 'poker' ? 2 : 1;
+    const maxPlayers = gameType === 'poker' ? 6 : 5;
+
+    // Pass gameType to backend
+    const newGameId = await createGameLobby(user.uid, gameType, minPlayers, maxPlayers);
     await joinGameLobby(newGameId, user.uid, user.displayName || user.email || 'Player');
 
     try {
       localStorage.setItem('sessionId', newGameId);
     } catch {}
-    setSessionId(newGameId); // <-- keep sessionId state in sync
+    setSessionId(newGameId);
 
     await sendInvite({
       senderId: user.uid,
       senderName: user.displayName || user.email || 'Player',
       recipientId: friendUid,
       sessionId: newGameId,
-      game: 'blackjack',
+      game: gameType, // ✅ send correct game type
     });
 
-    navigate(`/blackjack/${newGameId}`);
+    navigate(`/${gameType}/${newGameId}`);
   }
 
-  // If logged out, show compact pill with sign-in nudge
+  // If logged out
   if (!user) {
     return (
       <div className='friends-dock friends-dock-collapsed'>
@@ -130,7 +139,7 @@ export default function FriendsDock() {
                       <div className='status-dot status-online' />
                     </div>
                     <div className='row-actions'>
-                      {enableInvites && // only show invite actions on /blackjack
+                      {enableInvites &&
                         (sessionId && sessionId !== 'default-session' ? (
                           <InviteButton
                             friendUid={f.uid}
@@ -138,7 +147,7 @@ export default function FriendsDock() {
                             sessionId={sessionId}
                             senderId={user.uid}
                             senderName={user.displayName || user.email || 'Player'}
-                            game='blackjack'
+                            game={gameType} // ✅ dynamic
                           />
                         ) : (
                           <button className='btn' onClick={() => createTableAndInvite(f.uid)}>
@@ -176,7 +185,7 @@ export default function FriendsDock() {
                             sessionId={sessionId}
                             senderId={user.uid}
                             senderName={user.displayName || user.email || 'Player'}
-                            game='blackjack'
+                            game={gameType} // ✅ dynamic
                           />
                         ) : (
                           <button className='btn' onClick={() => createTableAndInvite(f.uid)}>
@@ -207,12 +216,10 @@ export default function FriendsDock() {
                       </div>
                     </div>
                     <div className='row-actions'>
-                      {/* Accept request */}
                       <button className='btn' onClick={() => acceptFriendRequest(req.senderId)}>
                         Accept
                       </button>
 
-                      {/* After accepting, you can invite them directly */}
                       {enableInvites &&
                         (sessionId && sessionId !== 'default-session' ? (
                           <InviteButton
@@ -221,13 +228,10 @@ export default function FriendsDock() {
                             sessionId={sessionId}
                             senderId={user.uid}
                             senderName={user.displayName || user.email || 'Player'}
-                            game='blackjack'
+                            game={gameType} // ✅ dynamic
                           />
                         ) : (
-                          <button
-                            className='btn'
-                            onClick={() => createTableAndInvite(req.senderId)}
-                          >
+                          <button className='btn' onClick={() => createTableAndInvite(req.senderId)}>
                             Create table & invite
                           </button>
                         ))}
