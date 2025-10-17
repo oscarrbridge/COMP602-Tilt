@@ -17,6 +17,12 @@
     border-right: 1px solid var(--text-colour);
     flex: 1;
     text-align: center;
+    cursor: pointer;
+    transition: 0.3s all;
+}
+
+.FilterConatiner p:hover {
+    transform: scale(1.03);
 }
 
 .FilterConatiner p:last-child {

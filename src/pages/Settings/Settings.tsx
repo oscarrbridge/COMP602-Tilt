@@ -16,7 +16,7 @@ import { UNIVERSITY_OPTIONS, type UniversityOption } from '../../components/Auth
 
 export default function Settings() {
   // const navigate = useNavigate(); // not used currently
-  const [settingsPage, setSettingsPage] = useState<'account' | 'general'>('account');
+  const [settingsPage, setSettingsPage] = useState<'account' | 'general'>('general');
 
   const renderContent = () => {
     switch (settingsPage) {
@@ -37,8 +37,8 @@ export default function Settings() {
           <div className='leftMenu'>
             <h2>Category</h2>
             <div className='settingItems'>
-              <p onClick={() => setSettingsPage('account')}>Account</p>
               <p onClick={() => setSettingsPage('general')}>General</p>
+              <p onClick={() => setSettingsPage('account')}>Account</p>
             </div>
           </div>
           <div className='rightMenu'>{renderContent()}</div>
@@ -53,20 +53,22 @@ function General() {
   const [selected, setSelected] = useState<string>('');
   const [message, setMessage] = useState<string>('');
   const [saving, setSaving] = useState<boolean>(false);
+  const [privateAccount, setPrivateAccount] = useState<boolean>(false);
 
-  // Load current university once
+  // Load current settings
   useEffect(() => {
     if (!user) return;
     (async () => {
       try {
         const snap = await getDoc(doc(db, 'users', user.uid));
-        const uni = snap.data()?.university;
+        const data = snap.data();
+        const uni = data?.university;
         if (uni?.value) setSelected(uni.value as string);
+        setPrivateAccount(data?.private ?? false); // Load privacy setting
       } catch {}
     })();
   }, [user]);
 
-  // University change handler
   const handleSave = async () => {
     if (!user) return setMessage('You must be logged in.');
     if (!selected) return setMessage('Please select a university.');
@@ -83,8 +85,9 @@ function General() {
           domains: sel.domains ?? [],
           updatedAt: new Date(),
         },
+        private: privateAccount, // <-- Save privacy setting
       });
-      setMessage('✅ University updated!');
+      setMessage('✅ Settings updated!');
     } catch (e: any) {
       setMessage(`❌ ${e?.message || 'Failed to update'}`);
     } finally {
@@ -106,11 +109,22 @@ function General() {
             </option>
           ))}
         </select>
-
-        <button onClick={handleSave} disabled={saving}>
-          {saving ? 'Saving…' : 'Save University'}
-        </button>
       </div>
+
+      <div className='form-group' style={{ marginTop: '1rem' }}>
+        <label>
+          <input
+            type='checkbox'
+            checked={privateAccount}
+            onChange={(e) => setPrivateAccount(e.target.checked)}
+          />
+          Make my account private (hide from friend search)
+        </label>
+      </div>
+
+      <button onClick={handleSave} disabled={saving}>
+        {saving ? 'Saving…' : 'Save Settings'}
+      </button>
 
       {message && <p style={{ marginTop: 12 }}>{message}</p>}
     </div>

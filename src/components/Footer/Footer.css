@@ -1,0 +1,30 @@
+.FooterContainer{
+    background-color: var(--secondary-colour);
+    height: 250px;
+    margin-top: 40px;
+
+    padding: 20px 40px;
+
+    display: flex;
+
+    justify-content: space-between;
+}
+
+.Footercolumn {
+    display: flex;
+    flex: 1;
+}
+
+.FooterColumn ul {
+    list-style: none;
+    padding: 0;
+    cursor: pointer;
+
+}
+
+.FooterColumn p {
+    transition: all 0.3s;
+}
+.FooterColumn p:hover {
+    transform: scale(1.03);
+}

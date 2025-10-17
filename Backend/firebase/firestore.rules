@@ -1,7 +1,9 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // --- USERS ---
     match /users/{uid} {
       allow read: if true;
 
@@ -35,6 +37,27 @@ service cloud.firestore {
       allow delete: if request.auth != null && requestId.matches(".*" + request.auth.uid + ".*");
     }
 
+    // --- GAMES ---
+    match /games/{gameId} {
+      // Anyone can read games (so players can see lobbies)
+      allow read: if true;
+
+      // Any logged-in user can create/update games
+      allow create, update: if request.auth != null;
+
+      // No delete (optional: restrict to host later)
+      allow delete: if false;
+
+      // Players subcollection
+      match /players/{playerId} {
+        allow read: if true;
+        // Only the player themself can write their entry
+        allow create, update: if request.auth != null && request.auth.uid == playerId;
+        allow delete: if false;
+      }
+    }
+
+    // --- Everything else stays blocked ---
     match /{document=**} {
       allow read, write: if false;
     }

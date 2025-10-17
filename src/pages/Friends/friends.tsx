@@ -6,6 +6,8 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { useUser } from '@backend/firebase/UserFunctions.tsx';
 import { db } from '../../../Backend/firebase/firebaseConfig';
 import { getDoc } from 'firebase/firestore';
+import Footer from "@components/Footer/footer";
+
 
 // Component to show accepted friends
 function FriendsList({ friends, removeFriend }) {
@@ -114,7 +116,10 @@ function FriendRequests({ pendingRequests, acceptFriendRequest, sendFriendReques
         }
       });
 
-      const finalResults = results.filter((u) => u.uid !== currentUid);
+      const finalResults = results.filter(
+        (u) => u.uid !== currentUid && !u.private // Exclude self and private users
+      );
+
       setSearchResults(finalResults);
     } catch (error) {
       console.error('Firestore search failed:', error);
@@ -265,6 +270,7 @@ export default function Friends() {
           />
         </div>
       </div>
+      <Footer />
     </>
   );
 }

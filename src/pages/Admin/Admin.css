@@ -1,6 +1,6 @@
 .userTableContainer {
   width: 100%;
-  height: 80vh;
+  height: auto;
 
   display: flex;
   flex-direction: column;
@@ -10,8 +10,13 @@
 }
 
 .userTable {
-  width: 80%;
+  width: 95%;
 
+    background-color: white;
+    color: rgb(255, 255, 255);
+    padding: 10px 20px;
+    border-radius: 18px;
+    margin-top: 10px;
   background-color: rgb(0, 0, 0);
 
   padding: 10px 20px;
@@ -19,4 +24,8 @@
   margin-top: 10px;
 
   text-align: center;
+}
+
+.roles-checkboxes {
+  width: auto;
 }
