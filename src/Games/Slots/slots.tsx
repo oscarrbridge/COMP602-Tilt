@@ -9,6 +9,7 @@ import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
 import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx";
 import BetControls from "../BetControls.tsx";
 import BackgroundLayout from "../../components/BackgroundLayout/BackgroundLayout";
+import useCurrentBooster from "../../hooks/useCurrentBooster.tsx";
 
 // ---------------- Slot Logic ----------------
 function generateNum(): number {
@@ -95,7 +96,7 @@ function Slots() {
   const [bet, setBet] = useState<number>(2.0);
   const [lastWin, setLastWin] = useState<number>(0);
   const [winningCells, setWinningCells] = useState<number[]>([]);
-  const [roundInProgress, setRoundInProgress] = useState(false);
+  const { applyBooster } = useCurrentBooster();
 
   const presetGrid: number[][] = [
     [1, 2, 3, 4, 5],
@@ -115,7 +116,6 @@ function Slots() {
       return;
     }
 
-    setRoundInProgress(true);
     setLastWin(0);
 
     // Record the bet
@@ -138,15 +138,17 @@ function Slots() {
     setWinningCells(matches);
 
     const winAmount = betInBase * totalMultiplier;
-    if (winAmount > 0) {
-      setLastWin(winAmount);
-      await recordWinTx(user.uid, winAmount, 1, "slots");
+
+    const boostedWinAmount = await applyBooster(winAmount);
+
+    if (boostedWinAmount > 0) {
+      setLastWin(boostedWinAmount);
+      await recordWinTx(user.uid, boostedWinAmount, 1, "slots");
     } else {
       await recordLossTx(user.uid, betInBase, 1, "slots");
     }
 
     await refreshBalance();
-    setRoundInProgress(false);
   };
 
   return (
@@ -156,14 +158,13 @@ function Slots() {
           <h1>♠ Slots ♣</h1>
 
           {/* Bet Input & Spin */}
-          {!roundInProgress && (
-            <BetControls
-              balance={balance}
-              bet={bet}
-              setBet={setBet}
-              startGame={spin}
-            />
-          )}
+
+          <BetControls
+            balance={balance}
+            bet={bet}
+            setBet={setBet}
+            startGame={spin}
+          />
         </CurrencyProvider>
 
         {/* Slot Grid */}

@@ -5,7 +5,7 @@ import NavBar from "../NavBar/NavBar";
 import PanelMenu from "./PanelMenu/PanelMenu.tsx";
 import InfoPanel from "./InfoPanel/InfoPanel.tsx";
 import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx";
-import GameRankingPanel from "./gameRankingPanel/gameRankingPanel.tsx";
+import UniCreditsPanel from "./UniCreditsPanel/uniCreditsPanel.tsx";
 import BettingHistoryPanel from "./BettingHistoryPanel/BettingHistoryPanel";
 
 interface BackgroundLayoutProps {
@@ -25,7 +25,7 @@ const BackgroundLayout: React.FC<BackgroundLayoutProps> = ({ children }) => {
 
       <div className="content-wrapper">
         <div className="uni-credits-menu">
-          <GameRankingPanel />
+          <UniCreditsPanel />
         </div>
         <div className="game-container">{children}</div>
 

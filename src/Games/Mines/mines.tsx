@@ -1,7 +1,11 @@
 import { useMemo, useState, useEffect } from "react";
 import "./mines.css";
 import BackgroundLayout from "../../components/BackgroundLayout/BackgroundLayout";
-import { placeBet, recordWinTx, recordLossTx } from "../../../Backend/transactions";
+import {
+  placeBet,
+  recordWinTx,
+  recordLossTx,
+} from "../../../Backend/transactions";
 import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
 import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx";
 import BetControls from "../BetControls.tsx";
@@ -50,7 +54,7 @@ export default function Mines() {
   const { user, balance, refreshBalance } = useUser(); // balance is in cents
   const [Size, SetSize] = useState(5);
   const [Mines, SetMines] = useState(5);
-  const [bet, setBet] = useState(10);       // bet shown in whole dollars
+  const [bet, setBet] = useState(10); // bet shown in whole dollars
   const [betInBase, setBetInBase] = useState(0); // bet in cents (NZD base)
   const [Cells, SetCells] = useState<Cell[] | null>(null);
   const [Status, SetStatus] = useState<Status>("Idle");
@@ -196,10 +200,12 @@ export default function Mines() {
 
             <div className="panel">
               {/* Shared bet controls */}
-              {(Status === "Idle" || Status === "Lost" || Status === "Cash") && (
+              {(Status === "Idle" ||
+                Status === "Lost" ||
+                Status === "Cash") && (
                 <BetControls
-                  balance={balance}   // cents
-                  bet={bet}           // dollars
+                  balance={balance} // cents
+                  bet={bet} // dollars
                   setBet={setBet}
                   startGame={startGame}
                 />
@@ -250,10 +256,16 @@ export default function Mines() {
             </div>
 
             <div className="status">
-              {Status === "Idle" && <>Press <b>Bet</b> to play.</>}
+              {Status === "Idle" && (
+                <>
+                  Press <b>Bet</b> to play.
+                </>
+              )}
               {Status === "Playing" && <>Pick Tiles</>}
               {Status === "Lost" && <>💣 Mine Hit. You lost.</>}
-              {Status === "Cash" && <>💰 Cashed Out: ${(PayoutNow / 100).toFixed(2)}</>}
+              {Status === "Cash" && (
+                <>💰 Cashed Out: ${(PayoutNow / 100).toFixed(2)}</>
+              )}
             </div>
 
             <Board

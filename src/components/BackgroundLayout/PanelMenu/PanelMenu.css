@@ -1,6 +1,6 @@
 .panel-menu {
   position: fixed;
-  top: 80px; /* below navbar */
+  top: 120px; /* below navbar */
   left: 0;
   bottom: 0;
   width: 15vw;

@@ -1,7 +1,7 @@
 /* BackgroundLayout.css or App.css */
 .content-wrapper {
   position: fixed;
-  top: 11vh;  /* leave space for navbar/title */
+  top: 15vh;  /* leave space for navbar/title */
   left: 50%;
   transform: translateX(-50%);
 
