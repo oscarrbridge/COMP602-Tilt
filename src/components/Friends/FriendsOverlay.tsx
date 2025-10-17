@@ -32,7 +32,7 @@ export default function FriendsDock() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // ✅ Determine which game we’re currently on based on route
+  // Determine which game we’re currently on based on route
   const isBlackjack = location.pathname.startsWith('/blackjack');
   const isPoker = location.pathname.startsWith('/poker');
   const enableInvites = isBlackjack || isPoker;
@@ -44,7 +44,7 @@ export default function FriendsDock() {
   });
   const onlineFriends = friendsWithOnline.filter((f: any) => f.online);
 
-  // ✅ Create a new lobby for either Poker or Blackjack
+  // Create a new lobby for either Poker or Blackjack
   async function createTableAndInvite(friendUid: string) {
     if (!user) return;
 

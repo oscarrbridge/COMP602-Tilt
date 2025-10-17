@@ -19,6 +19,7 @@ import Settings from './pages/Settings/Settings.tsx';
 
 // Games
 import Poker from './Games/Poker/poker.tsx';
+import PokerCreate from './Games/Poker/PokerCreate.tsx';
 import Blackjack from './Games/Blackjack/Blackjack.tsx';
 import Roulette from './Games/Roulette/roulette.tsx';
 import Slots from './Games/Slots/slots.tsx';
@@ -46,7 +47,9 @@ createRoot(document.getElementById('root')!).render(
           <Route path='/cointoss' element={<CoinFlip />} />
           <Route path='/roulette' element={<Roulette />} />
           <Route path='/blackjack/:gameId' element={<BlackjackMRoute />} />
-          <Route path='/poker/:gameId' element={<Poker />} />
+
+          <Route path="/poker" element={<PokerCreate />} /> {/* Game creation */}
+          <Route path="/poker/:gameId" element={<Poker />} /> {/* Actual game */}
           <Route path='/LobbyTest' element={<LobbyTest />} />
 
           <Route path='/admin' element={<Admin />} />
