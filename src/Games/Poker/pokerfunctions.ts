@@ -8,7 +8,9 @@ import {
   getDocs,
   updateDoc,
   deleteDoc as deleteFirestoreDoc,
+  getDoc,
 } from "firebase/firestore";
+
 
 /**
  * Join an existing poker lobby
@@ -26,7 +28,7 @@ export async function joinPokerLobby(
       displayName: displayName || "Anonymous",
       bet: 0,
       cards: [],
-      holeCards: [], // poker hand
+      holeCards: [],
       chips: 1000,
       status: "waiting",
       ready: false,
@@ -44,12 +46,12 @@ export async function createPokerLobby(
   minPlayers = 2,
   maxPlayers = 6
 ) {
-  const gameRef = doc(collection(db, "games")); // auto-generated ID
+  const gameRef = doc(collection(db, "games"));
 
   const baseGameData = {
     host: hostUid,
     currentTurn: null,
-    state: "waiting", // waiting | in-progress | finished
+    state: "waiting",
     minPlayers,
     maxPlayers,
     createdAt: serverTimestamp(),
@@ -87,7 +89,6 @@ export async function updatePlayerStatus(
 ) {
   const playerRef = doc(db, "games", gameId, "players", uid);
   await updateDoc(playerRef, { ...updates, updatedAt: serverTimestamp() });
-  console.log(`Player ${uid} updated in game ${gameId}`, updates);
 }
 
 /**
@@ -103,21 +104,106 @@ export async function updatePokerGame(
     playersOrder: string[];
     dealerPosition: number;
     state: "waiting" | "in-progress" | "finished";
-    currentTurn: string; // ✅ add this line
+    currentTurn: string;
   }>
 ) {
   const gameRef = doc(db, "games", gameId);
   await updateDoc(gameRef, { ...updates, updatedAt: serverTimestamp() });
-  console.log(`Poker game ${gameId} updated:`, updates);
 }
 
 export async function setNextTurn(gameId: string, nextPlayerUid: string) {
   await updatePokerGame(gameId, { currentTurn: nextPlayerUid });
 }
 
+/**
+ * Player Action: Call
+ */
+export async function playerCall(gameId: string, uid: string) {
+  const gameRef = doc(db, "games", gameId);
+  const gameSnap = await getDoc(gameRef);
+  if (!gameSnap.exists()) return;
+
+  const gameData = gameSnap.data();
+  const playerRef = doc(db, "games", gameId, "players", uid);
+  const playerSnap = await getDoc(playerRef);
+  if (!playerSnap.exists()) return;
+
+  const player = playerSnap.data();
+  const diff = gameData.currentBet - (player.bet || 0);
+
+  if (player.chips >= diff) {
+    await updateDoc(playerRef, {
+      chips: player.chips - diff,
+      bet: gameData.currentBet,
+    });
+    await updateDoc(gameRef, { pot: (gameData.pot || 0) + diff });
+    console.log(`${uid} called ${diff}`);
+  }
+}
 
 /**
- * Reset the round after a hand finishes (pot, community cards, bets)
+ * Player Action: Raise
+ */
+export async function playerRaise(gameId: string, uid: string, raiseAmount: number) {
+  const gameRef = doc(db, "games", gameId);
+  const gameSnap = await getDoc(gameRef);
+  if (!gameSnap.exists()) return;
+
+  const gameData = gameSnap.data();
+  const playerRef = doc(db, "games", gameId, "players", uid);
+  const playerSnap = await getDoc(playerRef);
+  if (!playerSnap.exists()) return;
+
+  const player = playerSnap.data();
+  const totalBet = gameData.currentBet + raiseAmount;
+  const diff = totalBet - (player.bet || 0);
+
+  if (player.chips >= diff) {
+    await updateDoc(playerRef, {
+      chips: player.chips - diff,
+      bet: totalBet,
+    });
+    await updateDoc(gameRef, {
+      currentBet: totalBet,
+      pot: (gameData.pot || 0) + diff,
+    });
+    console.log(`${uid} raised to ${totalBet}`);
+  }
+}
+
+/**
+ * Player Action: Check
+ */
+export async function playerCheck(gameId: string, uid: string) {
+  const gameRef = doc(db, "games", gameId);
+  const gameSnap = await getDoc(gameRef);
+  if (!gameSnap.exists()) return;
+
+  const gameData = gameSnap.data();
+  const playerRef = doc(db, "games", gameId, "players", uid);
+  const playerSnap = await getDoc(playerRef);
+  if (!playerSnap.exists()) return;
+
+  const player = playerSnap.data();
+
+  if ((player.bet || 0) === gameData.currentBet) {
+    console.log(`${uid} checked`);
+  } else {
+    console.log(`${uid} cannot check, must call or fold`);
+  }
+}
+
+/**
+ * Player Action: Fold
+ */
+export async function playerFold(gameId: string, uid: string) {
+  const playerRef = doc(db, "games", gameId, "players", uid);
+  await updateDoc(playerRef, { status: "folded" });
+  console.log(`${uid} folded`);
+}
+
+/**
+ * Reset round after a hand finishes
  */
 export async function resetRound(gameId: string) {
   const gameRef = doc(db, "games", gameId);
@@ -134,15 +220,21 @@ export async function resetRound(gameId: string) {
   const playersSnap = await getDocs(playersRef);
   await Promise.all(
     playersSnap.docs.map((p) =>
-      updateDoc(p.ref, { cards: [], holeCards: [], bet: 0, status: "waiting", ready: false, updatedAt: serverTimestamp() })
+      updateDoc(p.ref, {
+        cards: [],
+        holeCards: [],
+        bet: 0,
+        status: "waiting",
+        ready: false,
+        updatedAt: serverTimestamp(),
+      })
     )
   );
-
   console.log(`Round reset for poker game ${gameId}`);
 }
 
 /**
- * Delete a poker lobby and all players
+ * Delete poker lobby
  */
 export async function deletePokerLobby(gameId: string) {
   const gameRef = doc(db, "games", gameId);
@@ -152,5 +244,4 @@ export async function deletePokerLobby(gameId: string) {
   await Promise.all(playersSnap.docs.map((p) => deleteFirestoreDoc(p.ref)));
 
   await deleteFirestoreDoc(gameRef);
-  console.log(`Poker lobby ${gameId} deleted`);
 }
