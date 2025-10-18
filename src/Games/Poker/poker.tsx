@@ -1,4 +1,4 @@
-// PokerGame.tsx
+// Poker.tsx
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
@@ -14,9 +14,7 @@ import { evaluateHand } from "./pokerHandEvaluator";
 
 // Card deck helper
 const suits = ["♠", "♥", "♦", "♣"];
-const values = [
-  "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A",
-];
+const values = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
 
 function createDeck() {
   const deck: string[] = [];
@@ -74,12 +72,10 @@ export default function PokerGame() {
     setReady(true);
   };
 
-  // Start hand once all ready
+  // Start hand once all players ready
   useEffect(() => {
     if (!players.length || !gameId) return;
-    if (players.every((p) => p.ready)) {
-      startHand();
-    }
+    if (players.every((p) => p.ready)) startHand();
   }, [players]);
 
   const startHand = async () => {
@@ -89,41 +85,72 @@ export default function PokerGame() {
 
     const updatedPlayers = players.map((p) => {
       const hole = [newDeck.pop()!, newDeck.pop()!];
-      updatePlayerStatus(gameId, p.uid, { holeCards: hole, status: "playing" });
-      return { ...p, holeCards: hole, status: "playing" };
+      updatePlayerStatus(gameId, p.uid, { holeCards: hole, status: "playing", bet: 0 });
+      return { ...p, holeCards: hole, status: "playing", bet: 0 };
     });
 
-    // Set initial turn to Big Blind
+    // Set initial turn (Big Blind)
     const dealerPos = 0;
     const bigBlindIndex = (dealerPos + 2) % updatedPlayers.length;
     const bigBlindPlayer = updatedPlayers[bigBlindIndex];
     if (!bigBlindPlayer) return;
     const bigBlindUid = bigBlindPlayer.uid;
 
-    await updatePokerGame(gameId, { state: "in-progress", round: "preflop" });
+    await updatePokerGame(gameId, { state: "in-progress", round: "preflop", pot: 0, currentBet: 0 });
     setNextTurn(gameId, bigBlindUid);
   };
 
-  // Betting
-  const bet = async (amount: number) => {
+  // Player action
+  const playerAction = async (action: "fold" | "call" | "check" | "raise", amount = 0) => {
     if (!myTurn || !user || !gameId) return;
     const me = players.find((p) => p.uid === user.uid);
-    if (!me || me.chips < amount) return;
+    if (!me) return;
 
-    await updatePlayerStatus(gameId, user.uid, {
-      bet: me.bet + amount,
-      chips: me.chips - amount,
-    });
+    switch (action) {
+      case "fold":
+        await updatePlayerStatus(gameId, user.uid, { status: "folded" });
+        break;
 
-    await updatePokerGame(gameId, { pot: pot + amount, currentBet: Math.max(currentBet, me.bet + amount) });
+      case "call":
+        const callAmount = currentBet - (me.bet || 0);
+        if (callAmount > me.chips) return;
+        await updatePlayerStatus(gameId, user.uid, { chips: me.chips - callAmount, bet: (me.bet || 0) + callAmount });
+        await updatePokerGame(gameId, { pot: pot + callAmount });
+        break;
 
-    // Move turn
-    const myIndex = players.findIndex((p) => p.uid === user.uid);
-    const nextIndex = (myIndex + 1) % players.length;
-    setNextTurn(gameId, players[nextIndex].uid);
+      case "check":
+        if ((me.bet || 0) < currentBet) return; // can't check if behind
+        break;
+
+      case "raise":
+        const raiseAmount = amount;
+        if (raiseAmount <= currentBet - (me.bet || 0)) return;
+        if (raiseAmount > me.chips) return;
+        await updatePlayerStatus(gameId, user.uid, { chips: me.chips - raiseAmount, bet: (me.bet || 0) + raiseAmount });
+        await updatePokerGame(gameId, { pot: pot + raiseAmount, currentBet: (me.bet || 0) + raiseAmount });
+        break;
+    }
+
+    // Move to next player
+    const alivePlayers = players.filter(p => p.status === "playing");
+    const myIndex = alivePlayers.findIndex(p => p.uid === user.uid);
+    const nextIndex = (myIndex + 1) % alivePlayers.length;
+    setNextTurn(gameId, alivePlayers[nextIndex].uid);
+
+    // Check if betting round is over
+    const allBetsEqual = alivePlayers.every(p => (p.bet || 0) === Math.max(...alivePlayers.map(pl => pl.bet || 0)));
+    const remainingPlayers = alivePlayers.filter(p => p.status === "playing");
+    if (remainingPlayers.length === 1) {
+      // Only one player left → award pot
+      const winner = remainingPlayers[0];
+      updatePlayerStatus(gameId, winner.uid, { chips: winner.chips + pot });
+      resetRound(gameId);
+    } else if (allBetsEqual) {
+      dealNextRound();
+    }
   };
 
-  // Deal next community round
+  // Deal community cards
   const dealNextRound = async () => {
     if (!gameId || !deck.length) return;
     let newCommunity = [...communityCards];
@@ -155,15 +182,15 @@ export default function PokerGame() {
   const showdown = () => {
     const scores = players.map((p) => ({
       uid: p.uid,
-      handValue: evaluateHand([...p.holeCards, ...communityCards]),
+      handValue: evaluateHand([...(p.holeCards || []), ...communityCards]),
     }));
 
-    const maxScore = Math.max(...scores.map((s) => s.handValue));
-    const winners = scores.filter((s) => s.handValue === maxScore);
+    const maxScore = Math.max(...scores.map(s => s.handValue));
+    const winners = scores.filter(s => s.handValue === maxScore);
 
     const share = Math.floor(pot / winners.length);
     winners.forEach(async (w) => {
-      const p = players.find((pl) => pl.uid === w.uid);
+      const p = players.find(pl => pl.uid === w.uid);
       if (p) await updatePlayerStatus(gameId!, p.uid, { chips: p.chips + share });
     });
 
@@ -177,7 +204,6 @@ export default function PokerGame() {
       {!ready && <button onClick={readyUp}>Ready</button>}
 
       <h2>Pot: {pot}</h2>
-
       <h3>Community Cards:</h3>
       <div>{communityCards.join(" ")}</div>
 
@@ -185,29 +211,26 @@ export default function PokerGame() {
       <ul>
         {players.map((p) => (
           <li key={p.uid}>
-            {p.displayName} - Chips: {p.chips} - Bet: {p.bet}{" "}
+            {p.displayName} - Chips: {p.chips} - Bet: {p.bet || 0}{" "}
             {p.uid === user?.uid ? "(You)" : ""}{" "}
             {p.status === "playing" ? "▶️" : p.status}
-            <div>
-              Hole: {p.uid === user?.uid ? (p.holeCards || []).join(" ") : "??"}
-            </div>
+            <div>Hole: {p.uid === user?.uid ? (p.holeCards || []).join(" ") : "??"}</div>
           </li>
         ))}
       </ul>
 
-      {/* Betting / actions */}
+      {/* Player actions */}
       {myTurn && round !== "showdown" && (
         <div>
-          <button onClick={() => bet(10)}>Bet 10</button>
-          <button onClick={() => bet(50)}>Bet 50</button>
-          <button onClick={dealNextRound}>Deal Next Round</button>
+          <button onClick={() => playerAction("fold")}>Fold</button>
+          <button onClick={() => playerAction("call")}>Call</button>
+          <button onClick={() => playerAction("check")}>Check</button>
+          <button onClick={() => playerAction("raise", 10)}>Raise 10</button>
+          <button onClick={() => playerAction("raise", 50)}>Raise 50</button>
         </div>
       )}
 
-      {/* Only show Next Hand button on showdown */}
-      {round === "showdown" && (
-        <button onClick={() => resetRound(gameId!)}>Next Hand</button>
-      )}
+      {round === "showdown" && <button onClick={() => resetRound(gameId!)}>Next Hand</button>}
     </div>
   );
 }
