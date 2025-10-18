@@ -19,7 +19,6 @@ import {
   getDocs,
 } from 'firebase/firestore';
 import { useParams } from 'react-router-dom';
-import '../../assets/Tilt.png';
 
 // Local helpers
 const suits = ['♠', '♥', '♦', '♣'];

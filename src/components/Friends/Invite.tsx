@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../../Backend/firebase/UserFunctions';
 import { createGameLobby, joinGameLobby } from '../../../Backend/lobby_functions';
+import { createPokerLobby, joinPokerLobby } from '../../Games/Poker/pokerfunctions';
 
 export type Invite = {
   id?: string;
@@ -92,22 +93,27 @@ export function InvitePopup() {
     const unsub = onSnapshot(qAccepted, async (snap) => {
       for (const d of snap.docs) {
         const inv = { id: d.id, ...(d.data() as any) } as Invite;
-
         if (!inv.sessionId || inv.hostAck) continue;
 
         try {
-          // Join lobby as the host (inviter)
-          await joinGameLobby(inv.sessionId, user.uid, user.displayName || user.email || 'Player');
+          if (inv.game === 'poker') {
+            await joinPokerLobby(
+              inv.sessionId,
+              user.uid,
+              user.displayName || user.email || 'Player'
+            );
+          } else {
+            await joinGameLobby(
+              inv.sessionId,
+              user.uid,
+              user.displayName || user.email || 'Player'
+            );
+          }
 
-          try {
-            localStorage.setItem('sessionId', inv.sessionId);
-          } catch {}
-
-          // Prevent duplicate redirection
           await updateDoc(doc(db, 'invites', inv.id!), { hostAck: true });
 
-          // Redirect based on game type
-          const route = inv.game === 'poker' ? `/poker/${inv.sessionId}` : `/blackjack/${inv.sessionId}`;
+          const route =
+            inv.game === 'poker' ? `/poker/${inv.sessionId}` : `/blackjack/${inv.sessionId}`;
           navigate(route, { replace: true });
         } catch (e) {
           console.error('Host redirect/join failed:', e);
@@ -122,29 +128,36 @@ export function InvitePopup() {
     if (!user) return;
 
     try {
-      // Ensure session ID exists
       let sessionId = inv.sessionId;
+
+      // Create session if missing
       if (!sessionId) {
-        sessionId = await createGameLobby(inv.senderId, inv.game || 'blackjack', 2, 5);
+        sessionId =
+          inv.game === 'poker'
+            ? await createPokerLobby(inv.senderId, 2, 6)
+            : await createGameLobby(inv.senderId, 'blackjack', 2, 5);
+
         await updateDoc(doc(db, 'invites', inv.id!), { sessionId, status: 'accepted' });
       } else {
         await updateDoc(doc(db, 'invites', inv.id!), { status: 'accepted' });
       }
 
-      // Join the lobby
-      await joinGameLobby(sessionId, user.uid, user.displayName || user.email || 'Player');
+      // Join session
+      if (inv.game === 'poker') {
+        await joinPokerLobby(sessionId, user.uid, user.displayName || user.email || 'Player');
+      } else {
+        await joinGameLobby(sessionId, user.uid, user.displayName || user.email || 'Player');
+      }
 
-      // Remember session locally
       try {
         localStorage.setItem('sessionId', sessionId);
       } catch {}
 
-      // Remove from UI
       setInvites((prev) => prev.filter((i) => i.id !== inv.id));
 
-      // Navigate based on game type
-      const route = inv.game === 'poker' ? `/poker/${sessionId}` : `/blackjack/${sessionId}`;
-      navigate(route, { replace: true });
+      navigate(inv.game === 'poker' ? `/poker/${sessionId}` : `/blackjack/${sessionId}`, {
+        replace: true,
+      });
     } catch (err) {
       console.error('Accept invite failed:', err);
     }
@@ -158,7 +171,14 @@ export function InvitePopup() {
 
   return (
     <div
-      style={{ position: 'fixed', right: 20, bottom: 90, zIndex: 9999, display: 'grid', gap: 10 }}
+      style={{
+        position: 'fixed',
+        right: 20,
+        bottom: 280,
+        zIndex: 2147483647,
+        display: 'grid',
+        gap: 10,
+      }}
     >
       {invites.map((inv) => (
         <div

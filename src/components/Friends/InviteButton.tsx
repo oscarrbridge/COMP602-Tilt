@@ -36,11 +36,10 @@ export default function InviteButton({
 
   // Copy link for the correct game route
   const copyLink = async () => {
-    const url = `${window.location.origin}/${game === 'poker' ? 'poker-lobby' : 'blackjack'}/${sessionId}`;
+    const url = `${window.location.origin}/${game === 'poker' ? 'poker' : 'blackjack'}/${sessionId}`;
     await navigator.clipboard.writeText(url);
     setOpen(false);
   };
-
   return (
     <div style={{ position: 'relative' }}>
       <button className='btn' onClick={() => setOpen((v) => !v)}>
