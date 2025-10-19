@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { updatePlayerStatus, resetRound } from './pokerfunctions';
 import { useUser } from '../../../Backend/firebase/UserFunctions';
+import BackgroundLayout from '../../components/BackgroundLayout/BackgroundLayout.tsx';
 import {
   collection,
   onSnapshot,
@@ -140,7 +141,7 @@ export default function PokerGame() {
       const me: any = pSnap.data();
       if (g.currentTurn !== user.uid) return;
 
-      // ✅ Do all reads you'll need *before* any writes:
+      // Do all reads you'll need *before* any writes:
       const playersColRef = collection(db, 'games', gameId, 'players');
       const playersSnap = await getDocs(playersColRef); // non-transactional read is ok,
       // but keep it BEFORE any tx.update
@@ -248,11 +249,23 @@ export default function PokerGame() {
     await resetRound(gameId!);
   };
 
-  // ===== UI =====
+// ===== UI =====
+if (!user) {
   return (
-    <div>
+    <BackgroundLayout>
+      <div className='game-container'>
+        <h1>♠ Poker ♣</h1>
+        <p className='small'>Sign in to join this table.</p>
+      </div>
+    </BackgroundLayout>
+  );
+}
+
+return (
+  <BackgroundLayout>
+    <div className='game-container'>
       <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        Poker Game: {gameId}
+        ♠ Poker ♣
         <button
           onClick={async () => {
             try {
@@ -272,37 +285,111 @@ export default function PokerGame() {
             cursor: 'pointer',
           }}
         >
-          Copy
+          Copy Lobby Link
         </button>
       </h1>
-
-      {!ready && <button onClick={readyUp}>Ready</button>}
-
-      <h2>Pot: {pot}</h2>
-      <h3>Round: {round}</h3>
-      <div>Community Cards: {communityCards.join(' ')}</div>
-
-      <h3>Players:</h3>
-      <ul>
-        {players.map((p) => (
-          <li key={p.uid}>
-            {p.displayName} - Chips: {p.chips} - Bet: {p.bet || 0} {p.uid === user?.uid && '(You)'}{' '}
-            {p.status === 'playing' ? '▶️' : p.status}
-            <div>Hole: {p.uid === user?.uid ? (p.holeCards || []).join(' ') : '??'}</div>
-          </li>
-        ))}
-      </ul>
-
-      {myTurn && round !== 'showdown' && (
-        <div>
-          <button onClick={() => playerAction('check')}>Check</button>
-          <button onClick={() => playerAction('call')}>Call</button>
-          <button onClick={() => playerAction('raise', 50)}>Raise 50</button>
-          <button onClick={() => playerAction('fold')}>Fold</button>
+      {/* Community Cards */}
+      <div className='table'>
+        <div className='hand-container'>
+          <h2>Community Cards</h2>
+          <div className='cards'>
+            {communityCards.map((card: string, i: number) => (
+              <div
+                key={i}
+                className={`card ${
+                  card.includes('♥') || card.includes('♦') ? 'red' : ''
+                } dealt`}
+              >
+                {card}
+              </div>
+            ))}
+          </div>
         </div>
-      )}
+        <h2>Pot: ${pot} / Round: {round}</h2>
 
-      {round === 'showdown' && <button onClick={() => resetRound(gameId!)}>Next Hand</button>}
+        {/* Player Hands */}
+        <div className='hand-container'>
+          <h2>You</h2>
+          <div className='cards'>
+            {players
+              .find((p) => p.uid === user?.uid)
+              ?.holeCards?.map((card: string, i: number) => (
+                <div
+                  key={i}
+                  className={`card ${
+                    card.includes('♥') || card.includes('♦') ? 'red' : ''
+                  } dealt`}
+                >
+                  {card}
+                </div>
+              )) || (
+              <p className='small' style={{ opacity: 0.7 }}>
+                Waiting for cards...
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Other Players */}
+        {players.filter((p) => p.uid !== user?.uid).length > 0 && (
+          <div className='hand-container'>
+            <h2>Other Players</h2>
+            <div className='cards' style={{ display: 'grid', gap: 8 }}>
+              {players
+                .filter((p) => p.uid !== user?.uid)
+                .map((p) => (
+                  <div
+                    key={p.uid}
+                    style={{
+                      border: '1px solid rgba(255,255,255,.12)',
+                      borderRadius: 8,
+                      padding: 8,
+                    }}
+                  >
+                    <div style={{ marginBottom: 6, fontWeight: 600 }}>
+                      {p.displayName || p.uid.slice(0, 6)} - Chips: {p.chips}
+                      {p.uid === user?.uid && ' (You)'}
+                      {p.status === 'playing' ? ' • playing' : ` (${p.status})`}
+                    </div>
+
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      {(p.holeCards || []).map((card: string, i: number) => (
+                        <div
+                          key={i}
+                          className={`card ${
+                            card.includes('♥') || card.includes('♦') ? 'red' : ''
+                          } dealt`}
+                          style={{ minWidth: 32, textAlign: 'center' }}
+                        >
+                          {p.uid === user?.uid ? card : '??'}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Controls */}
+      <div className='controls' style={{ marginTop: 20 }}>
+        {!ready && <button onClick={readyUp}>Ready Up</button>}
+
+        {myTurn && round !== 'showdown' && (
+          <>
+            <button onClick={() => playerAction('check')}>Check</button>
+            <button onClick={() => playerAction('call')}>Call</button>
+            <button onClick={() => playerAction('raise', 50)}>Raise 50</button>
+            <button onClick={() => playerAction('fold')}>Fold</button>
+          </>
+        )}
+
+        {round === 'showdown' && (
+          <button onClick={() => resetRound(gameId!)}>Next Hand</button>
+        )}
+      </div>
     </div>
-  );
+  </BackgroundLayout>
+);
 }
