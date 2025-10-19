@@ -5,6 +5,7 @@ import { collection, onSnapshot, query, where, doc, updateDoc, deleteDoc, server
 import { db } from "../../../Backend/firebase/firebaseConfig";
 import { approveEvent, rejectEvent } from "../../../Backend/firebase/events";
 import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
+import { resolveEventBets } from "../../../Backend/firebase/eventBetting";
 
 import Footer from "@components/Footer/footer";
 
@@ -95,14 +96,24 @@ export default function Admin() {
   async function onEventOutcome(id: string, outcome: "happened" | "did-not-happen") {
     try { 
       setBusyId(id); 
+      
+      // Update event status first
       const eventDoc = doc(db, "specialEvents", id);
       await updateDoc(eventDoc, {
         status: outcome,
         resolvedBy: currentUser?.uid ?? "system",
         resolvedAt: serverTimestamp(),
       });
+      
+      // Resolve all bets for this event and distribute payouts
+      await resolveEventBets(id, outcome);
+      
+      alert(`Event marked as "${outcome === 'happened' ? 'happened' : 'did not happen'}" and payouts processed!`);
     } 
-    catch (e: any) { alert("Event outcome update failed: " + (e?.message ?? e)); } 
+    catch (e: any) { 
+      console.error("Event outcome error:", e);
+      alert("Event outcome update failed: " + (e?.message ?? e)); 
+    } 
     finally { setBusyId(null); }
   }
 

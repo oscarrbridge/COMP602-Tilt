@@ -3,6 +3,7 @@ import { useState } from "react";
 import EventBettingWindow from "../EventBettingWindow/EventBettingWindow";
 
 interface SpecialEventProps {
+  id?: string;
   EventHook: string;
   EventTitle: string;
   EventDescription: string;
@@ -10,7 +11,7 @@ interface SpecialEventProps {
   EventLink: string; // Keep for backward compatibility, but won't be used
 }
 
-export default function SpecialEvent({EventHook, EventTitle, EventDescription, EventImage}: SpecialEventProps)
+export default function SpecialEvent({id, EventHook, EventTitle, EventDescription, EventImage}: SpecialEventProps)
 {
   const [isBettingWindowOpen, setIsBettingWindowOpen] = useState(false);
 
@@ -47,12 +48,15 @@ export default function SpecialEvent({EventHook, EventTitle, EventDescription, E
       </article>
 
       {/* Betting Window Modal */}
-      <EventBettingWindow
-        isOpen={isBettingWindowOpen}
-        onClose={() => setIsBettingWindowOpen(false)}
-        eventTitle={EventTitle}
-        eventDescription={EventDescription}
-      />
+      {id && (
+        <EventBettingWindow
+          isOpen={isBettingWindowOpen}
+          onClose={() => setIsBettingWindowOpen(false)}
+          eventId={id}
+          eventTitle={EventTitle}
+          eventDescription={EventDescription}
+        />
+      )}
     </>
   );
 }
