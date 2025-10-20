@@ -1,10 +1,14 @@
 import { useState } from "react";
 import "./Blackjack.css";
 import BackgroundLayout from "../../components/BackgroundLayout/BackgroundLayout";
-import { placeBet, recordWinTx, recordLossTx } from "../../../Backend/transactions";
+import {
+  placeBet,
+  recordWinTx,
+  recordLossTx,
+} from "../../../Backend/transactions";
 import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
-import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx"; 
-import BetControls from "../BetControls.tsx";
+import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx";
+import BetControls from "../BetControls/BetControls.tsx";
 
 const suits = ["♠", "♥", "♦", "♣"];
 const ranks = [
@@ -36,16 +40,21 @@ const cardValue = (card: { rank: string; suit: string }) => {
 };
 
 export default function Blackjack() {
-  const {user, balance, refreshBalance } = useUser();
-  const [playerCards, setPlayerCards] = useState<{ rank: string; suit: string }[]>([]);
-  const [dealerCards, setDealerCards] = useState<{ rank: string; suit: string }[]>([]);
+  const { user, balance, refreshBalance } = useUser();
+  const [playerCards, setPlayerCards] = useState<
+    { rank: string; suit: string }[]
+  >([]);
+  const [dealerCards, setDealerCards] = useState<
+    { rank: string; suit: string }[]
+  >([]);
   const [bet, setBet] = useState(10);
   const [lastWin, setLastWin] = useState(0);
   const [roundResult, setRoundResult] = useState("");
   const [dealerRevealed, setDealerRevealed] = useState(false); // Implement CSS here
   const [betInBase, setBetInBase] = useState(0);
-  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-  
+  const sleep = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
+
   // Track whether a round is in progress
   const [roundInProgress, setRoundInProgress] = useState(false);
 
@@ -63,7 +72,6 @@ export default function Blackjack() {
     return total;
   };
 
-
   const getDealerDisplayScore = () => {
     if (!roundInProgress) {
       // Round over → reveal full dealer score
@@ -78,7 +86,7 @@ export default function Blackjack() {
 
     return "??";
   };
-  const startGame = async(newBetInBase : number) => {
+  const startGame = async (newBetInBase: number) => {
     if (newBetInBase > balance) {
       alert("Not enough balance!");
       return;
@@ -91,9 +99,8 @@ export default function Blackjack() {
     setRoundInProgress(true);
     setDealerRevealed(false);
 
-    await placeBet(user.uid, newBetInBase,1, "blackjack");
+    await placeBet(user.uid, newBetInBase, 1, "blackjack");
     await refreshBalance();
-
   };
 
   const hit = async () => {
@@ -110,7 +117,7 @@ export default function Blackjack() {
     }
   };
 
-  const stand = async()  => {
+  const stand = async () => {
     setDealerRevealed(true);
     setRoundInProgress(false);
     let dealerHand = [...dealerCards];
@@ -120,9 +127,9 @@ export default function Blackjack() {
 
     while (calcScore(dealerHand) < 17) {
       dealerHand.push(getCard());
-      setDealerCards([...dealerHand]); 
+      setDealerCards([...dealerHand]);
       await sleep(800); // delay between draws
-  }
+    }
 
     const playerScore = calcScore(playerCards);
     const dealerScore = calcScore(dealerHand);
@@ -133,18 +140,14 @@ export default function Blackjack() {
       await recordLossTx(user.uid, betInBase, 1, "blackjack");
       await refreshBalance();
       setRoundResult("loss");
-      
-    }
-    else if (playerScore == dealerScore){
+    } else if (playerScore == dealerScore) {
       await recordWinTx(user.uid, betInBase, 1, "blackjack"); // Give balance back when Tie
       await refreshBalance();
       setRoundResult("tie");
-
-    }
-    else if (playerScore > dealerScore || dealerScore > 21) {
+    } else if (playerScore > dealerScore || dealerScore > 21) {
       setLastWin(bet);
 
-      await recordWinTx(user.uid, betInBase*2, 1, "blackjack"); // Double bet to accomadate for winnings
+      await recordWinTx(user.uid, betInBase * 2, 1, "blackjack"); // Double bet to accomadate for winnings
       await refreshBalance();
       setRoundResult("win");
     }
@@ -153,30 +156,35 @@ export default function Blackjack() {
   return (
     <BackgroundLayout>
       <div className="game-container">
-            <CurrencyProvider base="NZD" DefaultCurrency="NZD">
-        <h1>♠ Blackjack ♣</h1>
+        <CurrencyProvider base="NZD" DefaultCurrency="NZD">
+          <h1>♠ Blackjack ♣</h1>
 
-        {/* Bet Input & Deal */}
-        {!roundInProgress && (
-            <BetControls balance={balance} bet={bet} setBet={setBet} startGame={startGame} />
-        )}
+          {/* Bet Input & Deal */}
+          {!roundInProgress && (
+            <BetControls
+              balance={balance}
+              bet={bet}
+              setBet={setBet}
+              startGame={startGame}
+            />
+          )}
         </CurrencyProvider>
 
-      {/* Table */}
-      <div className="table">
-        <div className="hand-container">
-          <h2>Dealer ({getDealerDisplayScore()})</h2>
-          <div className="cards">
-            {dealerCards.map((c, i) => (
-              <div
-                key={i}
-                className={`card ${c.suit === "♥" || c.suit === "♦" ? "red" : ""} dealt`}
-              >
-                {i === 1 && roundInProgress  ? "??" : `${c.rank}${c.suit}`}
-              </div>
-            ))}
+        {/* Table */}
+        <div className="table">
+          <div className="hand-container">
+            <h2>Dealer ({getDealerDisplayScore()})</h2>
+            <div className="cards">
+              {dealerCards.map((c, i) => (
+                <div
+                  key={i}
+                  className={`card ${c.suit === "♥" || c.suit === "♦" ? "red" : ""} dealt`}
+                >
+                  {i === 1 && roundInProgress ? "??" : `${c.rank}${c.suit}`}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
 
           <div className="hand-container">
             <h2>You ({calcScore(playerCards)})</h2>

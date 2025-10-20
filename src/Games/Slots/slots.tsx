@@ -7,13 +7,13 @@ import {
 } from "../../../Backend/transactions";
 import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
 import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx";
-import BetControls from "../BetControls.tsx";
+import BetControls from "../BetControls/BetControls.tsx";
 import BackgroundLayout from "../../components/BackgroundLayout/BackgroundLayout";
 import useCurrentBooster from "../../hooks/useCurrentBooster.tsx";
 
 // ---------------- Slot Logic ----------------
 function generateNum(): number {
-  return Math.floor(Math.random() * 17) + 1; // 1–17
+  return Math.floor(Math.random() * 17) + 1;
 }
 
 function generateRow(): number[] {
@@ -24,33 +24,10 @@ function spinSlots(): number[][] {
   return Array.from({ length: 5 }, () => generateRow());
 }
 
-function getDuplicates(row: number[]): number[] {
-  const unique: number[] = [];
-  const duplicates: number[] = [];
-
-  for (const item of row) {
-    if (!unique.includes(item)) {
-      unique.push(item);
-    } else {
-      duplicates.push(item);
-    }
-  }
-
-  return duplicates;
-}
-
-interface RowResult {
-  match: number;
-  multiplier: number;
-}
-
 function calculateWinnings(slotGrid: number[][]): RowResult[] {
   const result: RowResult[] = [];
-
   for (const row of slotGrid) {
     const counts: Record<number, number> = {};
-
-    // Count frequency of each symbol in this row
     for (const symbol of row) {
       counts[symbol] = (counts[symbol] || 0) + 1;
     }
@@ -58,13 +35,10 @@ function calculateWinnings(slotGrid: number[][]): RowResult[] {
     let rowMultiplier = 0;
     let matchValue = 0;
 
-    // Check for the highest streak in this row
     for (const [symbolStr, count] of Object.entries(counts)) {
       const symbol = parseInt(symbolStr, 10);
-
       if (count >= 3) {
         matchValue = symbol;
-
         if (count === 3) rowMultiplier = 1;
         else if (count === 4) rowMultiplier = 2;
         else if (count === 5) rowMultiplier = 5;
@@ -78,123 +52,143 @@ function calculateWinnings(slotGrid: number[][]): RowResult[] {
           else if (symbol <= 16) rowMultiplier *= 15;
           else if (symbol <= 17) rowMultiplier *= 20;
         }
-
-        break; // stop after first valid match
+        break;
       }
     }
-
     result.push({ match: matchValue, multiplier: rowMultiplier });
   }
-
   return result;
 }
 
-// ---------------- React Component ----------------
+interface RowResult {
+  match: number;
+  multiplier: number;
+}
+
 function Slots() {
   const { user, balance, refreshBalance } = useUser();
-  const [grid, setGrid] = useState<number[][]>([]);
+  const [displayGrid, setDisplayGrid] = useState<number[][]>([]);
   const [bet, setBet] = useState<number>(2.0);
   const [lastWin, setLastWin] = useState<number>(0);
+  const [isSpinning, setIsSpinning] = useState<boolean>(false);
   const [winningCells, setWinningCells] = useState<number[]>([]);
+  const [showResult, setShowResult] = useState<boolean>(false);
   const { applyBooster } = useCurrentBooster();
 
-  const presetGrid: number[][] = [
-    [1, 2, 3, 4, 5],
-    [6, 7, 8, 9, 10],
-    [17, 17, 17, 17, 17],
-    [11, 12, 13, 14, 15],
-    [16, 1, 2, 3, 4],
-  ];
-
   useEffect(() => {
-    setGrid(presetGrid);
+    setDisplayGrid(spinSlots());
   }, []);
 
   const spin = async (betInBase: number) => {
-    if (betInBase > balance) {
-      alert("Insufficient balance for this bet.");
+    if (betInBase > balance || isSpinning) {
+      if (betInBase > balance) alert("Insufficient balance for this bet.");
       return;
     }
 
+    setIsSpinning(true);
+    setShowResult(false);
     setLastWin(0);
+    setWinningCells([]);
 
-    // Record the bet
+    const finalGrid = spinSlots();
+
     await placeBet(user.uid, betInBase, 1, "slots");
     await refreshBalance();
 
-    // Generate spin result
-    const newGrid = spinSlots();
-    setGrid(newGrid);
+    // Start spinning animation
+    const spinDuration = 1500;
+    const spinInterval = 80;
+    const spinStart = Date.now();
 
-    const winningData = calculateWinnings(newGrid);
-    const matches = winningData.map((row) => row.match);
-    const multipliers = winningData.map((row) => row.multiplier);
+    const spinAnimation = setInterval(() => {
+      const elapsed = Date.now() - spinStart;
 
-    let totalMultiplier = multipliers.reduce(
-      (acc, val) => (val > 0 ? acc + val : acc),
-      0
-    );
+      if (elapsed >= spinDuration) {
+        clearInterval(spinAnimation);
+        setDisplayGrid(finalGrid);
 
-    setWinningCells(matches);
+        // Calculate winnings
+        const winningData = calculateWinnings(finalGrid);
+        const matches = winningData.map((row) => row.match);
+        const multipliers = winningData.map((row) => row.multiplier);
 
-    const winAmount = betInBase * totalMultiplier;
+        let totalMultiplier = multipliers.reduce(
+          (acc, val) => (val > 0 ? acc + val : acc),
+          0
+        );
 
-    const boostedWinAmount = await applyBooster(winAmount);
+        setWinningCells(matches);
 
-    if (boostedWinAmount > 0) {
-      setLastWin(boostedWinAmount);
-      await recordWinTx(user.uid, boostedWinAmount, 1, "slots");
-    } else {
-      await recordLossTx(user.uid, betInBase, 1, "slots");
-    }
+        const winAmount = betInBase * totalMultiplier;
 
-    await refreshBalance();
+        // Process results and update display
+        (async () => {
+          let finalAmount = winAmount;
+
+          // Apply booster immediately after animation
+          if (winAmount > 0) {
+            finalAmount = await applyBooster(winAmount);
+            await recordWinTx(user.uid, finalAmount, 1, "slots");
+          } else {
+            // Even on losses, consume the booster
+            await applyBooster(0);
+            await recordLossTx(user.uid, betInBase, 1, "slots");
+          }
+
+          // Set the win amount and show result AFTER processing
+          setLastWin(finalAmount);
+          setShowResult(true);
+
+          await refreshBalance();
+          setIsSpinning(false);
+        })(); // Immediately invoked async function
+
+        return;
+      }
+
+      setDisplayGrid(spinSlots());
+    }, spinInterval);
   };
 
   return (
-    <BackgroundLayout>
-      <div className="game-container">
-        <CurrencyProvider base="NZD" DefaultCurrency="NZD">
-          <h1>♠ Slots ♣</h1>
-
-          {/* Bet Input & Spin */}
-
-          <BetControls
-            balance={balance}
-            bet={bet}
-            setBet={setBet}
-            startGame={spin}
-          />
-        </CurrencyProvider>
-
-        {/* Slot Grid */}
-        <div className="slot-grid">
-          {grid.map((row, rowIndex) => (
+    <BackgroundLayout gameId="Slots">
+      <div className="slots-game-container">
+        <div className={`slot-grid ${!isSpinning ? "idle-hover" : ""}`}>
+          {displayGrid.map((row, rowIndex) => (
             <div key={rowIndex} className="slot-row">
               {row.map((cell, cellIndex) => {
                 const isWinning =
+                  showResult &&
                   winningCells[rowIndex] !== 0 &&
                   cell === winningCells[rowIndex];
 
                 return (
-                  <img
-                    key={cellIndex}
-                    src={`/assets/${cell}.png`}
-                    alt={`Slot ${cell}`}
+                  <div
+                    key={`${rowIndex}-${cellIndex}`}
                     className={`slot-cell ${isWinning ? "winning" : ""}`}
-                  />
+                  >
+                    <img
+                      src={`/assets/${cell}.png`}
+                      alt={`Slot ${cell}`}
+                      className="slot-image"
+                    />
+                  </div>
                 );
               })}
             </div>
           ))}
         </div>
-        {/* Win / Loss Display */}
-        <div className="win-display">
-          {lastWin > 0 ? (
-            <span className="win-amount">+ ${(lastWin / 100).toFixed(2)}</span>
-          ) : (
-            <span className="loss-amount">- ${bet.toFixed(2)}</span>
-          )}
+
+        <div className="slots-bet-controls">
+          <CurrencyProvider base="NZD" DefaultCurrency="NZD">
+            <BetControls
+              balance={balance}
+              bet={bet}
+              setBet={setBet}
+              startGame={spin}
+              disabled={isSpinning}
+            />
+          </CurrencyProvider>
         </div>
       </div>
     </BackgroundLayout>

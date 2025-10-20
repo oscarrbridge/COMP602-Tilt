@@ -4,68 +4,48 @@ import "./BoosterDisplay.css";
 
 interface BoosterDisplayProps {
   multiplier: number | null;
-  selected?: boolean;
-  disabled?: boolean;
-  onClick?: () => void;
 }
 
-export default function BoosterDisplay({
-  multiplier,
-  selected = false,
-  disabled = false,
-  onClick,
-}: BoosterDisplayProps) {
-  const boosterRef = useRef<HTMLButtonElement>(null);
+export default function BoosterDisplay({ multiplier }: BoosterDisplayProps) {
   const iconRef = useRef<HTMLDivElement>(null);
-  const flipTween = useRef<GSAPTween>();
+  const flipTween = useRef<gsap.core.Tween | null>(null);
+
+  const isActive = multiplier && multiplier > 1;
 
   useEffect(() => {
-    if (!boosterRef.current || !iconRef.current) return;
+    if (!iconRef.current) return;
 
-    // Reset animations
-    if (flipTween.current) flipTween.current.kill();
-    gsap.set(iconRef.current, { rotationY: 0 });
-
-    if (multiplier && multiplier > 1) {
-      // Fast flip every 2 seconds
+    // Initialize flip tween once
+    if (!flipTween.current) {
       flipTween.current = gsap.to(iconRef.current, {
         rotationY: "+=360",
-        duration: 0.4, // quick flip
+        duration: 0.3, // fast spin
         repeat: -1,
-        repeatDelay: 1.6, // total ~2s per flip
-        ease: "power2.inOut",
-      });
-
-      // Pop in animation when booster becomes active
-      gsap.fromTo(
-        boosterRef.current,
-        { scale: 0.9, opacity: 0.7 },
-        { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.7)" }
-      );
-    } else {
-      // Static idle look for 1x
-      gsap.to(boosterRef.current, {
-        scale: 1,
-        opacity: 0.8,
-        duration: 0.4,
-        ease: "power1.out",
+        repeatDelay: 2.7, // one spin every ~3s
+        ease: "power1.inOut",
+        paused: true,
       });
     }
-  }, [multiplier]);
+
+    if (isActive) {
+      flipTween.current.play();
+    } else {
+      flipTween.current.pause(0);
+      gsap.set(iconRef.current, { rotationY: 0 });
+    }
+  }, [isActive]);
 
   return (
-    <button
-      className={`booster-display-item ${selected ? "selected" : ""}`}
-      disabled={disabled}
-      onClick={onClick}
-      ref={boosterRef}
+    <div
+      className={`booster-display-item ${isActive ? "selected" : ""}`}
+      style={{ width: "120px", flexDirection: "column", alignItems: "center" }}
     >
       <div className="booster-display-icon" ref={iconRef}>
-        {multiplier ?? 1}x
+        {isActive ? multiplier : 1}x
       </div>
-      <span>
-        {multiplier && multiplier > 1 ? "Booster Active" : "No Booster"}
-      </span>
-    </button>
+      <div className="active-booster-display">
+        {isActive ? "Active Booster" : "No Booster"}
+      </div>
+    </div>
   );
 }

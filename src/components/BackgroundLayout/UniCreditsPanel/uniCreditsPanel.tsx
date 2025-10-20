@@ -112,7 +112,11 @@ export default function UniCreditsPanel() {
                 key={multiplier}
                 className={`booster-item ${isSelected ? "selected" : ""}`}
                 onClick={() => setSelectedBooster(multiplier)}
-                disabled={!canAfford || activating}
+                disabled={
+                  !canAfford ||
+                  activating ||
+                  Boolean(currentBooster && currentBooster > 1)
+                }
               >
                 <div className="booster-icon">
                   <span>{multiplier}x</span>
@@ -137,7 +141,7 @@ export default function UniCreditsPanel() {
           {activating ? "Activating..." : "Activate Booster"}
         </button>
 
-        {currentBooster && currentBooster > 1 ? (
+        {currentBooster && currentBooster > 0 ? (
           <div key={currentBooster} className="booster-display-wrapper">
             <BoosterDisplay multiplier={currentBooster} />
           </div>

@@ -1,16 +1,40 @@
 import { useState, useEffect } from "react";
 import "./Blackjack.css";
 import BackgroundLayout from "../../components/BackgroundLayout/BackgroundLayout.tsx";
-import { placeBet, recordWinTx, recordLossTx } from "../../../Backend/transactions.ts";
+import {
+  placeBet,
+  recordWinTx,
+  recordLossTx,
+} from "../../../Backend/transactions.ts";
 import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
 import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx";
-import BetControls from "../BetControls.tsx";
-import { db } from '../../../Backend/firebase/firebaseConfig';
-import {doc,setDoc,updateDoc,onSnapshot,arrayUnion} from "firebase/firestore";
+import BetControls from "../BetControls/BetControls.tsx";
+import { db } from "../../../Backend/firebase/firebaseConfig";
+import {
+  doc,
+  setDoc,
+  updateDoc,
+  onSnapshot,
+  arrayUnion,
+} from "firebase/firestore";
 
 // Local helpers
 const suits = ["♠", "♥", "♦", "♣"];
-const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+const ranks = [
+  "A",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "J",
+  "Q",
+  "K",
+];
 const getCard = () => {
   const suit = suits[Math.floor(Math.random() * suits.length)];
   const rank = ranks[Math.floor(Math.random() * ranks.length)];
@@ -23,12 +47,20 @@ const cardValue = (card: { rank: string; suit: string }) => {
   return parseInt(card.rank);
 };
 
-export default function Blackjackm({ gameId = "testGame" }: { gameId?: string }) {
+export default function Blackjackm({
+  gameId = "testGame",
+}: {
+  gameId?: string;
+}) {
   const { user, balance, refreshBalance } = useUser();
 
   // Local UI state
-  const [playerCards, setPlayerCards] = useState<{ rank: string; suit: string }[]>([]);
-  const [dealerCards, setDealerCards] = useState<{ rank: string; suit: string }[]>([]);
+  const [playerCards, setPlayerCards] = useState<
+    { rank: string; suit: string }[]
+  >([]);
+  const [dealerCards, setDealerCards] = useState<
+    { rank: string; suit: string }[]
+  >([]);
   const [bet, setBet] = useState(10);
   const [betInBase, setBetInBase] = useState(0);
   const [roundResult, setRoundResult] = useState("");
@@ -104,7 +136,7 @@ export default function Blackjackm({ gameId = "testGame" }: { gameId?: string })
     await setDoc(playerRef, {
       bet: newBetInBase,
       cards: [getCard(), getCard()],
-      status: "active"
+      status: "active",
     });
 
     // Update game doc
@@ -112,7 +144,7 @@ export default function Blackjackm({ gameId = "testGame" }: { gameId?: string })
       state: "in-progress",
       dealerHand: [getCard(), getCard()],
       currentTurn: user.uid,
-      gameType: "blackjack"
+      gameType: "blackjack",
     });
 
     await placeBet(user.uid, newBetInBase, 1, "blackjack");
@@ -122,7 +154,7 @@ export default function Blackjackm({ gameId = "testGame" }: { gameId?: string })
   const hit = async () => {
     const card = getCard();
     await updateDoc(playerRef, {
-      cards: arrayUnion(card)
+      cards: arrayUnion(card),
     });
 
     const newCards = [...playerCards, card];
@@ -170,7 +202,12 @@ export default function Blackjackm({ gameId = "testGame" }: { gameId?: string })
           <h1>♠ Blackjack ♣</h1>
 
           {!roundInProgress && (
-            <BetControls balance={balance} bet={bet} setBet={setBet} startGame={startGame} />
+            <BetControls
+              balance={balance}
+              bet={bet}
+              setBet={setBet}
+              startGame={startGame}
+            />
           )}
         </CurrencyProvider>
 
@@ -217,19 +254,19 @@ export default function Blackjackm({ gameId = "testGame" }: { gameId?: string })
             roundResult === "win"
               ? "win-amount"
               : roundResult === "loss"
-              ? "loss-amount"
-              : roundResult === "tie"
-              ? "tie-amount"
-              : ""
+                ? "loss-amount"
+                : roundResult === "tie"
+                  ? "tie-amount"
+                  : ""
           }`}
         >
           {roundResult === "win"
             ? `+ $${bet}`
             : roundResult === "loss"
-            ? `- $${bet}`
-            : roundResult === "tie"
-            ? "Tie"
-            : ""}
+              ? `- $${bet}`
+              : roundResult === "tie"
+                ? "Tie"
+                : ""}
         </div>
       </div>
     </BackgroundLayout>

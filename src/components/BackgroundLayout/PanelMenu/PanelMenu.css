@@ -3,20 +3,28 @@
   top: 120px; /* below navbar */
   left: 0;
   bottom: 0;
-  width: 15vw;
-  background: #1a1818;
+  width: 14vw;
+  background: linear-gradient(135deg, #042031 0%, #153752 100%);
   border-right: 3px solid #333;
   border-top: 3px solid #333;
-  overflow-y: auto; /* allow scroll */
-  
+  overflow-y: auto;
   padding: 10px;
+  color: var(--text-colour);
+  text-align: center;
 }
 
-
 .panel-header {
+  
   padding: 16px;
   border-bottom: 1px solid #444;
-  font-size: 18px;
+  font-size: 1.5rem;
+  margin: 0;
+  color: var(--text-colour, #4595d6);
+  font-weight: 600;
+  margin-bottom: 7px;
+  background: linear-gradient(135deg, #087bc2, #535bf2);
+  border-radius: 6px;
+  font-family: inherit;
 }
 
 .panel-content {
@@ -30,21 +38,40 @@
   margin: 0 0 20px 0;
 }
 
+.panel-menu li {
+  margin-bottom: 12px;
+}
 
 .panel-menu li a {
-  text-decoration: none;
-  color: #fff;
-  font-weight: bold;
   display: flex;
   align-items: center;
-  padding: 8px 12px;
-  border-radius: 4px;
-  transition: background 0.2s, transform 0.2s;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--text-colour);
+  font-weight: 500;
+  padding: 14px 18px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #087bc2, #535bf2);
+  border: 1px solid transparent;
+  transition: background-color 0.25s, border-color 0.25s, transform 0.2s;
 }
 
-.panel-content li:hover {
-  background: #333;
+.panel-menu li a:hover {
+  background: linear-gradient(135deg, #280880, #535bf2);
+  border-color: #646cff;
+  transform: translateY(-2px);
 }
+
+.panel-menu li a:active {
+  transform: scale(0.98);
+}
+
+.panel-icon {
+  width: 75px;
+  height: 75px;
+  object-fit: contain;
+}
+
 
 @media (max-width: 1200px) {
   .panel-menu {

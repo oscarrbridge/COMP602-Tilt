@@ -1,130 +1,101 @@
-/* BackgroundLayout.css or App.css */
-.content-wrapper {
-  position: fixed;
-  top: 15vh;  /* leave space for navbar/title */
-  left: 50%;
-  transform: translateX(-50%);
+/* BackgroundLayout.css */
 
-  width: 65vw;   /* fixed wrapper width */
-  height: 800px; /* fixed wrapper height */
-
-  display: grid;
-  grid-template-columns: 12vw 1fr 12vw; /* left | center | right */
-  grid-template-rows: 100%;               /* single row fills height */
-  gap: 10px;
-
-  border: 2px solid #333;
-  border-radius: 20px;
-  overflow: hidden;
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0e334b 0%, #0b26a04f 100%); /* Dark gradient */
+  color: rgba(255, 255, 255, 0.87); /* optional text color for readability */
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  color-scheme: dark;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+.full-background-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  background: #0a0a0a; /* Add fallback background */
+}
 
+.content-wrapper {
+  position: fixed;
+  top: 15vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 65vw;
+  height: 800px;
+  display: grid;
+  grid-template-columns: 12vw 1fr 12vw;
+  grid-template-rows: 100%;
+  border: 2px solid #333;
+  border-radius: 30px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #021b2b 0%, #0137634f 100%);
+}
 
-/* Left panel */
-.uni-credits-panel {
+/* Consolidated panel styles */
+.side-panel {
   background: #1a1818;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   height: 100%;
-  width: 100%; /* fill its grid cell */
+  width: 100%;
   transition: width 0.3s ease;
   border-radius: 20px;
 }
 
-.betting-history-menu {
-  background: #1f1c1c;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  height: 100%;
-  width: 100%; /* fill its grid cell */
-  transition: width 0.3s ease;
-  border-radius: 20px;
-}
-
-
-/* Center column */
 .game-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-
-  width: 100%;   
-  height: 100%;  
-
+  width: 100%;
+  height: 100%;
   border-left: 2px solid #333;
   border-right: 2px solid #333;
-  border-radius: 20px;
-  background-color: #1a1818;
+  
   background: #1f1c1c;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-
   color: #fff;
   font-family: Arial, sans-serif;
-  filter: drop-shadow(-10px 0 20px rgba(0,0,0,0.6))  /* left shadow */
-          drop-shadow(10px 0 20px rgba(0,0,0,0.6)); 
-  
-
+  filter: drop-shadow(-10px 0 20px rgba(0, 11, 36, 0.747)) 
+          drop-shadow(10px 0 20px rgba(0, 11, 36, 0.747));
   overflow: hidden;
 }
 
-
-.background-container {
-   min-height: 100vh;  /* ensures at least full screen */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: #111;
-  padding-top: 80px;
-}
-
-/* Navbar on top */
 .NavBar {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 80px; /* example navbar height */
+  height: 80px;
   z-index: 1000;
 }
 
-
-
-@media (max-height: 850px) {
-  .title-panel {
-    display: none;
-  }
+@media (max-width: 1500px) {
   .content-wrapper {
-    top: 3vh;
+    grid-template-columns: 1fr;
+    width: 90vw;
+  }
+  
+  .uni-credits-menu,
+  .betting-history-menu {
+    display: none;
   }
 }
 
 @media (max-width: 980px) {
   .content-wrapper {
-    width: 640px; ;
+    width: 95vw;
+    height: 80vh;
   }
-  .title-panel {
-    width: 610px; ;
-  }
-
 }
 
-
-@media (max-width: 1500px) {
-  .uni-credits-menu {
-    display: none;
-  }
-
-  .betting-history-menu {
-    display: none;
-  }
-
-  .content-wrapper {
-    grid-template-columns: 1fr;  
-  }
-  
-}

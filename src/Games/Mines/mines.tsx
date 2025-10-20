@@ -8,7 +8,7 @@ import {
 } from "../../../Backend/transactions";
 import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
 import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx";
-import BetControls from "../BetControls.tsx";
+import BetControls from "../BetControls/BetControls.tsx";
 
 // Game states during playtime
 type Status = "Idle" | "Playing" | "Lost" | "Cash";

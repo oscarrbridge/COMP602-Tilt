@@ -37,7 +37,7 @@ export default function BettingHistoryPanel() {
     const q = query(
       collection(db, "users", uid, "transactions"),
       orderBy("timestamp", "desc"),
-      limit(5)
+      limit(12)
     );
 
     const unsub = onSnapshot(q, (snap) => {
@@ -69,9 +69,12 @@ export default function BettingHistoryPanel() {
               <li key={t.id} className={`bet-item ${t.type}`}>
                 <div className="bet-main">
                   <span className="bet-type">
-                    {t.type.charAt(0).toUpperCase() + t.type.slice(1)}
+                    &nbsp;{t.type.charAt(0).toUpperCase() + t.type.slice(1)}
                   </span>
-                  <Price amount={Math.abs(t.amount)} from="NZD" />
+                  <span className="bet-amount">
+                    &nbsp;
+                    <Price amount={Math.abs(t.amount)} from="NZD" />
+                  </span>
                 </div>
                 <div className="bet-time">
                   {t.when

@@ -1,0 +1,243 @@
+/* === BET CONTROLS (THEMED & RESPONSIVE) === */
+
+.dial-group button,
+.modifier-group button,
+.big-bet-controls-button {
+  border-radius: 2px !important; /* Force remove border radius */
+  padding: 10px !important;
+}
+
+.bet-controls-controls-container {
+  width: 100%;
+  overflow: hidden;
+  
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
+  font-family: inherit;
+    
+}
+
+.bet-controls-main-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+  border-top: 1px solid var(--border-colour, rgba(255, 255, 255, 0.1));
+  box-sizing: border-box;
+  background: var(--secondary-colour);
+}
+
+.bet-controls-left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+}
+
+/* === Rows - Full Height Containers === */
+.bet-controls-bottom-row,
+.bet-controls-top-row {
+  display: flex;
+  align-items: stretch; /* Changed from center to stretch */
+  gap: 6px;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  border: 1px solid var(--border-colour, rgba(255, 255, 255, 0.1));
+  box-sizing: border-box;
+  padding: 8px;
+  
+  background:  #173347;
+}
+
+.bet-controls-label {
+  flex: 0 0 auto;
+  min-width: 80px;
+  font-weight: 500;
+  margin-top: 1px;;
+  color: var(--text-colour);
+  display: flex;
+  align-items: center;
+  user-select: none;
+  padding: 10px;
+  height: 100%; /* Take full height of row */
+  box-sizing: border-box;
+  
+}
+
+.bet-controls-input {
+  flex: 1;
+  min-width: 60px;
+  height: 100%; /* Full height */
+  text-align: center;
+  border: 1px solid var(--border-colour, rgba(255, 255, 255, 0.15));
+  background: var(--secondary-colour);
+  color: var(--text-colour);
+  font-size: 0.95rem;
+  padding: 10px;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  
+}
+
+.bet-controls-input:focus {
+  outline: none;
+  border-color: var(--accent-colour);
+  box-shadow: 0 0 8px var(--accent-colour);
+}
+
+.bet-controls-input.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Remove native number spinners */
+.bet-controls-input::-webkit-inner-spin-button,
+.bet-controls-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.bet-controls-input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* === Dial Buttons === */
+.dial-group {
+  display: flex;
+  gap: 6px;
+  height: 100%; /* Full height of row */
+  align-items: stretch; /* Stretch buttons vertically */
+  
+}
+
+.dial-group button {
+  width: 70px;
+  height: 100%; /* Full height */
+  flex: 1;
+  background-color: #198abebd ;
+  color: var(--primary-colour);
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 0 2px var(--accent-colour);
+  
+  border: none;
+  transition: all 0.2s ease;
+ 
+
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dial-group button:hover:not(.disabled) {
+  background: var(--accent-hover, #36a9e0);
+  transform: translateY(-1px);
+  box-shadow: 0 0 10px var(--accent-hover, #36a9e0);
+}
+
+.dial-group button:active:not(.disabled) {
+  transform: translateY(0);
+  box-shadow: 0 0 6px var(--accent-colour);
+}
+
+.dial-group button.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* === Modifier Buttons === */
+.modifier-group {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+  height: 100%; /* Full height of row */
+  align-items: stretch; /* Stretch buttons vertically */
+}
+
+.modifier-group button {
+  flex: 1; /* equal width */
+  min-width: 0;
+  height: 100%; /* Full height */
+  font-size: 0.85rem;
+  white-space: nowrap;
+  background-color: #198abebd ;
+  color: var(--primary-colour);
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 0 2px var(--accent-colour);
+  border: none;
+  transition: all 0.2s ease;
+    border-radius: none;
+    
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modifier-group button:hover:not(.disabled) {
+  background: var(--accent-hover, #36a9e0);
+  transform: translateY(-1px);
+  box-shadow: 0 0 10px var(--accent-hover, #36a9e0);
+}
+
+.modifier-group button:active:not(.disabled) {
+  transform: translateY(0);
+  box-shadow: 0 0 6px var(--accent-colour);
+}
+
+.modifier-group button.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* === Big Bet Button === */
+.big-bet-controls-button {
+  border-radius: 8px;
+  background: var(--accent-colour);
+  color: var(--primary-colour);
+  font-weight: bold;
+  cursor: pointer;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 8px var(--accent-colour);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  border: none;
+  min-width: 150px;
+  height: auto; /* Will be set by JS to match left height */
+  box-sizing: border-box;
+  
+}
+
+.big-bet-controls-button:hover:not(.disabled) {
+  transform: scale(1.03);
+  background: var(--accent-hover, #36a9e0);
+  box-shadow: 0 0 12px var(--accent-hover, #36a9e0);
+}
+
+.big-bet-controls-button.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
