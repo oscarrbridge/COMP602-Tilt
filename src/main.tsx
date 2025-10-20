@@ -27,7 +27,7 @@ import Mines from './Games/Mines/mines.tsx';
 import CoinFlip from './Games/CoinToss/Cointoss.tsx';
 import { BlackjackMRoute } from './Games/Blackjack multiplayer/BlackjackM.tsx';
 
-import { InvitePopup } from './components/Friends/Invite';
+import { InvitePopup } from './components/Friends/FriendsOverlay.tsx';
 import FriendsDock from './components/Friends/FriendsOverlay.tsx';
 
 createRoot(document.getElementById('root')!).render(
@@ -40,21 +40,17 @@ createRoot(document.getElementById('root')!).render(
           <Route path='/leaderboard' element={<Leaderboard />} />
           <Route path='/statistics' element={<Statistics />} />
           <Route path='/friends' element={<Friends />} />
-
           <Route path='/slots' element={<Slots />} />
           <Route path='/blackjack' element={<Blackjack />} />
           <Route path='/mines' element={<Mines />} />
           <Route path='/cointoss' element={<CoinFlip />} />
           <Route path='/roulette' element={<Roulette />} />
           <Route path='/blackjack/:gameId' element={<BlackjackMRoute />} />
-
-          <Route path="/poker" element={<PokerCreate />} /> {/* Game creation */}
-          <Route path="/poker/:gameId" element={<Poker />} /> {/* Actual game */}
+          <Route path='/poker' element={<PokerCreate />} /> {/* Game creation */}
+          <Route path='/poker/:gameId' element={<Poker />} /> {/* Actual game */}
           <Route path='/LobbyTest' element={<LobbyTest />} />
-
           <Route path='/admin' element={<Admin />} />
           <Route path='/staff' element={<Staff />} />
-
           <Route path='/settings' element={<Settings />} />
         </Routes>
         <InvitePopup />

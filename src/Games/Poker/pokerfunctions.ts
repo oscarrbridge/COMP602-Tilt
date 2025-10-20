@@ -10,6 +10,7 @@ import {
   deleteDoc as deleteFirestoreDoc,
   getDoc,
   runTransaction,
+  writeBatch,
 } from 'firebase/firestore';
 
 /**
@@ -61,7 +62,6 @@ export async function createPokerLobby(hostUid: string, minPlayers = 2, maxPlaye
     playersOrder: [],
     deck: [],
     deckIndex: 0,
-    street: 'preflop',
     dealLock: null,
     streetLock: null,
   };
@@ -205,34 +205,53 @@ export async function playerFold(gameId: string, uid: string) {
  * Reset round after a hand finishes
  */
 export async function resetRound(gameId: string) {
-  const gameRef = doc(db, 'games', gameId);
-  await updateDoc(gameRef, {
-    communityCards: [],
-    pot: 0,
-    currentBet: 0,
-    round: 'preflop',
-    playersOrder: [],
-    currentTurn: null,
-    state: 'waiting',
-    updatedAt: serverTimestamp(),
-  });
+  try {
+    const gameRef = doc(db, 'games', gameId);
+    const batch = writeBatch(db);
 
-  const playersRef = collection(db, 'games', gameId, 'players');
-  const playersSnap = await getDocs(playersRef);
-  await Promise.all(
-    playersSnap.docs.map((p) =>
-      updateDoc(p.ref, {
-        cards: [],
-        holeCards: [],
-        bet: 0,
-        status: 'waiting',
-        ready: false,
-        hasActed: false,
+    // numeric guards
+    const safeNumber = (n: any, d = 0) => (typeof n === 'number' && Number.isFinite(n) ? n : d);
+
+    batch.update(
+      gameRef,
+      sanitize({
+        communityCards: [],
+        pot: safeNumber(0),
+        currentBet: safeNumber(0),
+        round: 'preflop',
+        playersOrder: [],
+        currentTurn: null,
+        state: 'waiting',
+        dealLock: null,
+        streetLock: null,
+        streetBet: safeNumber(0),
         updatedAt: serverTimestamp(),
       })
-    )
-  );
-  console.log(`Round reset for poker game ${gameId}`);
+    );
+
+    const playersRef = collection(db, 'games', gameId, 'players');
+    const playersSnap = await getDocs(playersRef);
+
+    playersSnap.docs.forEach((p) => {
+      batch.update(
+        p.ref,
+        sanitize({
+          cards: [],
+          holeCards: [],
+          bet: safeNumber(0),
+          status: 'waiting',
+          ready: false,
+          hasActed: false,
+          updatedAt: serverTimestamp(),
+        })
+      );
+    });
+
+    await batch.commit();
+    console.log(`Round reset for poker game ${gameId}`);
+  } catch (e: any) {
+    console.error('resetRound failed', { code: e.code, message: e.message, e });
+  }
 }
 
 /**
@@ -283,6 +302,19 @@ export async function drawCardsTx(gameId: string, n: number): Promise<string[]> 
     tx.update(gameRef, { deck, deckIndex: idx + n, updatedAt: serverTimestamp() });
     return drawn;
   });
+}
+
+const isFiniteNumber = (x: any) => typeof x === 'number' && Number.isFinite(x);
+
+function sanitize<T extends Record<string, any>>(obj: T): T {
+  const out: any = {};
+  for (const [k, v] of Object.entries(obj ?? {})) {
+    if (v === undefined) continue; // Firestore rejects undefined
+    if (typeof v === 'number' && !Number.isFinite(v)) continue; // rejects NaN/Infinity
+    if (Array.isArray(v)) out[k] = v.filter((el) => el !== undefined);
+    else out[k] = v;
+  }
+  return out;
 }
 
 export async function tryStartHand(gameId: string, hostUid: string) {

@@ -68,6 +68,7 @@ export function Online(friendUids: string[]) {
   }, [friendUids]);
 
   useEffect(() => {
+    if (!user?.uid) return;
     // if no friends to watch, clear instantly (prevents stale online bubbles)
     if (chunks.length === 0) {
       setOnlineByUid({});
@@ -102,7 +103,7 @@ export function Online(friendUids: string[]) {
       });
     });
     return () => unsubs.forEach((u) => u && u());
-  }, [chunks]);
+  }, [chunks, user?.uid]);
 
   return { onlineByUid: onlineByUid };
 }
