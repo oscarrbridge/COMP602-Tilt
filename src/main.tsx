@@ -24,6 +24,7 @@ import Roulette from "./Games/Roulette/roulette.tsx";
 import Slots from "./Games/Slots/slots.tsx";
 import Mines from "./Games/Mines/mines.tsx";
 import CoinFlip from "./Games/CoinToss/Cointoss.tsx";
+import Crash from "./Games/Crash/Crash.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -45,6 +46,7 @@ createRoot(document.getElementById("root")!).render(
           <Route path="/mines" element={<Mines />} />
           <Route path="/cointoss" element={<CoinFlip />} />
           <Route path="/roulette" element={<Roulette />} />
+          <Route path="/crash" element={<Crash />} />
           <Route path='/blackjackm' element={<BlackjackM />} />
           <Route path='/LobbyTest' element={<LobbyTest />} />
 

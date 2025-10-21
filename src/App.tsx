@@ -40,7 +40,7 @@ export const PopularGames = [
   { Text: 'Mines',     Image: 'src/assets/mines.png',       LinkTo: '/mines' },
   { Text: 'Coin Toss', Image: 'src/assets/coins.png',       LinkTo: '/cointoss' },
   { Text: 'Roulette', Image: 'src/assets/roulette.png',     LinkTo: '/roulette' },
-  { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
+  { Text: 'Soon', Image: 'src/assets/crash.png',            LinkTo: '/crash' },
   { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
 ];
 
