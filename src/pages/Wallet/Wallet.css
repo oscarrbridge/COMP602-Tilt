@@ -1,40 +1,243 @@
+:root {
+  --panel-bg: var(--secondary-colour);
+  --panel-border: rgba(255, 255, 255, 0.06);
+  --panel-inset: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --accent: #2897c6;
+  --muted: rgba(255, 255, 255, 0.65);
+}
+
 .WalletContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    padding-top: 20px;
-    gap: 30px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 28px 20px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
 }
 
-.TopRow {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    gap: 40px;
+.WalletHeader h1 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  margin: 0 0 4px 0;
 }
 
-.BottomRow {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
+.WalletHeader p {
+  color: var(--muted);
+  margin: 0;
+  font-size: 0.95rem;
 }
 
+.WalletGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+}
+
+@media (max-width: 900px) {
+  .WalletGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.Card {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 22px;
+  padding: 22px;
+  transition: border-color 0.18s ease;
+}
+.Card :where(button, [type='submit'], .btn, .Button):focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.Card:hover {
+  border-color: rgba(57, 227, 255, 0.25);
+}
+
+.CardTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.25px;
+  margin: 0 0 14px 0;
+}
+
+.AccentDot {
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: var(--accent);
+}
+
+.Card input[type='text'],
+.Card input[type='number'],
+.Card input[type='password'],
+.Card input[type='email'],
+.Card textarea,
+.Card select {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #fff;
+  padding: 12px 14px;
+  border-radius: 14px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.Card input:focus,
+.Card textarea:focus,
+.Card select:focus {
+  border-color: rgba(57, 227, 255, 0.35);
+}
+
+.Card button,
+.WalletContainer button {
+  border: none;
+  border-radius: 9999px;
+  padding: 10px 18px;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--accent);
+  color: #06232c;
+  transition: opacity 0.12s ease;
+}
+
+.Card button:hover,
+.WalletContainer button:hover {
+  opacity: 0.92;
+}
+
+.Card button:active {
+  opacity: 1;
+}
+
+.Card form > * + * {
+  margin-top: 12px;
+}
+
+.Card .row,
+.Card .stack {
+  gap: 10px;
+}
+
+.Card :where(button, [type='submit'], .btn, .Button) {
+  background: var(--accent) !important;
+  color: #06232c !important;
+  border: 1px solid rgba(0, 0, 0, 0.25) !important;
+  border-radius: 9999px;
+  padding: 10px 18px;
+  font-weight: 700;
+}
+.Card :where(button, [type='submit'], .btn, .Button):hover {
+  opacity: 0.92;
+}
+.Card :where(button, [type='submit'], .btn, .Button):focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.Card input,
+.Card textarea,
+.Card select {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.Card--autopay *::placeholder {
+  color: rgba(255, 255, 255, 0.55) !important;
+}
+
+.Card--autopay :where(input, textarea, select) {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.Card--autopay
+  :where(
+    .card,
+    .container,
+    .panel,
+    .surface,
+    .box,
+    .field,
+    .input,
+    .MuiPaper-root,
+    .MuiCard-root,
+    .MuiOutlinedInput-root,
+    .switch,
+    .toggle
+  ) {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  border-radius: 14px !important;
+  box-shadow: none !important;
+}
+
+.Card--autopay :where(label, p, span, h1, h2, h3, h4) {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.TopRow,
+.BottomRow,
 .DepositContainer,
-.WithdrawContainer {
-    width: 40%;
-    max-width: 400px;
-    background-color: var(--secondary-colour);
-    padding: 20px;
-    border-radius: 18px;
+.WithdrawContainer,
+.AutoPayContainer,
+.UniCodeContainer {
 }
 
-.UniCodeContainer {
-    width: 40%;
-    max-width: 400px;
-    background-color: var(--secondary-colour);
-    padding: 20px;
-    border-radius: 18px;
+.Card--autopay {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+}
+.AutoTopupCard {
+  border-radius: 18px;
+  background: var(--panel-bg);
+  box-shadow:
+    var(--panel-inset),
+    0 0 0 1px var(--panel-border);
+  overflow: hidden;
+}
+
+.AutoTopupCard:focus-within {
+  box-shadow:
+    var(--panel-inset),
+    0 0 0 1px var(--panel-border),
+    inset 0 0 0 3px color-mix(in oklab, var(--accent) 35%, transparent);
+}
+
+.Card--autopay input:focus-visible {
+  box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--accent) 55%, transparent) !important;
+  border-color: var(--accent);
+}
+
+.SettingsControl input:focus {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--accent) 55%, transparent);
+}
+
+input,
+select,
+textarea,
+button {
+  outline: none;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent) 50%, transparent);
 }

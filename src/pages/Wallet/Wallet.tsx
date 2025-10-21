@@ -5,8 +5,7 @@ import Deposit from '../../components/Deposit/Deposit.tsx';
 import UniCodes from '../../components/AddUniBalance/AddUniBalance.tsx';
 import AutoPayment from '../../components/AutoPayment/AutoPayment.tsx';
 import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
-
-import Footer from "@components/Footer/footer";
+import Footer from '@components/Footer/footer';
 
 export default function Wallet() {
   useUser();
@@ -15,30 +14,43 @@ export default function Wallet() {
     <>
       <NavBar />
 
-      <div className='WalletContainer'>
-        <div className='TopRow'>
-          <div className='DepositContainer'>
-            <h2>Deposit Funds</h2>
+      <main className='WalletContainer'>
+        <header className='WalletHeader'>
+          <h1>Wallet</h1>
+          <p>Manage deposits, withdrawals, auto top-ups, and uni codes.</p>
+        </header>
+
+        <section className='WalletGrid'>
+          <article className='Card'>
+            <h2 className='CardTitle'>
+              <span className='AccentDot' /> Deposit Funds
+            </h2>
             <Deposit />
-          </div>
+          </article>
 
-          <div className='WithdrawContainer'>
-            <h2>Withdraw Funds</h2>
+          <article className='Card'>
+            <h2 className='CardTitle'>
+              <span className='AccentDot' /> Withdraw Funds
+            </h2>
             <Withdraw />
-          </div>
-        </div>
+          </article>
 
-        <div className='BottomRow'>
-          <div className='AutoPayContainer'>
-            <h2>Automatic Top-up</h2>
+          <article className='Card Card--autopay AutoTopupCard'>
+            <h2 className='CardTitle'>
+              <span className='AccentDot' /> Automatic Top-up
+            </h2>
             <AutoPayment />
-          </div>
-          <div className='UniCodeContainer'>
-            <h2>Redeem a Uni Code</h2>
+          </article>
+
+          <article className='Card'>
+            <h2 className='CardTitle'>
+              <span className='AccentDot' /> Redeem a Uni Code
+            </h2>
             <UniCodes />
-          </div>
-        </div>
-      </div>
+          </article>
+        </section>
+      </main>
+
       <Footer />
     </>
   );

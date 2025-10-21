@@ -4,6 +4,7 @@ import { doc, onSnapshot, writeBatch, increment, serverTimestamp } from 'firebas
 import { auth, db } from './firebaseConfig';
 
 const TOP_UP_THRESHOLD_CENTS = 1000; // Trigger when balance is below $10.00
+const AUTOPAY_CLIENT_SIDE_ENABLED = false;
 
 interface UserProfile {
   roles: string[];
@@ -57,6 +58,9 @@ export function useUser() {
 
   // Auto-top-up effect
   useEffect(() => {
+    // hard-stop client-side autopay
+    if (!AUTOPAY_CLIENT_SIDE_ENABLED) return;
+
     if (autoPayEnabled && balance < TOP_UP_THRESHOLD_CENTS && !isToppingUp && user?.uid) {
       void performAutoTopUp();
     }
@@ -64,6 +68,7 @@ export function useUser() {
 
   const performAutoTopUp = async () => {
     if (!user?.uid) return;
+    if (!AUTOPAY_CLIENT_SIDE_ENABLED) return;
 
     console.log(`Balance is low. Simulating a top-up of ${autoPayAmount / 100}.`);
     setIsToppingUp(true);
