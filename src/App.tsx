@@ -45,8 +45,8 @@ export const PopularGames = [
   { Text: 'Mines',     Image: 'src/assets/mines.png',       LinkTo: '/mines' },
   { Text: 'Coin Toss', Image: 'src/assets/coins.png',       LinkTo: '/cointoss' },
   { Text: 'Roulette', Image: 'src/assets/roulette.png',     LinkTo: '/roulette' },
-  { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
-  { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
+  { Text: 'Poker', Image: 'src/assets/poker.png',           LinkTo: '/poker' },
+  { Text: 'Crash', Image: 'src/assets/crash.png',           LinkTo: '/crash' },
 ];
 
 export const AllGames = [
@@ -55,20 +55,20 @@ export const AllGames = [
   { Text: 'Mines',     Image: 'src/assets/mines.png',       LinkTo: '/mines' },
   { Text: 'Coin Toss', Image: 'src/assets/coins.png',       LinkTo: '/cointoss' },
   { Text: 'Roulette', Image: 'src/assets/roulette.png',     LinkTo: '/roulette' },
+  { Text: 'Poker', Image: 'src/assets/poker.png',           LinkTo: '/poker' },
+  { Text: 'Crash', Image: 'src/assets/crash.png',           LinkTo: '/crash' },
   { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
   { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
   { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
   { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
-  { Text: 'Slots',     Image: 'src/assets/slots.png',       LinkTo: '/slots' },
-  { Text: 'Blackjack', Image: 'src/assets/blackjack.png',   LinkTo: '/blackjack' },
-  { Text: 'Mines',     Image: 'src/assets/mines.png',       LinkTo: '/mines' },
-  { Text: 'Coin Toss', Image: 'src/assets/coins.png',       LinkTo: '/cointoss' },
-  { Text: 'Roulette', Image: 'src/assets/roulette.png',     LinkTo: '/roulette' },
   { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
   { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
   { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
   { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
-  { Text: 'Slots',     Image: 'src/assets/slots.png',       LinkTo: '/slots' },
+  { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
+  { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
+  { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
+
 
 ];
 
@@ -238,14 +238,11 @@ export default function Dashboard() {
       </div>
    
 
-      <div className='HomeSearchBarContainer'>
-        <h2>Looking for a game?</h2>
-        <SearchBar Placeholder='Search for a game...' />
-        <FilterBar />
+      
       <div className="Footer">
           <Footer />
       </div>
-      </div>
+
     </AppProvider>
   );
 }
