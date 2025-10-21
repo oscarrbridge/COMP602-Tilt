@@ -245,6 +245,7 @@ export default function Dashboard() {
       <div className="Footer">
           <Footer />
       </div>
+      </div>
     </AppProvider>
   );
 }
