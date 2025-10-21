@@ -26,6 +26,7 @@ import Slots from './Games/Slots/slots.tsx';
 import Mines from './Games/Mines/mines.tsx';
 import CoinFlip from './Games/CoinToss/Cointoss.tsx';
 import { BlackjackMRoute } from './Games/Blackjack multiplayer/BlackjackM.tsx';
+import Crash from "./Games/Crash/Crash.tsx";
 
 import { InvitePopup } from './components/Friends/FriendsOverlay.tsx';
 import FriendsDock from './components/Friends/FriendsOverlay.tsx';
@@ -48,6 +49,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path='/blackjack/:gameId' element={<BlackjackMRoute />} />
           <Route path='/poker' element={<PokerCreate />} /> {/* Game creation */}
           <Route path='/poker/:gameId' element={<Poker />} /> {/* Actual game */}
+          <Route path="/crash" element={<Crash />} />
           <Route path='/LobbyTest' element={<LobbyTest />} />
           <Route path='/admin' element={<Admin />} />
           <Route path='/staff' element={<Staff />} />
