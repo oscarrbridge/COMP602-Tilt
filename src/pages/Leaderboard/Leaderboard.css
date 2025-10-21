@@ -1,0 +1,70 @@
+/* === Full-bleed, two wide cards === */
+.StatisticsContainer {
+  /* break out of any centered parent / max-width wrapper */
+  width: 100vw !important;
+  margin-inline: calc(50% - 50vw) !important;
+
+  min-height: calc(100vh - var(--nav-h));
+  padding: 16px 24px;
+  box-sizing: border-box;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); /* truly flexible halves */
+  gap: 40px; /* a bit more air */
+  align-items: stretch;
+}
+
+/* ensure the cards can actually expand */
+.StatisticsComponent {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: rgb(0, 0, 0);
+  border: 1px solid var(--panel-border);
+  border-radius: 22px;
+  padding: 16px;
+  overflow: hidden;
+}
+
+/* table wrapper fills the card */
+.StatisticsComponent > .LocalLeaderboard {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* tables use all available width and allow natural column growth */
+.LocalLeaderboard {
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.LocalLeaderboard table {
+  width: 100%;
+  table-layout: auto; /* allow columns to expand naturally */
+  border-spacing: 0;
+  border-collapse: separate;
+}
+
+/* optional: on very large screens, add some extra gap */
+@media (min-width: 1400px) {
+  .StatisticsContainer {
+    gap: 48px;
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+}
+
+/* Make all text inside each leaderboard card bold */
+.StatisticsComponent {
+  font-weight: 700;
+}
+
+/* If something overrides it (e.g. utility classes), force inherit */
+.StatisticsComponent * {
+  font-weight: inherit !important;
+}
+If you only want 

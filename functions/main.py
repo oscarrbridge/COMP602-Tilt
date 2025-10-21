@@ -1,67 +1,98 @@
-import os
+from datetime import datetime, timedelta, timezone
+from firebase_admin import firestore
+from firebase_functions import firestore_fn
+from firebase_admin.firestore import SERVER_TIMESTAMP
+from google.cloud.firestore_v1._helpers import DatetimeWithNanoseconds
 import stripe
-from firebase_admin import initialize_app, firestore, credentials
-from firebase_functions import firestore_fn, options
 
-cred = credentials.Certificate("tilt-af037-e2e569468028.json")
-initialize_app(cred)
+TOP_UP_THRESHOLD_CENTS = 1000  # $10.00
 
-db = firestore.client()
-stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
+
+def _now_utc():
+    return datetime.now(timezone.utc)
 
 
 @firestore_fn.on_document_updated(document="users/{userId}")
 def check_balance_for_autopay(event: firestore_fn.Event[firestore_fn.Change]) -> None:
-    """Watches for updates on user documents to trigger auto-payments."""
     before_data = event.data.before.to_dict() or {}
     after_data = event.data.after.to_dict() or {}
+    uid = event.params["userId"]
 
-    balance_before = before_data.get("balance", 0)
-    balance_after = after_data.get("balance", 0)
-
-    # Prevent infinite loops: If balance increased, stop.
-    if balance_after > balance_before:
-        print(f"User {event.params['userId']}: Balance increased. No action needed.")
-        return
-
-    # Trigger only if balance was spent and is now low
-    if not (balance_after < balance_before and balance_after <= 0):
-        return
-
-    # Check if auto-pay is enabled for this user
+    # Must be enabled and have a customer
     if not (after_data.get("autoPayEnabled") and after_data.get("stripeCustomerId")):
         return
 
+    # ⬇️ REPLACE your old crossing-only logic with this block:
+    before_bal = int(before_data.get("balance") or 0)
+    after_bal = int(after_data.get("balance") or 0)
+
+    is_below = after_bal < TOP_UP_THRESHOLD_CENTS
+    went_down = after_bal < before_bal
+    crossed = before_bal >= TOP_UP_THRESHOLD_CENTS and is_below
+
     print(
-        f"User {event.params['userId']}: Low balance detected. Triggering auto-top-up."
+        f"[AUTOPAY] uid={uid} before={before_bal} after={after_bal} "
+        f"is_below={is_below} crossed={crossed} went_down={went_down}"
     )
-    user_ref = db.collection("users").document(event.params["userId"])
-    top_up_amount = after_data.get("autoPayAmountCents", 0)
+
+    # Allow when below the threshold AND (just crossed OR went further down)
+    should_fire = False
+    if is_below:
+        should_fire = crossed or went_down
+
+    # If not crossing/dropping, still allow a run; debounce below prevents repeats
+    if not should_fire:
+        should_fire = is_below
+
+    if not should_fire:
+        return
+
+    user_ref = firestore.client().collection("users").document(uid)
+    top_up_amount = int(after_data.get("autoPayAmountCents") or 0)
+    if top_up_amount <= 0:
+        print(f"[AUTOPAY] uid={uid} top_up_amount invalid: {top_up_amount}")
+        return
+
+    # Debounce by lastAutoTopupAt
+    try:
+        user_snap = user_ref.get()
+        data = user_snap.to_dict() or {}
+        last = data.get("lastAutoTopupAt")
+        if isinstance(last, (DatetimeWithNanoseconds, datetime)):
+            if _now_utc() - last < timedelta(seconds=15):
+                print(f"[AUTOPAY] uid={uid} recently topped up; skipping.")
+                return
+    except Exception as e:
+        print(f"[AUTOPAY] uid={uid} read lastAutoTopupAt failed: {e}")
 
     try:
-        payment_methods = stripe.PaymentMethod.list(
+        # Ensure a saved card exists
+        pms = stripe.PaymentMethod.list(
             customer=after_data["stripeCustomerId"], type="card"
         )
-        if not payment_methods.data:
-            print(f"User {event.params['userId']}: No saved card. Disabling auto-pay.")
+        if not pms.data:
+            print(f"[AUTOPAY] uid={uid} no saved card; disabling auto-pay.")
             user_ref.update({"autoPayEnabled": False})
             return
 
-        # Charge the user's saved card
+        # Charge saved card
         stripe.PaymentIntent.create(
             amount=top_up_amount,
             currency="nzd",
             customer=after_data["stripeCustomerId"],
-            payment_method=payment_methods.data[0].id,
+            payment_method=pms.data[0].id,
             off_session=True,
             confirm=True,
         )
-        # On success, atomically increment the balance
-        user_ref.update({"balance": firestore.Increment(top_up_amount)})
-        print(f"User {event.params['userId']}: Auto-top-up successful.")
 
-    except Exception as e:
-        print(
-            f"Auto-payment failed for {event.params['userId']}: {e}. Disabling auto-pay."
+        # Atomically add balance and stamp time
+        user_ref.update(
+            {
+                "balance": firestore.Increment(top_up_amount),
+                "lastAutoTopupAt": SERVER_TIMESTAMP,
+            }
         )
+        print(f"[AUTOPAY] uid={uid} auto-top-up +{top_up_amount} cents succeeded.")
+    except Exception as e:
+        print(f"[AUTOPAY] uid={uid} auto-payment failed: {e}; disabling auto-pay.")
         user_ref.update({"autoPayEnabled": False})

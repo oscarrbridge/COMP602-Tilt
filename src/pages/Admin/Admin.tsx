@@ -1,14 +1,22 @@
-import "./Admin.css";
-import NavBar from "../../components/NavBar/NavBar";
-import { useEffect, useMemo, useState } from "react";
-import { collection, onSnapshot, query, where, doc, updateDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "../../../Backend/firebase/firebaseConfig";
-import { approveEvent, rejectEvent } from "../../../Backend/firebase/events";
+import './Admin.css';
+import NavBar from '../../components/NavBar/NavBar';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  collection,
+  onSnapshot,
+  query,
+  where,
+  doc,
+  updateDoc,
+  deleteDoc,
+  serverTimestamp,
+} from 'firebase/firestore';
+import { db } from '../../../Backend/firebase/firebaseConfig';
+import { approveEvent, rejectEvent } from '../../../Backend/firebase/events';
 import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
-import { resolveEventBets } from "../../../Backend/firebase/eventBetting";
+import { resolveEventBets } from '../../../Backend/firebase/eventBetting';
 
-import Footer from "@components/Footer/footer";
-
+import Footer from '@components/Footer/footer';
 
 // --- Types ---
 type Event = {
@@ -46,7 +54,7 @@ export default function Admin() {
 
   // --- Fetch Pending Events ---
   useEffect(() => {
-    const q = query(collection(db, "specialEvents"), where("status", "==", "pending"));
+    const q = query(collection(db, 'specialEvents'), where('status', '==', 'pending'));
     const unsub = onSnapshot(
       q,
       (snap) => {
@@ -63,7 +71,7 @@ export default function Admin() {
 
   // --- Fetch Live Events ---
   useEffect(() => {
-    const q = query(collection(db, "specialEvents"), where("status", "==", "approved"));
+    const q = query(collection(db, 'specialEvents'), where('status', '==', 'approved'));
     const unsub = onSnapshot(
       q,
       (snap) => {
@@ -82,39 +90,51 @@ export default function Admin() {
   const hasLiveEvents = useMemo(() => liveEvents.length > 0, [liveEvents]);
 
   async function onApprove(id: string) {
-    try { setBusyId(id); await approveEvent(id); } 
-    catch (e: any) { alert("Approve failed: " + (e?.message ?? e)); } 
-    finally { setBusyId(null); }
+    try {
+      setBusyId(id);
+      await approveEvent(id);
+    } catch (e: any) {
+      alert('Approve failed: ' + (e?.message ?? e));
+    } finally {
+      setBusyId(null);
+    }
   }
 
   async function onReject(id: string) {
-    try { setBusyId(id); await rejectEvent(id); } 
-    catch (e: any) { alert("Reject failed: " + (e?.message ?? e)); } 
-    finally { setBusyId(null); }
+    try {
+      setBusyId(id);
+      await rejectEvent(id);
+    } catch (e: any) {
+      alert('Reject failed: ' + (e?.message ?? e));
+    } finally {
+      setBusyId(null);
+    }
   }
 
-  async function onEventOutcome(id: string, outcome: "happened" | "did-not-happen") {
-    try { 
-      setBusyId(id); 
-      
+  async function onEventOutcome(id: string, outcome: 'happened' | 'did-not-happen') {
+    try {
+      setBusyId(id);
+
       // Update event status first
-      const eventDoc = doc(db, "specialEvents", id);
+      const eventDoc = doc(db, 'specialEvents', id);
       await updateDoc(eventDoc, {
         status: outcome,
-        resolvedBy: currentUser?.uid ?? "system",
+        resolvedBy: currentUser?.uid ?? 'system',
         resolvedAt: serverTimestamp(),
       });
-      
+
       // Resolve all bets for this event and distribute payouts
       await resolveEventBets(id, outcome);
-      
-      alert(`Event marked as "${outcome === 'happened' ? 'happened' : 'did not happen'}" and payouts processed!`);
-    } 
-    catch (e: any) { 
-      console.error("Event outcome error:", e);
-      alert("Event outcome update failed: " + (e?.message ?? e)); 
-    } 
-    finally { setBusyId(null); }
+
+      alert(
+        `Event marked as "${outcome === 'happened' ? 'happened' : 'did not happen'}" and payouts processed!`
+      );
+    } catch (e: any) {
+      console.error('Event outcome error:', e);
+      alert('Event outcome update failed: ' + (e?.message ?? e));
+    } finally {
+      setBusyId(null);
+    }
   }
 
   // --- Fetch Users ---
@@ -135,10 +155,15 @@ export default function Admin() {
   }, []);
 
   // --- User Management Functions ---
-  const handleRolesChange = async (id: string, role: string, isChecked: boolean, currentRoles: string[]) => {
+  const handleRolesChange = async (
+    id: string,
+    role: string,
+    isChecked: boolean,
+    currentRoles: string[]
+  ) => {
     let newRoles = [...currentRoles];
     if (isChecked && !newRoles.includes(role)) newRoles.push(role);
-    if (!isChecked) newRoles = newRoles.filter(r => r !== role);
+    if (!isChecked) newRoles = newRoles.filter((r) => r !== role);
     const userDoc = doc(db, 'users', id);
     await updateDoc(userDoc, { roles: newRoles });
   };
@@ -167,137 +192,206 @@ export default function Admin() {
     <>
       <NavBar />
 
-      {/* --- Special Events Section --- */}
-      <div className="userTableContainer">
-        <h2>Pending Special Events</h2>
-        {eventsErr && <div style={{ color: "#ff6b6b", marginBottom: 12 }}>Firestore error: {eventsErr}</div>}
-        <table className="userTable">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Hook</th>
-              <th>Description</th>
-              <th>Preview</th>
-              <th>Link</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {!loadingEvents && !hasEvents && (
-              <tr><td colSpan={6} style={{ textAlign: "center", opacity: 0.8 }}>No pending events</td></tr>
-            )}
-            {pending.map((ev) => (
-              <tr key={ev.id}>
-                <td>{ev.EventTitle}</td>
-                <td>{ev.EventHook}</td>
-                <td style={{ maxWidth: 420 }}>{ev.EventDescription}</td>
-                <td>{ev.EventImage ? <img src={ev.EventImage} alt="" style={{ height: 40, borderRadius: 6 }} /> : "—"}</td>
-                <td style={{ fontFamily: "monospace" }}>{ev.EventLink}</td>
-                <td>
-                  <button className="editButton" onClick={() => onApprove(ev.id)} disabled={busyId === ev.id}>Approve</button>
-                  <button className="deleteButton" onClick={() => onReject(ev.id)} disabled={busyId === ev.id} style={{ marginLeft: 8 }}>Reject</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <main className='AdminPage'>
+        {/* --- Special Events Section --- */}
+        {/* --- Special Events Section --- */}
+        <div className='userTableContainer'>
+          <h2>Pending Special Events</h2>
+          {eventsErr && (
+            <div style={{ color: '#ff6b6b', marginBottom: 12 }}>Firestore error: {eventsErr}</div>
+          )}
 
-      {/* --- Live Events Section --- */}
-      <div className="userTableContainer" style={{ marginTop: 40 }}>
-        <h2>Live Events</h2>
-        {liveEventsErr && <div style={{ color: "#ff6b6b", marginBottom: 12 }}>Firestore error: {liveEventsErr}</div>}
-        <table className="userTable">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Hook</th>
-              <th>Description</th>
-              <th>Preview</th>
-              <th>Link</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {!loadingLiveEvents && !hasLiveEvents && (
-              <tr><td colSpan={7} style={{ textAlign: "center", opacity: 0.8 }}>No live events</td></tr>
-            )}
-            {liveEvents.map((ev) => (
-              <tr key={ev.id}>
-                <td>{ev.EventTitle}</td>
-                <td>{ev.EventHook}</td>
-                <td style={{ maxWidth: 420 }}>{ev.EventDescription}</td>
-                <td>{ev.EventImage ? <img src={ev.EventImage} alt="" style={{ height: 40, borderRadius: 6 }} /> : "—"}</td>
-                <td style={{ fontFamily: "monospace" }}>{ev.EventLink}</td>
-                <td style={{ color: "#4CAF50", fontWeight: "bold" }}>Live</td>
-                <td>
-                  <button 
-                    className="editButton" 
-                    onClick={() => onEventOutcome(ev.id, "happened")} 
-                    disabled={busyId === ev.id}
-                    style={{ marginRight: 8 }}
-                  >
-                    Happened
-                  </button>
-                  <button 
-                    className="deleteButton" 
-                    onClick={() => onEventOutcome(ev.id, "did-not-happen")} 
-                    disabled={busyId === ev.id}
-                  >
-                    Did Not Happen
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          <div className='userTable'>
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Hook</th>
+                  <th>Description</th>
+                  <th>Preview</th>
+                  <th>Link</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {!loadingEvents && !hasEvents && (
+                  <tr>
+                    <td colSpan={6} style={{ textAlign: 'center', opacity: 0.8 }}>
+                      No pending events
+                    </td>
+                  </tr>
+                )}
+                {pending.map((ev) => (
+                  <tr key={ev.id}>
+                    <td>{ev.EventTitle}</td>
+                    <td>{ev.EventHook}</td>
+                    <td style={{ maxWidth: 420 }}>{ev.EventDescription}</td>
+                    <td>
+                      {ev.EventImage ? (
+                        <img src={ev.EventImage} alt='' style={{ height: 40, borderRadius: 6 }} />
+                      ) : (
+                        '—'
+                      )}
+                    </td>
+                    <td style={{ fontFamily: 'monospace' }}>{ev.EventLink}</td>
+                    <td>
+                      <button
+                        className='editButton'
+                        onClick={() => onApprove(ev.id)}
+                        disabled={busyId === ev.id}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        className='deleteButton'
+                        onClick={() => onReject(ev.id)}
+                        disabled={busyId === ev.id}
+                        style={{ marginLeft: 8 }}
+                      >
+                        Reject
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-      {/* --- User Management Section --- */}
-      <div className="userTableContainer" style={{ marginTop: 40 }}>
-        <h2>User Management</h2>
-        <table className='userTable'>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Balance</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.id}>
-                <td>{user.id}</td>
-                <td>{user.email}</td>
-                <td className='roles-checkboxes'>
-                  <label>
-                    <input
-                      type='checkbox'
-                      checked={user.roles.includes('admin')}
-                      onChange={(e) => handleRolesChange(user.id, 'admin', e.target.checked, user.roles)}
-                    /> Admin
-                  </label>
-                  <label>
-                    <input
-                      type='checkbox'
-                      checked={user.roles.includes('staff')}
-                      onChange={(e) => handleRolesChange(user.id, 'staff', e.target.checked, user.roles)}
-                    /> Staff
-                  </label>
-                </td>
-                <td>${user.balance.toFixed(2)}</td>
-                <td>
-                  <button onClick={() => handleBalanceEdit(user.id, user.balance)} className='editButton'>Edit</button>
-                  <button onClick={() => handleDelete(user.id)} className='deleteButton' disabled={currentUser?.uid === user.id}>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+        {/* --- Live Events Section --- */}
+        <div className='userTableContainer' style={{ marginTop: 40 }}>
+          <h2>Live Events</h2>
+          {liveEventsErr && (
+            <div style={{ color: '#ff6b6b', marginBottom: 12 }}>
+              Firestore error: {liveEventsErr}
+            </div>
+          )}
+
+          <div className='userTable'>
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Hook</th>
+                  <th>Description</th>
+                  <th>Preview</th>
+                  <th>Link</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {!loadingLiveEvents && !hasLiveEvents && (
+                  <tr>
+                    <td colSpan={7} style={{ textAlign: 'center', opacity: 0.8 }}>
+                      No live events
+                    </td>
+                  </tr>
+                )}
+                {liveEvents.map((ev) => (
+                  <tr key={ev.id}>
+                    <td>{ev.EventTitle}</td>
+                    <td>{ev.EventHook}</td>
+                    <td style={{ maxWidth: 420 }}>{ev.EventDescription}</td>
+                    <td>
+                      {ev.EventImage ? (
+                        <img src={ev.EventImage} alt='' style={{ height: 40, borderRadius: 6 }} />
+                      ) : (
+                        '—'
+                      )}
+                    </td>
+                    <td style={{ fontFamily: 'monospace' }}>{ev.EventLink}</td>
+                    <td style={{ color: '#4CAF50', fontWeight: 'bold' }}>Live</td>
+                    <td>
+                      <button
+                        className='editButton'
+                        onClick={() => onEventOutcome(ev.id, 'happened')}
+                        disabled={busyId === ev.id}
+                        style={{ marginRight: 8 }}
+                      >
+                        Happened
+                      </button>
+                      <button
+                        className='deleteButton'
+                        onClick={() => onEventOutcome(ev.id, 'did-not-happen')}
+                        disabled={busyId === ev.id}
+                      >
+                        Did Not Happen
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* --- User Management Section --- */}
+        <div className='userTableContainer' style={{ marginTop: 40 }}>
+          <h2>User Management</h2>
+
+          <div className='userTable'>
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Balance</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((u) => (
+                  <tr key={u.id}>
+                    <td>{u.id}</td>
+                    <td>{u.email}</td>
+                    <td className='roles-checkboxes'>
+                      <label>
+                        <input
+                          type='checkbox'
+                          checked={u.roles.includes('admin')}
+                          onChange={(e) =>
+                            handleRolesChange(u.id, 'admin', e.target.checked, u.roles)
+                          }
+                        />{' '}
+                        Admin
+                      </label>
+                      <label>
+                        <input
+                          type='checkbox'
+                          checked={u.roles.includes('staff')}
+                          onChange={(e) =>
+                            handleRolesChange(u.id, 'staff', e.target.checked, u.roles)
+                          }
+                        />{' '}
+                        Staff
+                      </label>
+                    </td>
+                    <td>${(u.balance / 100).toFixed(2)}</td>
+                    <td>
+                      <button
+                        onClick={() => handleBalanceEdit(u.id, u.balance)}
+                        className='editButton'
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(u.id)}
+                        className='deleteButton'
+                        disabled={currentUser?.uid === u.id}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+
       <Footer />
     </>
   );
