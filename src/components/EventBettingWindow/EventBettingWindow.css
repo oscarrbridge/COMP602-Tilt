@@ -1,0 +1,134 @@
+/* Overlay */
+.bettingWindowOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+/* Container */
+.bettingWindowContainer {
+  background: #0F212E;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 24px;
+  max-width: 500px;
+  width: 90%;
+  color: #eaeaea;
+}
+
+/* Header */
+.bettingWindowHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 16px;
+}
+
+.bettingWindowTitle {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.bettingWindowClose {
+  background: transparent;
+  border: none;
+  font-size: 2rem;
+  color: #eaeaea;
+  cursor: pointer;
+}
+
+/* Event Info */
+.bettingWindowEventInfo {
+  background: #1A2C38;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+/* Betting Options */
+.bettingOptions {
+  margin-bottom: 20px;
+}
+
+.bettingButtons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.bettingOptionBtn {
+  padding: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  background: #1A2C38;
+  color: #eaeaea;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bettingOptionBtn.selected.yesBtn {
+  background: #4CAF50;
+  border-color: #4CAF50;
+}
+
+.bettingOptionBtn.selected.noBtn {
+  background: #f44336;
+  border-color: #f44336;
+}
+
+/* Bet Amount */
+.bettingAmount {
+  margin-bottom: 24px;
+}
+
+.betAmountInput {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  background: #1A2C38;
+  color: #eaeaea;
+  box-sizing: border-box;
+}
+
+/* Actions */
+.bettingActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.cancelBtn, .placeBetBtn {
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cancelBtn {
+  background: #1A2C38;
+  color: #eaeaea;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.placeBetBtn {
+  background: #4CAF50;
+  color: white;
+}
+
+.placeBetBtn:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(234, 234, 234, 0.5);
+  cursor: not-allowed;
+}

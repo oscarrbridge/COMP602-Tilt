@@ -20,10 +20,9 @@ export function useUser() {
   const [loading, setLoading] = useState(true);
   const [isToppingUp, setIsToppingUp] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-
   const [autoPayAmount, setAutoPayAmount] = useState(2000); // Default to $20
 
-  // Effect to get the current user
+  // Watch authentication state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -32,20 +31,21 @@ export function useUser() {
     return () => unsubscribe();
   }, []);
 
-  // Effect to listen for REAL-TIME changes to the user's document
+  // Listen for user profile changes in Firestore
   useEffect(() => {
-    if (loading || !user) {
-      setBalance(0); // Set to 0 if logged out/loading
+    if (loading || !user?.uid) {
+      setBalance(0);
       return;
     }
+
     const userRef = doc(db, 'users', user.uid);
     const unsubscribe = onSnapshot(userRef, (docSnap) => {
       if (docSnap.exists()) {
-        const data = docSnap.data();
+        const data = docSnap.data() as UserProfile;
         setBalance(data.balance ?? 0);
-        setAutoPayEnabled(data.autoPayEnabled || false);
-        setAutoPayAmount(data.autoPayAmountCents || 2000); // Fallback to $20
-        setUserProfile(data as UserProfile);
+        setAutoPayEnabled(data.autoPayEnabled ?? false);
+        setAutoPayAmount(data.autoPayAmountCents ?? 2000);
+        setUserProfile(data);
       } else {
         setBalance(0);
         setUserProfile(null);
@@ -53,17 +53,17 @@ export function useUser() {
     });
 
     return () => unsubscribe();
-  }, [user, loading]);
+  }, [user?.uid, loading]);
 
-  // AUTO-TOP-UP LOGIC
+  // Auto-top-up effect
   useEffect(() => {
-    if (autoPayEnabled && balance < TOP_UP_THRESHOLD_CENTS && !isToppingUp) {
-      performAutoTopUp();
+    if (autoPayEnabled && balance < TOP_UP_THRESHOLD_CENTS && !isToppingUp && user?.uid) {
+      void performAutoTopUp();
     }
-  }, [balance, autoPayEnabled, isToppingUp, user]);
+  }, [balance, autoPayEnabled, isToppingUp, user?.uid]);
 
   const performAutoTopUp = async () => {
-    if (!user) return;
+    if (!user?.uid) return;
 
     console.log(`Balance is low. Simulating a top-up of ${autoPayAmount / 100}.`);
     setIsToppingUp(true);
@@ -73,16 +73,15 @@ export function useUser() {
       const txRef = doc(db, 'users', user.uid, 'transactions', `autopay-${Date.now()}`);
       const batch = writeBatch(db);
 
-      // Use the dynamic amount from state
       batch.update(userRef, { balance: increment(autoPayAmount) });
 
       batch.set(txRef, {
         type: 'deposit',
-        amount: autoPayAmount, // Use the dynamic amount
+        amount: autoPayAmount,
         source: 'auto-top-up',
         status: 'succeeded',
         balanceBefore: balance,
-        balanceAfter: balance + autoPayAmount, // Use the dynamic amount
+        balanceAfter: balance + autoPayAmount,
         timestamp: serverTimestamp(),
       });
 

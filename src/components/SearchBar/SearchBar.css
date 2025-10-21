@@ -13,5 +13,15 @@
 
     background-color: var(--text-colour);
 
-    color: var(--primary-colour)
+    color: var(--primary-colour);
+
+    box-shadow: 5px 5px 10px rgb(180, 180, 180) inset;
+    border: 1px var(--text-colour) solid;
+
+    transition: all 0.5s;
+}
+
+.SearchBar:focus{
+    box-shadow: 0px 0px 20px rgba(214, 210, 210, 0.427);
+    border: 1px var(--text-colour) solid;
 }
