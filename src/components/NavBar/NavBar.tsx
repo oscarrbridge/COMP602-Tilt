@@ -8,6 +8,10 @@ import { auth, db } from '../../../Backend/firebase/firebaseConfig';
 import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
 import './NavBar.css';
 
+import tiltLogo from '../../assets/Tilt.png';
+import userIcon from '../../assets/user-icon.png';
+import caretIcon from '../../assets/caret-icon.png';
+
 import NavWindow from '../NavWindow/NavWindow.tsx';
 import RegisterUser from '../../components/Auth/RegisterUser';
 import SignInPopup from '../../components/Auth/SignInUser';
@@ -87,7 +91,7 @@ export default function NavBar() {
       <CurrencyProvider base='NZD' DefaultCurrency='NZD'>
         <div className='NavBarContainer'>
           <div className='Logo' onClick={() => navigate('/')}>
-            <img src='src/assets/Tilt.png' width={80} />
+            <img src={tiltLogo} width={80} alt='Tilt logo' />
           </div>
 
           <div className='UserBalance'>
@@ -95,7 +99,7 @@ export default function NavBar() {
               {user ? (
                 <>
                   <div className='UserIcon'>
-                    <img src='src/assets/user-icon.png' width={25} />
+                    <img src={userIcon} width={25} alt='User' />
                   </div>
                   <UserBalance balance={balance} />
                   <div
@@ -103,14 +107,13 @@ export default function NavBar() {
                     onMouseEnter={() => SetNavActive(true)}
                     onMouseLeave={() => SetNavActive(false)}
                   >
-                    <img src='src/assets/caret-icon.png' width={25} />
+                    <img src={caretIcon} width={25} alt='Open' />
                     {NavActive && <NavWindow />}
                   </div>
                 </>
               ) : (
-                // Display a simpler icon or message when logged out
                 <div className='UserIcon'>
-                  <img src='src/assets/user-icon.png' width={25} />
+                  <img src={userIcon} width={25} alt='User' />
                 </div>
               )}
             </div>

@@ -28,6 +28,9 @@ export default function PanelMenu() {
           <li>
             <Link to="/roulette">🛞 Roulette</Link>
           </li>
+                    <li>
+            <Link to="/poker">🃏 Poker</Link>
+          </li>
         </ul>
       </div>
     </div>

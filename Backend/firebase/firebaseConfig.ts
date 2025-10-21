@@ -6,7 +6,7 @@ import { initializeApp } from 'firebase/app';
 import { connectAuthEmulator, getAuth, GoogleAuthProvider } from 'firebase/auth';
 // Import Firestore utilities:
 // - getFirestore: lets you create and manage a Firestore database instance
-import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
+import { connectFirestoreEmulator, getFirestore, setLogLevel } from 'firebase/firestore';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -27,6 +27,8 @@ export const googleProvider = new GoogleAuthProvider();
 
 // Initialize Cloud Firestore and get a reference to the service
 export const db = getFirestore(app);
+
+setLogLevel('debug');
 
 // if (window.location.hostname === 'localhost') {
 //   console.log('Development mode: Connecting to local Firebase emulators...');
