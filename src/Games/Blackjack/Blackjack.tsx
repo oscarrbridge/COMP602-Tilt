@@ -5,6 +5,8 @@ import { placeBet, recordWinTx, recordLossTx } from '../../../Backend/transactio
 import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
 import { CurrencyProvider } from '../../components/CurrencySwitcher/currencyswitcher.tsx';
 import BetControls from '../BetControls.tsx';
+import BlackjackFX from './BlackjackFX.tsx';
+import './BlackjackFX.css';
 
 const suits = ['♠', '♥', '♦', '♣'];
 const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
@@ -68,7 +70,7 @@ export default function Blackjack() {
       alert('Not enough balance!');
       return;
     }
-
+    setRoundResult('');
     setBetInBase(newBetInBase);
     setPlayerCards([getCard(), getCard()]);
     setDealerCards([getCard(), getCard()]);
@@ -143,7 +145,7 @@ export default function Blackjack() {
         </CurrencyProvider>
 
         {/* Table */}
-        <div className='table'>
+        <div className={`table ${roundResult ? `table--${roundResult}` : ''}`}>
           <div className='hand-container'>
             <h2>Dealer ({getDealerDisplayScore()})</h2>
             <div className='cards'>
@@ -172,9 +174,11 @@ export default function Blackjack() {
               ))}
             </div>
           </div>
+
+          <BlackjackFX result={roundResult as 'win' | 'loss' | 'tie' | ''} />
         </div>
 
-        {/* Hit / Stand */}
+        {/* Hit / Stand  */}
         {roundInProgress && (
           <div className='controls'>
             <button onClick={hit}>Hit</button>

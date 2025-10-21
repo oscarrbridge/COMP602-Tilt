@@ -115,7 +115,7 @@ export function InvitePopup() {
     await declineInvite(inv.id!);
   };
 
-  if (!invites.length) return null;
+  if (!user?.uid || !invites.length) return null;
 
   return (
     <div
@@ -219,27 +219,7 @@ export default function FriendsDock() {
     navigate(`/${gameType}/${newGameId}`);
   }
 
-  // If logged out
-  if (!user) {
-    return (
-      <div className='friends-dock friends-dock-collapsed'>
-        <button className='friends-pillar' onClick={() => setOpen((o) => !o)}>
-          Friends
-        </button>
-        {open && (
-          <div className='friends-dock-card'>
-            <div className='dock-header'>
-              <strong>Friends</strong>
-              <button className='dock-close' onClick={() => setOpen(false)}>
-                –
-              </button>
-            </div>
-            <div className='dock-body small'>Sign in to view and invite friends.</div>
-          </div>
-        )}
-      </div>
-    );
-  }
+  if (!user) return null;
 
   return (
     <div className={`friends-dock ${open ? 'open' : 'closed'}`}>
