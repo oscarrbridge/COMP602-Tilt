@@ -1,111 +1,135 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
-import { auth, db } from '../../../Backend/firebase/firebaseConfig'; // Adjust path if needed
+import { auth, db } from '../../../Backend/firebase/firebaseConfig';
+import { useCurrency } from '../CurrencySwitcher/currencyswitcher'; // same hook you used in BetControls
 import './AutoPayment.css';
 
-// The URL for your local FastAPI backend
-const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+// FastAPI URL
+const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:4000';
+
+// ---- helpers ----
+const clamp = (n: number, lo: number, hi: number) => Math.min(Math.max(n, lo), hi);
+const parseAmount = (s: string) => {
+  const n = Number(String(s).replace(/[^0-9.]/g, ''));
+  return Number.isFinite(n) ? n : 0;
+};
 
 export default function AutoPayment() {
   const [uid, setUid] = useState<string | null>(null);
   const [isEnabled, setIsEnabled] = useState(false);
-  const [amount, setAmount] = useState('20.00'); // Default top-up amount
+
+  // UI amount is in *active currency* dollars (string for the input)
+  const [amountInput, setAmountInput] = useState('20.00');
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Get the current user's UID
+  // currency utils (same shape as your BetControls)
+  const { convertFromBase, convert, code, base } = useCurrency(); // base is NZD in your app
+
+  // --- auth ---
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUid(user ? user.uid : null);
-    });
-    return () => unsubscribe();
+    const unsub = onAuthStateChanged(auth, (user) => setUid(user ? user.uid : null));
+    return () => unsub();
   }, []);
 
-  // Listen for real-time changes to the user's auto-pay settings in Firestore
+  // --- load settings (stored in NZD cents), render in active currency dollars ---
   useEffect(() => {
     if (!uid) {
       setIsLoading(false);
       return;
     }
-
-    const userRef = doc(db, 'users', uid);
-    const unsubscribe = onSnapshot(userRef, (docSnap) => {
+    const ref = doc(db, 'users', uid);
+    const unsub = onSnapshot(ref, (snap) => {
       setIsLoading(false);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setIsEnabled(data.autoPayEnabled || false);
-        if (data.autoPayAmountCents) {
-          setAmount((data.autoPayAmountCents / 100).toFixed(2));
-        }
+      if (!snap.exists()) return;
+
+      const data = snap.data() as any;
+      setIsEnabled(!!data.autoPayEnabled);
+
+      // Prefer cents canonical; fall back to dollars mirror if present.
+      // Values in DB are NZD cents (integer).
+      let nzdCents: number | null = null;
+      if (typeof data.autoPayAmountCents === 'number') {
+        nzdCents = data.autoPayAmountCents;
+      } else if (typeof data.autoPayAmountDollars === 'number') {
+        nzdCents = Math.round(Number(data.autoPayAmountDollars) * 100);
+      }
+
+      if (nzdCents != null) {
+        const nzdDollars = nzdCents / 100; // NZD dollars
+        const activeDollars = convertFromBase(nzdDollars); // -> active currency dollars
+        setAmountInput(activeDollars.toFixed(2));
       }
     });
+    return () => unsub();
+  }, [uid, convertFromBase]);
 
-    return () => unsubscribe();
-  }, [uid]);
+  // Convert current input (active currency dollars) -> NZD cents (int) for saving
+  const amountNzdCents = useMemo(() => {
+    const activeDollars = parseAmount(amountInput); // e.g. USD 20.00 if user switched
+    const nzdDollars = convert(activeDollars, code, base); // active -> NZD
+    return Math.round(nzdDollars * 100); // NZD cents (int)
+  }, [amountInput, convert, code, base]);
 
-  const toMinorUnits = (valueStr: string) => {
-    const n = Number(valueStr);
-    return isFinite(n) ? Math.round(n * 100) : 0;
+  const sendUpdate = async (enabled: boolean, nzdCents: number) => {
+    if (!uid) return;
+    setError('');
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/payments/update-autopay-settings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          uid,
+          autoPayEnabled: enabled,
+          autoPayAmountCents: nzdCents, // backend expects NZD cents (canonical)
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    } catch (e: any) {
+      setError(e.message || 'Failed to update settings.');
+      // revert the toggle UI if this was triggered from a toggle
+      setIsEnabled((prev) => prev); // no-op; handled by caller when needed
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // This function is called when the user wants to save their settings
+  // --- save button ---
   const handleSaveSettings = async () => {
     if (!uid) return;
-    setError('');
-    setIsLoading(true);
-
-    try {
-      // Update the settings in Firestore via your backend
-      await fetch(`${API_URL}/payments/update-autopay-settings`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          uid,
-          autoPayEnabled: isEnabled,
-          autoPayAmountCents: toMinorUnits(amount),
-        }),
-      });
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong.');
-    } finally {
-      setIsLoading(false);
-    }
+    // enforce a reasonable min ($5 in current currency) before converting
+    const clampedActive = clamp(parseAmount(amountInput), 5, 1_000_000);
+    setAmountInput(clampedActive.toFixed(2));
+    await sendUpdate(isEnabled, amountNzdCents);
   };
 
-  // This function handles the toggle action
+  // --- toggle ---
   const handleToggle = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!uid) return;
-    const checked = e.target.checked;
-    setIsEnabled(checked);
-    setError('');
-    setIsLoading(true);
+    const nextEnabled = e.target.checked;
+    setIsEnabled(nextEnabled);
 
-    try {
-      await fetch(`${API_URL}/payments/update-autopay-settings`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          uid,
-          autoPayEnabled: checked,
-          autoPayAmountCents: toMinorUnits(amount),
-        }),
-      });
-    } catch (err: any) {
-      setError(err.message || 'Failed to update settings.');
-      setIsEnabled(!checked); // Revert UI on error
-    } finally {
-      setIsLoading(false);
-    }
+    // If enabling and amount too small/invalid, force to 20.00 in UI currency
+    const parsed = parseAmount(amountInput);
+    const useAmountStr =
+      nextEnabled && (!Number.isFinite(parsed) || parsed < 5) ? '20.00' : amountInput;
+    if (useAmountStr !== amountInput) setAmountInput(useAmountStr);
+
+    await sendUpdate(nextEnabled, amountNzdCents);
   };
 
   return (
     <div className='AutoPaySetup'>
       <div className='ToggleControl'>
-        <label htmlFor='auto-pay-toggle'>Automatically top-up when balance is below $10</label>
+        <label htmlFor='auto-pay-toggle'>
+          Automatically top-up when balance is below $10 (NZD)
+        </label>
         <input
-          type='checkbox'
           id='auto-pay-toggle'
+          type='checkbox'
           checked={isEnabled}
           onChange={handleToggle}
           disabled={isLoading || !uid}
@@ -114,14 +138,14 @@ export default function AutoPayment() {
 
       {isEnabled && (
         <div className='SettingsControl'>
-          <p>Top-up amount:</p>
+          <p>Top-up amount ({code}):</p>
           <input
             type='number'
             inputMode='decimal'
-            min='5' // A reasonable minimum for auto-top-up
+            min='5'
             step='0.01'
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            value={amountInput}
+            onChange={(e) => setAmountInput(e.target.value)}
             disabled={isLoading}
           />
           <button onClick={handleSaveSettings} disabled={isLoading}>

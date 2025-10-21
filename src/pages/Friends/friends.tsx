@@ -1,6 +1,6 @@
 import './Friends.css';
 import NavBar from '../../components/NavBar/NavBar.tsx';
-import { useFriends } from '../../components/Friends/friends.tsx';
+import { useFriends } from '../../components/Friends/Friends.tsx';
 import { useState, useEffect } from 'react';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { useUser } from '@backend/firebase/UserFunctions.tsx';

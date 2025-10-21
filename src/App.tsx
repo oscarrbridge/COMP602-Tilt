@@ -1,26 +1,32 @@
-import NavBar from "./components/NavBar/NavBar";
-import SpecialEvent from "./components/SpecialEvent/SpecialEvent";
-import SpecialEventCreateButton from "./components/SpecialEvent/SpecialEventCreateButton";
-import type { SpecialEventItem } from "./components/SpecialEvent/ComponentType";
-import GameCard from "./components/GameCard/GameCard";
-import SearchBar from "./components/SearchBar/SearchBar";
-import FilterBar from "./components/FilterBar/FilterBar";
-import { AppProvider } from "@toolpad/core/AppProvider";
-import { createTheme } from "@mui/material/styles";
-import { useEffect, useMemo, useState } from "react";
-import { useLocalStorage } from "./hooks/StoreSpecialEvent";
+import NavBar from './components/NavBar/NavBar';
+import SpecialEvent from './components/SpecialEvent/SpecialEvent';
+import SpecialEventCreateButton from './components/SpecialEvent/SpecialEventCreateButton';
+import type { SpecialEventItem } from './components/SpecialEvent/ComponentType';
+import GameCard from './components/GameCard/GameCard';
+import SearchBar from './components/SearchBar/SearchBar';
+import FilterBar from './components/FilterBar/FilterBar';
+import { AppProvider } from '@toolpad/core/AppProvider';
+import { createTheme } from '@mui/material/styles';
+import { useEffect, useMemo, useState } from 'react';
+import { useLocalStorage } from './hooks/StoreSpecialEvent';
 import SearchGameCard from "./components/GameCard/SearchGameCard";
 import Footer from "@components/Footer/Footer.tsx";
         
-import { listenApprovedEvents, submitSpecialEvent, type NewEventInput } from '../Backend/firebase/events'; 
+import {
+  listenApprovedEvents,
+  submitSpecialEvent,
+  type NewEventInput,
+} from '../Backend/firebase/events';
+
 
 // Carousel imports
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-import Slider from "react-slick";
-import type { Settings } from "react-slick";
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
+import Slider from 'react-slick';
+import type { Settings } from 'react-slick';
 
-import "./App.css";
+import './App.css';
+import FriendsDock from '@components/Friends/FriendsOverlay';
 
 const theme = createTheme({ palette: { background: { default: 'var(--background)' } } });
 
@@ -33,15 +39,14 @@ const DEFAULT_CARD = {
   EventLink: '/',
 };
 
-
 export const PopularGames = [
   { Text: 'Slots',     Image: 'src/assets/slots.png',       LinkTo: '/slots' },
   { Text: 'Blackjack', Image: 'src/assets/blackjack.png',   LinkTo: '/blackjack' },
   { Text: 'Mines',     Image: 'src/assets/mines.png',       LinkTo: '/mines' },
   { Text: 'Coin Toss', Image: 'src/assets/coins.png',       LinkTo: '/cointoss' },
   { Text: 'Roulette', Image: 'src/assets/roulette.png',     LinkTo: '/roulette' },
-  { Text: 'Soon', Image: 'src/assets/crash.png',            LinkTo: '/crash' },
-  { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
+  { Text: 'Poker', Image: 'src/assets/poker.png',           LinkTo: '/poker' },
+  { Text: 'Crash', Image: 'src/assets/crash.png',           LinkTo: '/crash' },
 ];
 
 export const AllGames = [
@@ -50,20 +55,20 @@ export const AllGames = [
   { Text: 'Mines',     Image: 'src/assets/mines.png',       LinkTo: '/mines' },
   { Text: 'Coin Toss', Image: 'src/assets/coins.png',       LinkTo: '/cointoss' },
   { Text: 'Roulette', Image: 'src/assets/roulette.png',     LinkTo: '/roulette' },
+  { Text: 'Poker', Image: 'src/assets/poker.png',           LinkTo: '/poker' },
+  { Text: 'Crash', Image: 'src/assets/crash.png',           LinkTo: '/crash' },
   { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
   { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
   { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
   { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
-  { Text: 'Slots',     Image: 'src/assets/slots.png',       LinkTo: '/slots' },
-  { Text: 'Blackjack', Image: 'src/assets/blackjack.png',   LinkTo: '/blackjack' },
-  { Text: 'Mines',     Image: 'src/assets/mines.png',       LinkTo: '/mines' },
-  { Text: 'Coin Toss', Image: 'src/assets/coins.png',       LinkTo: '/cointoss' },
-  { Text: 'Roulette', Image: 'src/assets/roulette.png',     LinkTo: '/roulette' },
   { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
   { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
   { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
   { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
-  { Text: 'Slots',     Image: 'src/assets/slots.png',       LinkTo: '/slots' },
+  { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
+  { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
+  { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
+
 
 ];
 
@@ -91,9 +96,8 @@ export default function Dashboard() {
         ? d.EventImage
         : "src/assets/Tilt.png",
         EventLink: d.EventLink ?? '/',
-        createdAt: typeof d.createdAt?.toMillis === 'function'
-          ? d.createdAt.toMillis()
-          : (d.createdAt ?? 0),
+        createdAt:
+          typeof d.createdAt?.toMillis === 'function' ? d.createdAt.toMillis() : (d.createdAt ?? 0),
       })) as SpecialEventRender[];
       setEvents(mapped);
     });
@@ -128,9 +132,27 @@ export default function Dashboard() {
     adaptiveHeight: false,
     variableWidth: false,
     responsive: [
-      { breakpoint: 1200, settings: { slidesToShow: Math.min(3, itemsForSlider.length), infinite: itemsForSlider.length > Math.min(3, itemsForSlider.length) } },
-      { breakpoint: 900,  settings: { slidesToShow: Math.min(2, itemsForSlider.length), infinite: itemsForSlider.length > Math.min(2, itemsForSlider.length) } },
-      { breakpoint: 600,  settings: { slidesToShow: Math.min(1, itemsForSlider.length), infinite: itemsForSlider.length > Math.min(1, itemsForSlider.length) } },
+      {
+        breakpoint: 1200,
+        settings: {
+          slidesToShow: Math.min(3, itemsForSlider.length),
+          infinite: itemsForSlider.length > Math.min(3, itemsForSlider.length),
+        },
+      },
+      {
+        breakpoint: 900,
+        settings: {
+          slidesToShow: Math.min(2, itemsForSlider.length),
+          infinite: itemsForSlider.length > Math.min(2, itemsForSlider.length),
+        },
+      },
+      {
+        breakpoint: 600,
+        settings: {
+          slidesToShow: Math.min(1, itemsForSlider.length),
+          infinite: itemsForSlider.length > Math.min(1, itemsForSlider.length),
+        },
+      },
     ],
   };
 
@@ -147,20 +169,22 @@ export default function Dashboard() {
   return (
     <AppProvider theme={theme}>
       <NavBar />
+      <FriendsDock />
 
-      <div className="SpecialEventsContainer">
+      <div className='SpecialEventsContainer'>
         <h2>Special Events</h2>
 
         <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 12 }}>
           <SpecialEventCreateButton onAdd={addEvent} />
         </div>
 
-        <section className="SpecialEventsFull">
-          <div className="SpecialEventsInside">
+        <section className='SpecialEventsFull'>
+          <div className='SpecialEventsInside'>
             <Slider key={sliderKey} {...sliderSettings}>
               {itemsForSlider.map((event, i) => (
-                <div key={`${event.EventTitle}-${i}`} className="SpecialEventsSlide">
+                <div key={`${event.EventTitle}-${i}`} className='SpecialEventsSlide'>
                   <SpecialEvent
+                    id={event.id}
                     EventHook={event.EventHook}
                     EventTitle={event.EventTitle}
                     EventDescription={event.EventDescription}
@@ -174,9 +198,9 @@ export default function Dashboard() {
         </section>
       </div>
 
-      <div className="GamesContainer">
+      <div className='GamesContainer'>
         <h2>Popular Games</h2>
-        <div className="Games">
+        <div className='Games'>
           {PopularGames.map((game, i) => (
             <GameCard key={i} {...game} />
           ))}
@@ -214,9 +238,11 @@ export default function Dashboard() {
       </div>
    
 
+      
       <div className="Footer">
           <Footer />
       </div>
+
     </AppProvider>
   );
 }

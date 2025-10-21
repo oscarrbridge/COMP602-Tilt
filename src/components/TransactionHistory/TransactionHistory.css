@@ -1,12 +1,31 @@
+/* the ONLY scroller */
+.TransactionTable {
+  max-height: 60vh; /* pick a height that fits your layout */
+  overflow-y: auto; /* vertical scroll */
+  overflow-x: auto; /* horizontal scroll if needed */
+  border-radius: 14px;
+}
+
+/* table styles (no scrolling here) */
 .TransactionTable table {
-    width: 100%;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0; /* spacing breaks sticky headers & widths */
+}
 
-    text-align: left;
+/* optional: sticky header so columns stay visible while scrolling */
+.TransactionTable thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: black;
+}
 
-    justify-content: space-between;
-
-    border-spacing: 20px;
-
-    overflow: scroll;
-
+/* optional: nicer row spacing */
+.TransactionTable td,
+.TransactionTable th {
+  padding: 10px 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
