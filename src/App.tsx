@@ -161,6 +161,7 @@ export default function Dashboard() {
               {itemsForSlider.map((event, i) => (
                 <div key={`${event.EventTitle}-${i}`} className="SpecialEventsSlide">
                   <SpecialEvent
+                    id={event.id}
                     EventHook={event.EventHook}
                     EventTitle={event.EventTitle}
                     EventDescription={event.EventDescription}
