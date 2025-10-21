@@ -1,6 +1,8 @@
 import './Staff.css'
 import NavBar from '../../components/NavBar/NavBar.tsx'
 import { useState } from 'react'
+import Footer from "@components/Footer/footer";
+
 
 export default function Staff()
 {
@@ -30,6 +32,8 @@ export default function Staff()
                     <button onClick={GenarateCode}>Generate</button>
                 </div>
             </div>
+
+            <Footer />
         </>
     );
 } 

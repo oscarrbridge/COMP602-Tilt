@@ -6,6 +6,8 @@ import UniCodes from '../../components/AddUniBalance/AddUniBalance.tsx';
 import AutoPayment from '../../components/AutoPayment/AutoPayment.tsx';
 import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
 
+import Footer from "@components/Footer/footer";
+
 export default function Wallet() {
   useUser();
 
@@ -37,6 +39,7 @@ export default function Wallet() {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 }

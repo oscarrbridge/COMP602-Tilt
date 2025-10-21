@@ -8,11 +8,11 @@ interface GameCardProps {
   LinkTo?: string; // optional route to make card clickable
 }
 
-export default function GameCard({ Text, Image, LinkTo }: GameCardProps) {
+export default function SearchGameCard({ Text, Image, LinkTo }: GameCardProps) {
   const CardContent = (
-    <div className="GameCardImage">
-      <img src={Image} alt={Text + " icon"} className="GameCardIcon" />
-      <div className="GameCardText">
+    <div className="SearchGameCardImage">
+      <img src={Image} alt={Text + " icon"} className="SearchGameCardIcon" />
+      <div className="SearchGameCardText">
         <h3>{Text}</h3>
       </div>
     </div>
