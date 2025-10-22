@@ -1,10 +1,8 @@
 import './Statistics.css';
-import NavBar from '../../components/NavBar/NavBar.tsx';
-
-import History from '../../components/TransactionHistory/TransactionHistory.tsx';
-import UserStatistics from '../../components/UserStatistics/UserStatistics.tsx';
-
-import Footer from '@components/Footer/footer.tsx';
+import NavBar from '@components/NavBar/NavBar';
+import History from '@components/TransactionHistory/TransactionHistory';
+import UserStatistics from '@components/UserStatistics/UserStatistics';
+import Footer from '@components/Footer/Footer';
 
 export default function Statistics() {
   return (

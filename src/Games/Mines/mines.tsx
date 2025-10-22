@@ -1,13 +1,13 @@
-import { useMemo, useState, useEffect } from "react";
-import "./mines.css";
-import BackgroundLayout from "../../components/BackgroundLayout/BackgroundLayout";
-import { placeBet, recordWinTx, recordLossTx } from "../../../Backend/transactions";
-import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
-import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx";
-import BetControls from "../BetControls.tsx";
+import { useMemo, useState, useEffect } from 'react';
+import './mines.css';
+import BackgroundLayout from '../../components/BackgroundLayout/BackgroundLayout';
+import { placeBet, recordWinTx, recordLossTx } from '../../../Backend/transactions';
+import { useUser } from '@backend/firebase/UserFunctions';
+import { CurrencyProvider } from '@components/CurrencySwitcher/currencyswitcher';
+import BetControls from '../BetControls';
 
 // Game states during playtime
-type Status = "Idle" | "Playing" | "Lost" | "Cash";
+type Status = 'Idle' | 'Playing' | 'Lost' | 'Cash';
 
 // Definition for one cell
 type Cell = {
@@ -29,16 +29,16 @@ function Board({
   OnCellClick: (index: number) => void;
 }) {
   return (
-    <div className="board" style={{ "--size": Size } as React.CSSProperties}>
+    <div className='board' style={{ '--size': Size } as React.CSSProperties}>
       {Cells.map((cell) => (
         <div
           key={cell.Index}
-          className={`cell ${cell.Revealed ? "revealed" : ""} ${
-            cell.Revealed && cell.IsMine ? "mine" : ""
+          className={`cell ${cell.Revealed ? 'revealed' : ''} ${
+            cell.Revealed && cell.IsMine ? 'mine' : ''
           }`}
           onClick={() => !GameOver && !cell.Revealed && OnCellClick(cell.Index)}
         >
-          {cell.Revealed && cell.IsMine ? "💣" : cell.Revealed ? "💎" : ""}
+          {cell.Revealed && cell.IsMine ? '💣' : cell.Revealed ? '💎' : ''}
         </div>
       ))}
     </div>
@@ -50,10 +50,10 @@ export default function Mines() {
   const { user, balance, refreshBalance } = useUser(); // balance is in cents
   const [Size, SetSize] = useState(5);
   const [Mines, SetMines] = useState(5);
-  const [bet, setBet] = useState(10);       // bet shown in whole dollars
+  const [bet, setBet] = useState(10); // bet shown in whole dollars
   const [betInBase, setBetInBase] = useState(0); // bet in cents (NZD base)
   const [Cells, SetCells] = useState<Cell[] | null>(null);
-  const [Status, SetStatus] = useState<Status>("Idle");
+  const [Status, SetStatus] = useState<Status>('Idle');
   const [SafeRevealed, SetSafeRevealed] = useState(0);
 
   const total = Size * Size;
@@ -113,7 +113,7 @@ export default function Mines() {
   const startGame = async (newBetInBase: number) => {
     // newBetInBase is in cents
     if (newBetInBase > balance) {
-      alert("Not enough balance!");
+      alert('Not enough balance!');
       return;
     }
 
@@ -122,14 +122,14 @@ export default function Mines() {
     const validMines = Math.max(1, Math.min(Mines, total - 1));
     SetCells(BoardCreate(Size, validMines));
     SetSafeRevealed(0);
-    SetStatus("Playing");
-
-    await placeBet(user.uid, newBetInBase, 1, "mines");
+    SetStatus('Playing');
+    if (!user) return;
+    await placeBet(user.uid, newBetInBase, 1, 'mines');
     await refreshBalance();
   };
 
   async function HandleCellClick(index: number) {
-    if (Status !== "Playing" || !Cells) return;
+    if (Status !== 'Playing' || !Cells) return;
 
     const tile = Cells[index];
     if (tile.Revealed) return;
@@ -138,13 +138,11 @@ export default function Mines() {
     next[index] = { ...tile, Revealed: true };
 
     if (tile.IsMine) {
-      const revealedAll = next.map((c) =>
-        c.IsMine ? { ...c, Revealed: true } : c
-      );
+      const revealedAll = next.map((c) => (c.IsMine ? { ...c, Revealed: true } : c));
       SetCells(revealedAll);
-      SetStatus("Lost");
-
-      await recordLossTx(user.uid, betInBase, 1, "mines");
+      SetStatus('Lost');
+      if (!user) return;
+      await recordLossTx(user.uid, betInBase, 1, 'mines');
       await refreshBalance();
       return;
     }
@@ -158,9 +156,10 @@ export default function Mines() {
       reset();
       return;
     }
-    if (Status === "Playing" && SafeRevealed > 0) {
-      SetStatus("Cash");
-      await recordWinTx(user.uid, PayoutNow, 1, "mines");
+    if (Status === 'Playing' && SafeRevealed > 0) {
+      SetStatus('Cash');
+      if (!user) return;
+      await recordWinTx(user.uid, PayoutNow, 1, 'mines');
       await refreshBalance();
     }
   };
@@ -168,10 +167,10 @@ export default function Mines() {
   function reset() {
     SetCells(null);
     SetSafeRevealed(0);
-    SetStatus("Idle");
+    SetStatus('Idle');
   }
 
-  const gameOver = Status === "Lost" || Status === "Cash";
+  const gameOver = Status === 'Lost' || Status === 'Cash';
 
   const placeholder: Cell[] = Array.from({ length: total }, (_, i) => ({
     Index: i,
@@ -180,8 +179,8 @@ export default function Mines() {
   }));
 
   useEffect(() => {
-    if (Status === "Lost" || Status === "Cash") {
-      const timer = setTimeout(() => SetStatus("Idle"), 2000);
+    if (Status === 'Lost' || Status === 'Cash') {
+      const timer = setTimeout(() => SetStatus('Idle'), 2000);
       return () => clearTimeout(timer);
     }
   }, [Status]);
@@ -189,17 +188,17 @@ export default function Mines() {
   // --- UI ---
   return (
     <BackgroundLayout>
-      <CurrencyProvider base="NZD" DefaultCurrency="NZD">
-        <div className="game-container">
-          <div className="app">
+      <CurrencyProvider base='NZD' DefaultCurrency='NZD'>
+        <div className='game-container'>
+          <div className='app'>
             <h1>Mines</h1>
 
-            <div className="panel">
+            <div className='panel'>
               {/* Shared bet controls */}
-              {(Status === "Idle" || Status === "Lost" || Status === "Cash") && (
+              {(Status === 'Idle' || Status === 'Lost' || Status === 'Cash') && (
                 <BetControls
-                  balance={balance}   // cents
-                  bet={bet}           // dollars
+                  balance={balance} // cents
+                  bet={bet} // dollars
                   setBet={setBet}
                   startGame={startGame}
                 />
@@ -209,7 +208,7 @@ export default function Mines() {
                 <select
                   value={Size}
                   onChange={(e) => SetSize(Number(e.target.value))}
-                  disabled={Status === "Playing"}
+                  disabled={Status === 'Playing'}
                 >
                   {[3, 4, 5, 6].map((n) => (
                     <option key={n} value={n}>
@@ -222,38 +221,38 @@ export default function Mines() {
               <label>
                 Mines
                 <input
-                  type="number"
+                  type='number'
                   min={1}
                   max={total - 1}
                   value={Mines}
                   onChange={(e) => SetMines(Number(e.target.value))}
-                  disabled={Status === "Playing"}
+                  disabled={Status === 'Playing'}
                 />
               </label>
 
-              {Status === "Playing" && (
-                <button onClick={cashOut}>Cash out</button>
-              )}
+              {Status === 'Playing' && <button onClick={cashOut}>Cash out</button>}
             </div>
 
-            <div className="results">
-              <span className="result">Safes Found: {SafeRevealed}</span>
-              <span className="result">Current Multiplier ×{CurrentMult}</span>
-              <span className="result">
-                Current Payout: ${(PayoutNow / 100).toFixed(2)}
-              </span>
-              {Status === "Playing" && (
-                <span className="result">
+            <div className='results'>
+              <span className='result'>Safes Found: {SafeRevealed}</span>
+              <span className='result'>Current Multiplier ×{CurrentMult}</span>
+              <span className='result'>Current Payout: ${(PayoutNow / 100).toFixed(2)}</span>
+              {Status === 'Playing' && (
+                <span className='result'>
                   Next Safe ×{nextFactor} (${(NextPayout / 100).toFixed(2)})
                 </span>
               )}
             </div>
 
-            <div className="status">
-              {Status === "Idle" && <>Press <b>Bet</b> to play.</>}
-              {Status === "Playing" && <>Pick Tiles</>}
-              {Status === "Lost" && <>💣 Mine Hit. You lost.</>}
-              {Status === "Cash" && <>💰 Cashed Out: ${(PayoutNow / 100).toFixed(2)}</>}
+            <div className='status'>
+              {Status === 'Idle' && (
+                <>
+                  Press <b>Bet</b> to play.
+                </>
+              )}
+              {Status === 'Playing' && <>Pick Tiles</>}
+              {Status === 'Lost' && <>💣 Mine Hit. You lost.</>}
+              {Status === 'Cash' && <>💰 Cashed Out: ${(PayoutNow / 100).toFixed(2)}</>}
             </div>
 
             <Board

@@ -1,5 +1,5 @@
 // pokerfunctions.ts
-import { db } from '../../../Backend/firebase/firebaseConfig';
+import { db } from '@backend/firebase/firebaseConfig';
 import {
   collection,
   doc,
@@ -303,8 +303,6 @@ export async function drawCardsTx(gameId: string, n: number): Promise<string[]> 
     return drawn;
   });
 }
-
-const isFiniteNumber = (x: any) => typeof x === 'number' && Number.isFinite(x);
 
 function sanitize<T extends Record<string, any>>(obj: T): T {
   const out: any = {};

@@ -3,11 +3,9 @@ import { initializeApp } from 'firebase/app';
 // Import Firebase Authentication utilities:
 // - getAuth: lets you create and manage the auth instance
 // - GoogleAuthProvider: configures Google as a sign-in provider
-import { connectAuthEmulator, getAuth, GoogleAuthProvider } from 'firebase/auth';
-// Import Firestore utilities:
+import { getAuth, GoogleAuthProvider } from 'firebase/auth'; // Import Firestore utilities:
 // - getFirestore: lets you create and manage a Firestore database instance
-import { connectFirestoreEmulator, getFirestore, setLogLevel } from 'firebase/firestore';
-
+import { getFirestore, setLogLevel } from 'firebase/firestore';
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: 'AIzaSyA_EsLgUuYr9SwOyur4Yv7tlI9fNrqypak',
@@ -39,3 +37,7 @@ setLogLevel('debug');
 //   // Point Auth to the local emulator
 //   connectAuthEmulator(auth, 'http://127.0.0.1:9099');
 // }
+
+// quiet logs during tests
+const isTest = typeof import.meta !== 'undefined' && import.meta.env?.MODE === 'test';
+setLogLevel(isTest ? 'silent' : 'debug');

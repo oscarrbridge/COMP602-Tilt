@@ -1,0 +1,64 @@
+// authService.ts contains the functions for signup/login/logout
+import { auth, googleProvider, db } from '@backend/firebase/firebaseConfig';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, signOut, } from 'firebase/auth';
+async function profileData(user, extras) {
+    // Create Firestore user profile if it doesn't exist
+    const userProfile = doc(db, 'users', user.uid);
+    // Grabs the profile that was registered
+    const grabUser = await getDoc(userProfile);
+    // If that profile doesn't already exist
+    if (!grabUser.exists()) {
+        // Create the user's attributes
+        await setDoc(userProfile, {
+            email: user.email,
+            emailLower: user.email?.toLowerCase() ?? null,
+            // Username becomes the email address before '@'
+            // eg: email = tilt_account@gmail.com,
+            //     username = tilt_account
+            username: user.email?.split('@')[0],
+            usernameLower: user.email?.split('@')[0].toLowerCase(),
+            // Balance and history initilised to 0
+            balance: 0,
+            totalWinnings: 0,
+            totalLosses: 0,
+            netProfit: 0,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            uniBalance: 0,
+            university: extras?.university ?? null,
+            role: 'user',
+            friends: extras?.friends ?? [],
+        }, 
+        // Add merge to prevent override
+        { merge: true });
+    }
+    else {
+        await setDoc(userProfile, { updatedAt: serverTimestamp() }, { merge: true });
+        if (extras?.university) {
+            await setDoc(userProfile, { university: extras.university }, { merge: true });
+        }
+    }
+}
+// Register with email + password
+export async function registerUser(email, password, extras) {
+    const { user } = await createUserWithEmailAndPassword(auth, email, password);
+    await profileData(user, extras);
+    return user;
+}
+// Login with email + password
+export async function signInUser(email, password) {
+    const { user } = await signInWithEmailAndPassword(auth, email, password);
+    await profileData(user);
+    return user;
+}
+// Sign in with Google
+export async function signInWithGoogle(extras) {
+    const { user } = await signInWithPopup(auth, googleProvider);
+    await profileData(user, extras);
+    return user;
+}
+// Sign out
+export const signOutUser = () => {
+    return signOut(auth);
+};

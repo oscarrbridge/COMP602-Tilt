@@ -1,0 +1,475 @@
+:root {
+  --win-glow: rgba(70, 255, 140, 0.58); /* bumped */
+  --loss-red: rgba(255, 77, 109, 0.75);
+  --gold: #ffd86b;
+  --gold-edge: #caa23e;
+}
+
+/* base */
+.bj-fx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 15;
+  isolation: isolate;
+}
+.bj-fx * {
+  will-change: transform, opacity, filter;
+}
+
+/* table reactions (keep your .table--win/loss toggles) */
+.table--win {
+  animation: fx-table-win 1000ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.table--loss {
+  animation: fx-table-loss 680ms cubic-bezier(0.35, 0.01, 0.27, 0.99);
+}
+@keyframes fx-table-win {
+  0% {
+    filter: brightness(1);
+  }
+  20% {
+    filter: brightness(1.18) saturate(1.18);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+@keyframes fx-table-loss {
+  0%,
+  100% {
+    transform: translate(0) rotate(0);
+  }
+  12% {
+    transform: translate(-3px, -1px) rotate(-0.5deg);
+  }
+  28% {
+    transform: translate(4px, 1px) rotate(0.4deg);
+  }
+  46% {
+    transform: translate(-3px, 0) rotate(-0.3deg);
+  }
+  62% {
+    transform: translate(2px, -1px) rotate(0.25deg);
+  }
+  80% {
+    transform: translate(-2px, 0) rotate(-0.2deg);
+  }
+}
+
+/* vignette + flash */
+.bj-fx__vignette,
+.bj-fx__flash,
+.bj-fx__smoke {
+  position: absolute;
+  inset: 0;
+}
+.bj-fx--win .bj-fx__vignette {
+  background:
+    radial-gradient(70% 60% at 50% 50%, var(--win-glow), transparent 70%),
+    radial-gradient(120% 90% at 50% 50%, rgba(0, 0, 0, 0.2), transparent 70%);
+  mix-blend-mode: screen;
+  animation: fx-vignette 1000ms ease forwards;
+}
+.bj-fx--loss .bj-fx__vignette {
+  background:
+    radial-gradient(100% 78% at 50% 50%, rgba(0, 0, 0, 0.45), transparent 75%),
+    radial-gradient(68% 50% at 50% 50%, rgba(255, 77, 109, 0.24), transparent 70%);
+  animation: fx-vignette 720ms ease forwards;
+}
+@keyframes fx-vignette {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.9;
+  }
+}
+.bj-fx--loss .bj-fx__flash {
+  background: radial-gradient(55% 45% at 50% 45%, var(--loss-red), rgba(255, 77, 109, 0) 65%);
+  filter: blur(8px);
+  animation: fx-flash 420ms ease-out;
+}
+@keyframes fx-flash {
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* WIN: shockwave ring */
+.bj-fx__ring {
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.9),
+    0 0 28px 6px var(--win-glow);
+  animation: fx-ring 900ms ease-out forwards;
+}
+@keyframes fx-ring {
+  0% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+  40% {
+    opacity: 0.85;
+    transform: translate(-50%, -50%) scale(11);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(15);
+  }
+}
+
+/* WIN: beams (rotating light rays) */
+.bj-fx__beams {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  mix-blend-mode: screen;
+}
+.bj-fx__beams span {
+  --i: 0;
+  position: absolute;
+  width: 2px;
+  height: 44vh;
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0));
+  filter: drop-shadow(0 0 12px var(--win-glow));
+  transform-origin: center 80%;
+  transform: rotate(calc(45deg * var(--i))) translateY(8%);
+  animation: fx-beam 1200ms ease-out forwards;
+}
+@keyframes fx-beam {
+  0% {
+    opacity: 0;
+    filter: blur(2px) drop-shadow(0 0 0 transparent);
+  }
+  18% {
+    opacity: 0.9;
+  }
+  70% {
+    opacity: 0.9;
+    transform: rotate(360deg) translateY(-2%);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(540deg) translateY(-6%);
+  }
+}
+
+/* WIN: chips */
+.bj-fx__chips {
+  position: absolute;
+  inset: 0;
+  perspective: 900px;
+}
+.bj-fx__chips span {
+  --dx: 0px;
+  --dy: 0px;
+  --dz: 0px;
+  --delay: 0ms;
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #fff, var(--gold) 38%, var(--gold-edge) 88%);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55);
+  transform: translate(-50%, -50%) scale(1);
+  animation: fx-coin 980ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: var(--delay);
+}
+@keyframes fx-coin {
+  0% {
+    opacity: 0.98;
+    transform: translate(-50%, -50%) scale(0.85);
+    filter: brightness(1);
+  }
+  55% {
+    opacity: 0.98;
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.1);
+    filter: brightness(1.12);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy) - 60px)) scale(0.88);
+    filter: brightness(0.96);
+  }
+}
+
+/* WIN: rainbow confetti with trails */
+.bj-fx__confetti {
+  position: absolute;
+  inset: 0;
+}
+.bj-fx__confetti span {
+  --x: 0px;
+  --y: 0px;
+  --rot: 0deg;
+  --delay: 0ms;
+  --hue: 0;
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  width: 8px;
+  height: 18px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, hsl(var(--hue) 90% 70%), hsl(calc(var(--hue) + 15) 90% 55%));
+  transform: translate(-50%, -50%) rotate(0);
+  opacity: 0.98;
+  animation: fx-confetti 1100ms cubic-bezier(0.18, 0.8, 0.22, 1) forwards;
+  animation-delay: var(--delay);
+}
+.bj-fx__confetti span::after {
+  content: '';
+  position: absolute;
+  inset: auto auto -10px 0;
+  width: 100%;
+  height: 10px;
+  border-radius: 2px;
+  background: inherit;
+  filter: blur(4px);
+  opacity: 0.6;
+}
+@keyframes fx-confetti {
+  0% {
+    opacity: 0.98;
+  }
+  70% {
+    transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y) + 100px)) rotate(var(--rot));
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y) + 160px))
+      rotate(calc(var(--rot) + 120deg));
+  }
+}
+
+/* WIN: sparkle dust */
+.bj-fx__sparkle {
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: screen;
+}
+.bj-fx__sparkle i {
+  --d: 0ms;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 0 12px rgba(255, 255, 255, 0.95),
+    0 0 22px var(--win-glow);
+  transform: translate(-50%, -50%) scale(0);
+  animation: fx-star 700ms ease-out forwards;
+  animation-delay: var(--d);
+}
+.bj-fx__sparkle i:nth-child(odd) {
+  left: calc(50% + 22px);
+}
+.bj-fx__sparkle i:nth-child(3n) {
+  top: calc(50% - 20px);
+}
+@keyframes fx-star {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  38% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.3);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -70%) scale(0.6);
+  }
+}
+
+/* WIN: chromatic fringe */
+.bj-fx__chroma {
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: screen;
+  animation: fx-chroma 800ms ease;
+}
+@keyframes fx-chroma {
+  0% {
+    filter: drop-shadow(0 0 0 rgba(255, 0, 120, 0)) drop-shadow(0 0 0 rgba(0, 200, 255, 0));
+  }
+  25% {
+    filter: drop-shadow(0 0 6px rgba(255, 0, 120, 0.45))
+      drop-shadow(0 0 6px rgba(0, 200, 255, 0.45));
+  }
+  100% {
+    filter: drop-shadow(0 0 0 rgba(255, 0, 120, 0)) drop-shadow(0 0 0 rgba(0, 200, 255, 0));
+  }
+}
+
+/* LOSS: crack overlay + shards + smoke */
+.bj-fx__crack {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(60% 40% at 50% 45%, rgba(255, 255, 255, 0.06), transparent 70%),
+    conic-gradient(
+      from 0deg,
+      rgba(255, 255, 255, 0.2) 0 2deg,
+      transparent 2deg 15deg,
+      rgba(255, 255, 255, 0.2) 15deg 17deg,
+      transparent 17deg 33deg,
+      rgba(255, 255, 255, 0.2) 33deg 35deg,
+      transparent 35deg 360deg
+    );
+  mask: radial-gradient(70% 50% at 50% 50%, rgba(255, 255, 255, 0.9), transparent 70%);
+  opacity: 0;
+  animation: fx-crack 560ms ease-out forwards;
+}
+@keyframes fx-crack {
+  0% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.bj-fx__shards {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  align-content: start;
+  opacity: 0.99;
+}
+.bj-fx__shards span {
+  width: 12px;
+  height: 16px;
+  margin: 3px auto 0;
+  border-radius: 2px;
+  background: linear-gradient(135deg, #ff6b6b, #ff2e63 60%, #ff9aa2);
+  filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.5));
+  transform: translateY(-120%) rotate(0) scale(0.9);
+  animation: fx-shard 1100ms cubic-bezier(0.16, 0.86, 0.22, 1) forwards;
+  animation-delay: var(--delay, 0ms);
+}
+@keyframes fx-shard {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  65% {
+    transform: translateY(20%) rotate(260deg) scale(1.05);
+  }
+  100% {
+    transform: translateY(140%) rotate(600deg) scale(0.95);
+    opacity: 0;
+  }
+}
+
+.bj-fx__smoke {
+  background:
+    radial-gradient(40% 30% at 30% 20%, rgba(255, 255, 255, 0.1), transparent 70%) no-repeat,
+    radial-gradient(35% 28% at 70% 15%, rgba(255, 255, 255, 0.1), transparent 70%) no-repeat,
+    radial-gradient(45% 35% at 50% 30%, rgba(255, 255, 255, 0.1), transparent 72%) no-repeat;
+  background-size:
+    40% 30%,
+    35% 28%,
+    50% 40%;
+  background-position:
+    30% 20%,
+    70% 12%,
+    50% 28%;
+  opacity: 0;
+}
+.bj-fx--loss .bj-fx__smoke {
+  animation: fx-smoke 1200ms ease-out forwards;
+}
+@keyframes fx-smoke {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(2px);
+  }
+  30% {
+    opacity: 0.4;
+    filter: blur(3px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-12px);
+    filter: blur(7px);
+  }
+}
+
+/* TIE shimmer */
+.bj-fx__sheen {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(70% 40% at 50% 45%, rgba(160, 200, 255, 0.32), transparent 70%);
+  mix-blend-mode: screen;
+  animation: fx-sheen 1000ms ease both;
+}
+@keyframes fx-sheen {
+  0% {
+    opacity: 0;
+    filter: blur(0);
+  }
+  18% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    filter: blur(2px);
+  }
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .bj-fx__vignette,
+  .bj-fx__flash,
+  .bj-fx__ring,
+  .bj-fx__beams span,
+  .bj-fx__chips span,
+  .bj-fx__confetti span,
+  .bj-fx__sparkle i,
+  .bj-fx__chroma,
+  .bj-fx__crack,
+  .bj-fx__shards span,
+  .bj-fx__smoke,
+  .bj-fx__sheen,
+  .table--win,
+  .table--loss {
+    animation: none !important;
+    transition: none !important;
+    opacity: 0 !important;
+    filter: none !important;
+  }
+}
