@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useFriends } from './friends';
+import { useFriends } from './FriendsHelpers';
 import { useUser } from '../../../Backend/firebase/UserFunctions';
 import InviteButton from './InviteButton';
-import './Friends.css';
+import './FriendsList.css';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createGameLobby, joinGameLobby } from '../../../Backend/lobby_functions';
 import { sendInvite, listenIncomingInvites, declineInvite } from './Invite';

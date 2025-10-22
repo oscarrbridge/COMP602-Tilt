@@ -1,0 +1,125 @@
+import { jsxs as _jsxs, jsx as _jsx } from "react/jsx-runtime";
+import { useEffect, useState } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '@backend/firebase/firebaseConfig';
+import './Deposit.css';
+import { useCurrency } from '../CurrencySwitcher/currencyswitcher';
+const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:4000';
+export default function Deposit() {
+    // States for uid, withdraw amount, currency type, submit payment, error
+    const [uid, setUid] = useState(auth.currentUser?.uid ?? null);
+    const [amount, setAmount] = useState('');
+    const { code, setCode } = useCurrency();
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState('');
+    // Keep uid in sync with Firebase auth state
+    // If we already have a uid, skip
+    useEffect(() => {
+        if (uid)
+            return;
+        const unsub = onAuthStateChanged(auth, (u) => setUid(u?.uid ?? null));
+        return () => unsub();
+    }, [uid]);
+    // keep currency in sync with NavWindow (reads localStorage)
+    useEffect(() => {
+        const KEY = 'currency.code';
+        // Type guard for allowed currency codes
+        const isCurrency = (x) => x === 'NZD' || x === 'AUD' || x === 'USD' || x === 'EUR' || x === 'GBP';
+        // Initial sync on mount: read current value from localStorage
+        const initial = localStorage.getItem(KEY);
+        if (isCurrency(initial) && initial !== code)
+            setCode(initial);
+        // Same-tab change detection:
+        // The storage event does not fire in the same tab that wrote the value,
+        let last = initial ?? code;
+        const id = window.setInterval(() => {
+            const cur = localStorage.getItem(KEY);
+            if (cur && cur !== last) {
+                last = cur;
+                if (isCurrency(cur) && cur !== code)
+                    setCode(cur);
+            }
+        }, 250);
+        // Also resync when the window regains focus (covers tab switches / minimized)
+        const onFocus = () => {
+            const cur = localStorage.getItem(KEY);
+            if (isCurrency(cur) && cur !== code)
+                setCode(cur);
+        };
+        window.addEventListener('focus', onFocus);
+        // Cross-tab sync:
+        // The 'storage' event fires in *other* tabs when localStorage changes.
+        const onStorage = (e) => {
+            if (e.key !== KEY || e.newValue == null)
+                return;
+            if (isCurrency(e.newValue) && e.newValue !== code)
+                setCode(e.newValue);
+        };
+        window.addEventListener('storage', onStorage);
+        // Cleanup, stop polling and remove listeners on unmount
+        return () => {
+            clearInterval(id);
+            window.removeEventListener('focus', onFocus);
+            window.removeEventListener('storage', onStorage);
+        };
+    }, [code, setCode]);
+    // Convert major units into minor units for active currency
+    function toMinorUnits(valueStr, currCode) {
+        const n = Number(valueStr);
+        if (!isFinite(n))
+            return 0;
+        const factor = currCode.toUpperCase() === 'JPY' ? 1 : 100;
+        return Math.round(n * factor);
+    }
+    // Submit helper:
+    // Validates minimum amount: $0
+    // POSTs to /payments/withdraw with { uid, amount_cents, currency }
+    // Shows success or error
+    async function onSubmit(e) {
+        e.preventDefault();
+        setError('');
+        // Must be signed in to deposit
+        if (!uid) {
+            setError('Please sign in to make a deposit.');
+            return;
+        }
+        // Validate amount in cents, checks for minimum
+        const amount_cents = toMinorUnits(amount, code);
+        if (!amount_cents || amount_cents <= 0) {
+            setError(`Enter a valid amount greater than 0`);
+            return;
+        }
+        try {
+            setSubmitting(true);
+            // Call backend, currency is normalized to lowercase
+            const res = await fetch(`${API_URL}/payments/deposit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    uid,
+                    amount_cents,
+                    currency: code.toLowerCase(),
+                }),
+            });
+            // If the server says the request did not work
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                // Use the server’s message if it exists
+                throw new Error(err.detail || `Request failed (${res.status})`);
+            }
+            // The request worked so we expect the server to give us a link to continue
+            const { url } = await res.json();
+            // If there is no link, treat it as an error we can show to the user
+            if (!url)
+                throw new Error('No checkout URL returned.');
+            // If there is a link, send the browser there (the checkout page)
+            window.location.href = url;
+        }
+        catch (err) {
+            // Failed: show message and re-enable the form
+            setError(err.message || 'Something went wrong starting the deposit.');
+            setSubmitting(false);
+        }
+    }
+    return (_jsx("div", { className: 'DepositPage', children: _jsxs("form", { className: 'WithdrawForm', onSubmit: onSubmit, children: [_jsxs("label", { children: ["Amount (", code, "):"] }), _jsx("input", { type: 'number', inputMode: 'decimal', min: '0', step: '0.01', placeholder: 'Enter amount, e.g., 10.00', value: amount, onChange: (e) => setAmount(e.target.value), disabled: submitting }), _jsx("button", { type: 'submit', disabled: submitting || !uid, children: submitting ? 'Redirecting…' : 'Deposit' }), !uid && _jsx("p", { className: 'FormHint', children: "You must be signed in to deposit." }), error && _jsx("p", { className: 'FormError', children: error })] }) }));
+}

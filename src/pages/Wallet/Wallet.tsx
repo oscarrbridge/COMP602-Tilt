@@ -1,11 +1,11 @@
 import './Wallet.css';
-import NavBar from '../../components/NavBar/NavBar.tsx';
-import Withdraw from '../../components/Withdraw/Withdraw.tsx';
-import Deposit from '../../components/Deposit/Deposit.tsx';
-import UniCodes from '../../components/AddUniBalance/AddUniBalance.tsx';
-import AutoPayment from '../../components/AutoPayment/AutoPayment.tsx';
-import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
-import Footer from '@components/Footer/footer';
+import NavBar from '@components/NavBar/NavBar';
+import Withdraw from '@components/Withdraw/Withdraw';
+import Deposit from '@components/Deposit/Deposit';
+import UniCodes from '@components/AddUniBalance/AddUniBalance';
+import AutoPayment from '@components/AutoPayment/AutoPayment';
+import { useUser } from '@backend/firebase/UserFunctions';
+import Footer from '@components/Footer/Footer';
 
 export default function Wallet() {
   useUser();

@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import './Slots.css';
-import { placeBet, recordWinTx, recordLossTx } from '../../../Backend/transactions';
-import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
-import { CurrencyProvider } from '../../components/CurrencySwitcher/currencyswitcher.tsx';
-import BetControls from '../BetControls.tsx';
-import BackgroundLayout from '../../components/BackgroundLayout/BackgroundLayout';
-import '../../components/animations/win.css';
-import '../../components/animations/loss.css';
-import { resetFx } from '../../components/animations/animation';
+import { placeBet, recordWinTx, recordLossTx } from '@backend/transactions';
+import { useUser } from '@backend/firebase/UserFunctions';
+import { CurrencyProvider } from '@components/CurrencySwitcher/currencyswitcher';
+import BetControls from '../BetControls';
+import BackgroundLayout from '@components/BackgroundLayout/BackgroundLayout';
+import '@components/animations/win.css';
+import '@components/animations/loss.css';
+import { resetFx } from '@components/animations/animation';
 
 type WinTier = '' | 'win' | 'bigwin' | 'jackpot';
 type LossTier = '' | 'loss' | 'bust';
@@ -63,7 +63,7 @@ export default function Slots() {
   const { user, balance, refreshBalance } = useUser();
   const [grid, setGrid] = useState<number[][]>([]);
   const [bet, setBet] = useState<number>(2.0);
-  const [lastWin, setLastWin] = useState<number>(0);
+  const [, setLastWin] = useState<number>(0);
   const [winningCells, setWinningCells] = useState<number[]>([]);
   const [roundInProgress, setRoundInProgress] = useState(false);
   const hostRef = useRef<HTMLDivElement>(null);
@@ -100,7 +100,7 @@ export default function Slots() {
     }
     setRoundInProgress(true);
     setLastWin(0);
-
+    if (!user) return;
     await placeBet(user.uid, betInBase, 1, 'slots');
     await refreshBalance();
 

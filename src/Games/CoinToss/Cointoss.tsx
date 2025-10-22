@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import './Cointoss.css';
-import BackgroundLayout from '../../components/BackgroundLayout/BackgroundLayout';
-import { placeBet, recordWinTx, recordLossTx } from '../../../Backend/transactions';
-import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
-import { CurrencyProvider } from '../../components/CurrencySwitcher/currencyswitcher.tsx';
-import BetControls from '../BetControls.tsx';
+import BackgroundLayout from '@components/BackgroundLayout/BackgroundLayout';
+import { placeBet, recordWinTx, recordLossTx } from '@backend/transactions';
+import { useUser } from '@backend/firebase/UserFunctions';
+import { CurrencyProvider } from '@components/CurrencySwitcher/currencyswitcher';
+import BetControls from '../BetControls';
 import coinBase from '../../assets/coin.png';
 import coinHead from '../../assets/coin-head.png';
 import coinTail from '../../assets/Tilt-icon.png';

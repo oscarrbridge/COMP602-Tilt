@@ -1,23 +1,20 @@
 import NavBar from './components/NavBar/NavBar';
 import SpecialEvent from './components/SpecialEvent/SpecialEvent';
 import SpecialEventCreateButton from './components/SpecialEvent/SpecialEventCreateButton';
-import type { SpecialEventItem } from './components/SpecialEvent/ComponentType';
 import GameCard from './components/GameCard/GameCard';
 import SearchBar from './components/SearchBar/SearchBar';
 import FilterBar from './components/FilterBar/FilterBar';
 import { AppProvider } from '@toolpad/core/AppProvider';
 import { createTheme } from '@mui/material/styles';
 import { useEffect, useMemo, useState } from 'react';
-import { useLocalStorage } from './hooks/StoreSpecialEvent';
-import SearchGameCard from "./components/GameCard/SearchGameCard";
-import Footer from "@components/Footer/Footer.tsx";
-        
+import SearchGameCard from './components/GameCard/SearchGameCard';
+import Footer from '@components/Footer/Footer';
+
 import {
   listenApprovedEvents,
   submitSpecialEvent,
   type NewEventInput,
 } from '../Backend/firebase/events';
-
 
 // Carousel imports
 import 'slick-carousel/slick/slick.css';
@@ -40,36 +37,35 @@ const DEFAULT_CARD = {
 };
 
 export const PopularGames = [
-  { Text: 'Slots',     Image: 'src/assets/slots.png',       LinkTo: '/slots' },
-  { Text: 'Blackjack', Image: 'src/assets/blackjack.png',   LinkTo: '/blackjack' },
-  { Text: 'Mines',     Image: 'src/assets/mines.png',       LinkTo: '/mines' },
-  { Text: 'Coin Toss', Image: 'src/assets/coins.png',       LinkTo: '/cointoss' },
-  { Text: 'Roulette', Image: 'src/assets/roulette.png',     LinkTo: '/roulette' },
-  { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
-  { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
+  { Text: 'Slots', Image: 'src/assets/slots.png', LinkTo: '/slots' },
+  { Text: 'Blackjack', Image: 'src/assets/blackjack.png', LinkTo: '/blackjack' },
+  { Text: 'Mines', Image: 'src/assets/mines.png', LinkTo: '/mines' },
+  { Text: 'Coin Toss', Image: 'src/assets/coins.png', LinkTo: '/cointoss' },
+  { Text: 'Roulette', Image: 'src/assets/roulette.png', LinkTo: '/roulette' },
+  { Text: 'Soon', Image: 'src/assets/comingsoon.png', LinkTo: '/' },
+  { Text: 'Soon', Image: 'src/assets/comingsoon.png', LinkTo: '/' },
 ];
 
 export const AllGames = [
-  { Text: 'Slots',     Image: 'src/assets/slots.png',       LinkTo: '/slots' },
-  { Text: 'Blackjack', Image: 'src/assets/blackjack.png',   LinkTo: '/blackjack' },
-  { Text: 'Mines',     Image: 'src/assets/mines.png',       LinkTo: '/mines' },
-  { Text: 'Coin Toss', Image: 'src/assets/coins.png',       LinkTo: '/cointoss' },
-  { Text: 'Roulette', Image: 'src/assets/roulette.png',     LinkTo: '/roulette' },
-  { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
-  { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
-  { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
-  { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
-  { Text: 'Slots',     Image: 'src/assets/slots.png',       LinkTo: '/slots' },
-  { Text: 'Blackjack', Image: 'src/assets/blackjack.png',   LinkTo: '/blackjack' },
-  { Text: 'Mines',     Image: 'src/assets/mines.png',       LinkTo: '/mines' },
-  { Text: 'Coin Toss', Image: 'src/assets/coins.png',       LinkTo: '/cointoss' },
-  { Text: 'Roulette', Image: 'src/assets/roulette.png',     LinkTo: '/roulette' },
-  { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
-  { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
-  { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
-  { Text: 'Soon', Image: 'src/assets/comingsoon.png',       LinkTo: '/' },
-  { Text: 'Slots',     Image: 'src/assets/slots.png',       LinkTo: '/slots' },
-
+  { Text: 'Slots', Image: 'src/assets/slots.png', LinkTo: '/slots' },
+  { Text: 'Blackjack', Image: 'src/assets/blackjack.png', LinkTo: '/blackjack' },
+  { Text: 'Mines', Image: 'src/assets/mines.png', LinkTo: '/mines' },
+  { Text: 'Coin Toss', Image: 'src/assets/coins.png', LinkTo: '/cointoss' },
+  { Text: 'Roulette', Image: 'src/assets/roulette.png', LinkTo: '/roulette' },
+  { Text: 'Soon', Image: 'src/assets/comingsoon.png', LinkTo: '/' },
+  { Text: 'Soon', Image: 'src/assets/comingsoon.png', LinkTo: '/' },
+  { Text: 'Soon', Image: 'src/assets/comingsoon.png', LinkTo: '/' },
+  { Text: 'Soon', Image: 'src/assets/comingsoon.png', LinkTo: '/' },
+  { Text: 'Slots', Image: 'src/assets/slots.png', LinkTo: '/slots' },
+  { Text: 'Blackjack', Image: 'src/assets/blackjack.png', LinkTo: '/blackjack' },
+  { Text: 'Mines', Image: 'src/assets/mines.png', LinkTo: '/mines' },
+  { Text: 'Coin Toss', Image: 'src/assets/coins.png', LinkTo: '/cointoss' },
+  { Text: 'Roulette', Image: 'src/assets/roulette.png', LinkTo: '/roulette' },
+  { Text: 'Soon', Image: 'src/assets/comingsoon.png', LinkTo: '/' },
+  { Text: 'Soon', Image: 'src/assets/comingsoon.png', LinkTo: '/' },
+  { Text: 'Soon', Image: 'src/assets/comingsoon.png', LinkTo: '/' },
+  { Text: 'Soon', Image: 'src/assets/comingsoon.png', LinkTo: '/' },
+  { Text: 'Slots', Image: 'src/assets/slots.png', LinkTo: '/slots' },
 ];
 
 type SpecialEventRender = {
@@ -92,9 +88,8 @@ export default function Dashboard() {
         EventHook: d.EventHook ?? '',
         EventTitle: d.EventTitle ?? '',
         EventDescription: d.EventDescription ?? '',
-        EventImage: d.EventImage && d.EventImage.trim() !== ""
-        ? d.EventImage
-        : "src/assets/Tilt.png",
+        EventImage:
+          d.EventImage && d.EventImage.trim() !== '' ? d.EventImage : 'src/assets/Tilt.png',
         EventLink: d.EventLink ?? '/',
         createdAt:
           typeof d.createdAt?.toMillis === 'function' ? d.createdAt.toMillis() : (d.createdAt ?? 0),
@@ -161,9 +156,9 @@ export default function Dashboard() {
     alert('Submitted for approval.');
   };
 
-    const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredGames = AllGames.filter(game =>
+  const filteredGames = AllGames.filter((game) =>
     game.Text.toLowerCase().includes(searchTerm.toLowerCase())
   );
   return (
@@ -206,45 +201,42 @@ export default function Dashboard() {
           ))}
         </div>
       </div>
-      <br>
-      </br>
+      <br></br>
 
-
-      <div className="search-bar">
-        <div className="search-category">
+      <div className='search-bar'>
+        <div className='search-category'>
           <span>Casino</span>
-          <i className="fa fa-chevron-down"></i>
+          <i className='fa fa-chevron-down'></i>
         </div>
-        <div className="search-input">
-          <i className="fa fa-search"></i>
+        <div className='search-input'>
+          <i className='fa fa-search'></i>
           <input
-            type="text"
-            placeholder="Search your game"
+            type='text'
+            placeholder='Search your game'
             value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)} 
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
       </div>
 
       {/* All Games section uses filteredGames */}
-      <div className="SearchGamesContainer">
+      <div className='SearchGamesContainer'>
         <br></br>
         <h3>All Games</h3>
-        <div className="SearchGames">
+        <div className='SearchGames'>
           {filteredGames.map((game, i) => (
             <SearchGameCard key={`all-${i}`} {...game} />
           ))}
         </div>
       </div>
-   
 
       <div className='HomeSearchBarContainer'>
         <h2>Looking for a game?</h2>
         <SearchBar Placeholder='Search for a game...' />
         <FilterBar />
-      <div className="Footer">
+        <div className='Footer'>
           <Footer />
-      </div>
+        </div>
       </div>
     </AppProvider>
   );

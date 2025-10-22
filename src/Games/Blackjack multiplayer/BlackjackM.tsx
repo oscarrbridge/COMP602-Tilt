@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import './Blackjack.css';
-import BackgroundLayout from '../../components/BackgroundLayout/BackgroundLayout.tsx';
-import { placeBet, recordWinTx, recordLossTx } from '../../../Backend/transactions.ts';
-import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
-import { CurrencyProvider } from '../../components/CurrencySwitcher/currencyswitcher.tsx';
-import BetControls from '../BetControls.tsx';
-import { db } from '../../../Backend/firebase/firebaseConfig';
+import BackgroundLayout from '@components/BackgroundLayout/BackgroundLayout';
+import { placeBet, recordWinTx, recordLossTx } from '@backend/transactions';
+import { useUser } from '@backend/firebase/UserFunctions';
+import { CurrencyProvider } from '@components/CurrencySwitcher/currencyswitcher';
+import BetControls from '../BetControls';
+import { db } from '@backend/firebase/firebaseConfig';
 import {
   doc,
   setDoc,
@@ -49,7 +49,7 @@ export default function Blackjackm({ gameId = 'testGame' }: { gameId?: string })
   const [bet, setBet] = useState(10);
   const [lastWin, setLastWin] = useState(0);
   const [roundResult, setRoundResult] = useState('');
-  const [dealerRevealed, setDealerRevealed] = useState(false);
+  const [, setDealerRevealed] = useState(false);
   const [betInBase, setBetInBase] = useState(0);
   const [roundInProgress, setRoundInProgress] = useState(false);
 
@@ -291,13 +291,6 @@ export default function Blackjackm({ gameId = 'testGame' }: { gameId?: string })
     return '??';
   };
 
-  // build order once per round (host)
-  async function buildPlayersOrder(): Promise<string[]> {
-    const playersCol = collection(db, 'games', gameId, 'players');
-    const snap = await getDocs(playersCol);
-    return snap.docs.filter((d) => (d.data() as any).status === 'active').map((d) => d.id);
-  }
-
   // advance to next active player or kick to dealer (host-only)
   async function advanceTurnOrFinish() {
     if (!user || hostUid !== user.uid) return; // host-only
@@ -348,7 +341,7 @@ export default function Blackjackm({ gameId = 'testGame' }: { gameId?: string })
   }
 
   // helper: pay exactly once and mark paid=true
-  async function payOnce(uid: string, amount: number, kind: 'win' | 'loss' | 'tie') {
+  async function payOnce(uid: string, _amount: number, kind: 'win' | 'loss' | 'tie') {
     const pRef = doc(db, 'games', gameId, 'players', uid);
     const pSnap = await getDoc(pRef);
     const pdata: any = pSnap.exists() ? pSnap.data() : {};
@@ -409,43 +402,6 @@ export default function Blackjackm({ gameId = 'testGame' }: { gameId?: string })
     }
 
     await updateDoc(gameRef, { state: 'finished', currentTurn: null });
-  }
-
-  // host-only: (kept for safety; auto-deal calls this via tryAutoDeal)
-  async function beginRoundHost() {
-    if (!user || hostUid !== user.uid) return;
-
-    const gSnap = await getDoc(gameRef);
-    const gData: any = gSnap.exists() ? gSnap.data() : {};
-    if (gData.state === 'in-progress' || gData.state === 'dealer') return;
-
-    const order = await buildPlayersOrder();
-    if (!order.length) return;
-
-    const playersColRef = collection(db, 'games', gameId, 'players');
-    const snap = await getDocs(playersColRef);
-
-    await Promise.all(
-      snap.docs.map(async (d) => {
-        const data: any = d.data();
-        if (data.status === 'active') {
-          await setDoc(
-            doc(db, 'games', gameId, 'players', d.id),
-            { cards: [getCard()], paid: false },
-            { merge: true }
-          );
-        }
-      })
-    );
-
-    await updateDoc(gameRef, {
-      state: 'in-progress',
-      dealerHand: [getCard()],
-      currentTurn: order[0] || null,
-      playersOrder: order,
-      activeIndex: 0,
-      gameType: 'blackjack',
-    });
   }
 
   // Actions

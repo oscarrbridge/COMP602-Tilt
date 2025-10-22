@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import './Blackjack.css';
 import BackgroundLayout from '../../components/BackgroundLayout/BackgroundLayout';
-import { placeBet, recordWinTx, recordLossTx } from '../../../Backend/transactions';
-import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
-import { CurrencyProvider } from '../../components/CurrencySwitcher/currencyswitcher.tsx';
-import BetControls from '../BetControls.tsx';
-import BlackjackFX from './BlackjackFX.tsx';
+import { placeBet, recordWinTx, recordLossTx } from '@backend/transactions';
+import { useUser } from '@backend/firebase/UserFunctions';
+import { CurrencyProvider } from '@components/CurrencySwitcher/currencyswitcher';
+import BetControls from '../BetControls';
+import BlackjackFX from './BlackjackFX';
 import './BlackjackFX.css';
 
 const suits = ['♠', '♥', '♦', '♣'];
@@ -30,7 +30,7 @@ export default function Blackjack() {
   const [bet, setBet] = useState(10);
   const [lastWin, setLastWin] = useState(0);
   const [roundResult, setRoundResult] = useState('');
-  const [dealerRevealed, setDealerRevealed] = useState(false); // Implement CSS here
+  const [, setDealerRevealed] = useState(false); // Implement CSS here
   const [betInBase, setBetInBase] = useState(0);
   const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -78,6 +78,8 @@ export default function Blackjack() {
     setRoundInProgress(true);
     setDealerRevealed(false);
 
+    if (!user) return;
+
     await placeBet(user.uid, newBetInBase, 1, 'blackjack');
     await refreshBalance();
   };
@@ -90,6 +92,8 @@ export default function Blackjack() {
       setLastWin(0);
       setRoundResult('loss'); // player busts
       setRoundInProgress(false);
+
+      if (!user) return;
 
       await recordLossTx(user.uid, betInBase, 1, 'blackjack');
       await refreshBalance();
@@ -116,16 +120,19 @@ export default function Blackjack() {
     if (playerScore > 21 || (dealerScore <= 21 && dealerScore > playerScore)) {
       setLastWin(0);
 
+      if (!user) return;
+
       await recordLossTx(user.uid, betInBase, 1, 'blackjack');
       await refreshBalance();
       setRoundResult('loss');
     } else if (playerScore == dealerScore) {
+      if (!user) return;
       await recordWinTx(user.uid, betInBase, 1, 'blackjack'); // Give balance back when Tie
       await refreshBalance();
       setRoundResult('tie');
     } else if (playerScore > dealerScore || dealerScore > 21) {
       setLastWin(bet);
-
+      if (!user) return;
       await recordWinTx(user.uid, betInBase * 2, 1, 'blackjack'); // Double bet to accomadate for winnings
       await refreshBalance();
       setRoundResult('win');

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../../../Backend/firebase/firebaseConfig';
+import { auth } from '@backend/firebase/firebaseConfig';
 import './Deposit.css';
-import { useCurrency, CurrencySwitcher } from '../CurrencySwitcher/currencyswitcher.tsx';
+import { useCurrency } from '../CurrencySwitcher/currencyswitcher';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:4000';
 
