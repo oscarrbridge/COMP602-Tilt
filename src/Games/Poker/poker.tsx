@@ -8,8 +8,8 @@ import {
   dealNextStreet,
   setNextTurnSafe,
 } from './pokerfunctions';
-import { useUser } from '@backend/firebase/UserFunctions';
-import BackgroundLayout from '@components/BackgroundLayout/BackgroundLayout';
+import { useUser } from '../../../Backend/firebase/UserFunctions';
+import BackgroundLayout from '../../components/BackgroundLayout/BackgroundLayout.tsx';
 import {
   collection,
   onSnapshot,
@@ -20,7 +20,7 @@ import {
   serverTimestamp,
   writeBatch,
 } from 'firebase/firestore';
-import { db } from '@backend/firebase/firebaseConfig';
+import { db } from '../../../Backend/firebase/firebaseConfig';
 import { evaluateHand } from './pokerHandEvaluator';
 import { updateDoc } from 'firebase/firestore';
 
@@ -37,7 +37,7 @@ export default function PokerGame() {
   const [currentBet, setCurrentBet] = useState(0);
   const [myTurn, setMyTurn] = useState(false);
   const [round, setRound] = useState<'preflop' | 'flop' | 'turn' | 'river' | 'showdown'>('preflop');
-  const [, setReady] = useState(false);
+  const [ready, setReady] = useState(false);
   const [advancing, setAdvancing] = useState(false);
 
   // ===== Listen for realtime updates =====
@@ -50,7 +50,7 @@ export default function PokerGame() {
       setPlayers(list);
 
       const me = list.find((p) => p.uid === user?.uid);
-      if (me) setReady(Boolean((me as any).ready));
+      if (me) setReady(!!me.ready);
     });
 
     const gameRef = doc(db, 'games', gameId);

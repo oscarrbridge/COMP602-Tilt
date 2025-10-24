@@ -10,6 +10,7 @@
   width: 100%;
   height: 100%;
 
+  
   background-color: #1a1818;
   background-size: cover;
   background-position: center;
@@ -29,10 +30,6 @@
 
 /* Slot grid */
 .slot-grid {
-  position: relative;
-  border-radius: 12px;
-  overflow: hidden;
-  isolation: isolate;
   display: grid;
   grid-template-rows: repeat(5, auto);
   gap: 8px; /* smaller spacing */
@@ -174,3 +171,4 @@
   opacity: 1;
   animation: popGold 2s ease-in-out infinite;
 }
+

@@ -6,6 +6,6 @@ signOut(auth)
   .then(() => {
     // Sign-out successful
   })
-  .catch(() => {
+  .catch((error) => {
     // An error happened
   });

@@ -1,17 +1,22 @@
-import { useState } from 'react';
-import { signOut } from 'firebase/auth';
+import { useState, useEffect } from 'react';
+import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
-import { CurrencyProvider } from '@components/CurrencySwitcher/currencyswitcher';
-import { auth } from '@myfirebase/firebaseConfig';
-import { useUser } from '@backend/firebase/UserFunctions';
+import { CurrencyProvider } from '../CurrencySwitcher/currencyswitcher.tsx';
+
+import { auth, db } from '../../../Backend/firebase/firebaseConfig';
+import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
 import './NavBar.css';
-import tiltLogo from '@/assets/Tilt.png';
-import userIcon from '@/assets/user-icon.png';
-import caretIcon from '@/assets/caret-icon.png';
-import NavWindow from '@components/NavWindow/NavWindow';
-import RegisterUser from '@components/Auth/RegisterUser';
-import SignInPopup from '@components/Auth/SignInUser';
-import UserBalance from '@components/UserBalance/UserBalance';
+
+import tiltLogo from '../../assets/Tilt.png';
+import userIcon from '../../assets/user-icon.png';
+import caretIcon from '../../assets/caret-icon.png';
+
+import NavWindow from '../NavWindow/NavWindow.tsx';
+import RegisterUser from '../../components/Auth/RegisterUser';
+import SignInPopup from '../../components/Auth/SignInUser';
+import UserBalance from '../UserBalance/UserBalance';
+import TestTransactions from './transactionTest';
 
 export default function NavBar() {
   const navigate = useNavigate();

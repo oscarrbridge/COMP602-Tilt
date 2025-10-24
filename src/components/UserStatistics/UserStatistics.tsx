@@ -2,8 +2,10 @@ import { doc, collection, onSnapshot as onUpdate } from 'firebase/firestore';
 import { auth, db } from '../../../Backend/firebase/firebaseConfig';
 import type { UserDoc } from '../../types/UserDoc';
 import { onAuthStateChanged } from 'firebase/auth';
+
 import './UserStatistics.css';
 import { useEffect, useState } from 'react';
+
 import { Price, useCurrency } from '@components/CurrencySwitcher/currencyswitcher';
 
 interface CalculatedStatistics {
@@ -37,7 +39,7 @@ export default function GetStatistics() {
     averageBet: 0,
     mostProfitableGame: '',
   });
-  const [, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // If we don't have a user log in yet, ensures upon log in event it updates
   useEffect(() => {

@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import './Cointoss.css';
-import BackgroundLayout from '@components/BackgroundLayout/BackgroundLayout';
-import { placeBet, recordWinTx, recordLossTx } from '@backend/transactions';
-import { useUser } from '@backend/firebase/UserFunctions';
-import { CurrencyProvider } from '@components/CurrencySwitcher/currencyswitcher';
-import BetControls from '../BetControls';
+import BackgroundLayout from '../../components/BackgroundLayout/BackgroundLayout';
+import { placeBet, recordWinTx, recordLossTx } from '../../../Backend/transactions';
+import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
+import { CurrencyProvider } from '../../components/CurrencySwitcher/currencyswitcher.tsx';
+import BetControls from '../BetControls.tsx';
 import coinBase from '../../assets/coin.png';
 import coinHead from '../../assets/coin-head.png';
 import coinTail from '../../assets/Tilt-icon.png';
@@ -23,10 +23,10 @@ export default function CoinFlip() {
   const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const startGame = async (newBetInBase: number) => {
-    if (!user) {
-      alert('You must be logged in to play!');
-      return;
-    }
+      if (!user) {
+        alert('You must be logged in to play!');
+        return;
+      }
     if (newBetInBase > balance) {
       alert('Not enough balance!');
       return;
@@ -46,10 +46,10 @@ export default function CoinFlip() {
   };
 
   const chooseSide = async (choice: 'heads' | 'tails') => {
-    if (!user) {
-      alert('You must be logged in to play!');
-      return;
-    }
+      if (!user) {
+        alert('You must be logged in to play!');
+        return;
+      }
 
     setPlayerChoice(choice);
     setIsFlipping(true);

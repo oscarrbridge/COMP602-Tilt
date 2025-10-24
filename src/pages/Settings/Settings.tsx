@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Settings.css';
 import NavBar from '@components/NavBar/NavBar';
 

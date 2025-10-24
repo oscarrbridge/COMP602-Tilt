@@ -1,6 +1,6 @@
 // authService.ts contains the functions for signup/login/logout
 
-import { auth, googleProvider, db } from '@backend/firebase/firebaseConfig';
+import { auth, googleProvider, db } from '../../Backend/firebase/firebaseConfig.ts';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import {
   createUserWithEmailAndPassword,

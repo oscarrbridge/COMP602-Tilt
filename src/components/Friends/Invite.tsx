@@ -8,7 +8,12 @@ import {
   updateDoc,
   doc,
 } from 'firebase/firestore';
-import { db } from '@backend/firebase/firebaseConfig';
+import { db } from '../../../Backend/firebase/firebaseConfig';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useUser } from '../../../Backend/firebase/UserFunctions';
+import { createGameLobby, joinGameLobby } from '../../../Backend/lobby_functions';
+import { createPokerLobby, joinPokerLobby } from '../../Games/Poker/pokerfunctions';
 
 export type Invite = {
   id?: string;

@@ -1,5 +1,5 @@
 import './Admin.css';
-import NavBar from '@components/NavBar/NavBar';
+import NavBar from '../../components/NavBar/NavBar';
 import { useEffect, useMemo, useState } from 'react';
 import {
   collection,
@@ -11,11 +11,12 @@ import {
   deleteDoc,
   serverTimestamp,
 } from 'firebase/firestore';
-import { db } from '@myfirebase/firebaseConfig';
-import { approveEvent, rejectEvent } from '@myfirebase/events';
-import { useUser } from '@backend/firebase/UserFunctions';
-import { resolveEventBets } from '@myfirebase/eventBetting';
-import Footer from '@components/Footer/Footer';
+import { db } from '../../../Backend/firebase/firebaseConfig';
+import { approveEvent, rejectEvent } from '../../../Backend/firebase/events';
+import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
+import { resolveEventBets } from '../../../Backend/firebase/eventBetting';
+
+import Footer from '@components/Footer/footer';
 
 // --- Types ---
 type Event = {
