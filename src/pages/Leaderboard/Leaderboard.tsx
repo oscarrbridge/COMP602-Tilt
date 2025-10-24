@@ -1,8 +1,10 @@
 import './Leaderboard.css';
-import NavBar from '@components/NavBar/NavBar';
-import LocalLeaderboard from '@components/LocalLeaderboard/LocalLeaderboard';
-import GlobalLeaderboard from '@components/GlobalLeaderboard/GlobalLeaderboard';
-import Footer from '@components/Footer/Footer';
+import NavBar from '../../components/NavBar/NavBar.tsx';
+
+import LocalLeaderboard from '../../components/LocalLeaderboard/LocalLeaderboard.tsx';
+import GlobalLeaderboard from '../../components/GlobalLeaderboard/GlobalLeaderboard.tsx';
+
+import Footer from '@components/Footer/footer';
 
 export default function Leaderboard() {
   return (

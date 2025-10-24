@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useFriends } from './FriendsHelpers';
+import { useFriends } from './friends';
 import { useUser } from '../../../Backend/firebase/UserFunctions';
 import InviteButton from './InviteButton';
-import './FriendsList.css';
+import './Friends.css';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createGameLobby, joinGameLobby } from '../../../Backend/lobby_functions';
 import { sendInvite, listenIncomingInvites, declineInvite } from './Invite';
@@ -115,7 +115,7 @@ export function InvitePopup() {
     await declineInvite(inv.id!);
   };
 
-  if (!user?.uid || !invites.length) return null;
+  if (!invites.length) return null;
 
   return (
     <div
@@ -219,7 +219,27 @@ export default function FriendsDock() {
     navigate(`/${gameType}/${newGameId}`);
   }
 
-  if (!user) return null;
+  // If logged out
+  if (!user) {
+    return (
+      <div className='friends-dock friends-dock-collapsed'>
+        <button className='friends-pillar' onClick={() => setOpen((o) => !o)}>
+          Friends
+        </button>
+        {open && (
+          <div className='friends-dock-card'>
+            <div className='dock-header'>
+              <strong>Friends</strong>
+              <button className='dock-close' onClick={() => setOpen(false)}>
+                –
+              </button>
+            </div>
+            <div className='dock-body small'>Sign in to view and invite friends.</div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className={`friends-dock ${open ? 'open' : 'closed'}`}>

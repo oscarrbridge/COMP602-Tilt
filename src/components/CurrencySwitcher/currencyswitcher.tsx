@@ -1,8 +1,14 @@
-import './currencySwitcher.css';
+import './currencySwitcher.css'
 
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 // Currency Types
-export type CurrencyCode = 'NZD' | 'AUD' | 'USD' | 'EUR' | 'GBP';
+export type CurrencyCode = "NZD" | "AUD" | "USD" | "EUR" | "GBP";
 export type RateTable = Record<CurrencyCode, number>;
 
 export interface CurrencyContextValue {
@@ -16,7 +22,7 @@ export interface CurrencyContextValue {
 }
 
 // Default exchange rates relative to NZD
-const defaultBase: CurrencyCode = 'NZD';
+const defaultBase: CurrencyCode = "NZD";
 const defaultRates: RateTable = {
   NZD: 1,
   AUD: 0.9,
@@ -27,11 +33,11 @@ const defaultRates: RateTable = {
 
 // Symbols
 const currencySymbols: Record<CurrencyCode, string> = {
-  NZD: 'NZ$',
-  AUD: 'A$',
-  USD: '$',
-  EUR: '€',
-  GBP: '£',
+  NZD: "NZ$",
+  AUD: "A$",
+  USD: "$",
+  EUR: "€",
+  GBP: "£",
 };
 
 // Currency
@@ -51,12 +57,15 @@ export function CurrencyProvider({
   rates,
   base = defaultBase,
   DefaultCurrency = base,
-  storageKey = 'currency.code',
+  storageKey = "currency.code",
 }: CurrencyProviderProps) {
-  const mergedRates: RateTable = useMemo(() => ({ ...defaultRates, ...(rates || {}) }), [rates]);
+  const mergedRates: RateTable = useMemo(
+    () => ({ ...defaultRates, ...(rates || {}) }),
+    [rates]
+  );
 
   const [code, setCode] = useState<CurrencyCode>(() => {
-    if (typeof window !== 'undefined' && storageKey) {
+    if (typeof window !== "undefined" && storageKey) {
       try {
         const saved = window.localStorage.getItem(storageKey);
         if (saved && isCurrencyCode(saved)) return saved;
@@ -73,20 +82,25 @@ export function CurrencyProvider({
   }, [code, storageKey]);
 
   const value: CurrencyContextValue = useMemo(() => {
-    const convert = (amount: number, from: CurrencyCode, to: CurrencyCode = code) => {
+    const convert = (
+      amount: number,
+      from: CurrencyCode,
+      to: CurrencyCode = code
+    ) => {
       if (from === to) return amount;
       if (from === base) return amount * mergedRates[to];
       if (to === base) return amount / mergedRates[from];
       return (amount / mergedRates[from]) * mergedRates[to];
     };
 
-    const convertFromBase = (amountInBase: number) => convert(amountInBase, base, code);
+    const convertFromBase = (amountInBase: number) =>
+      convert(amountInBase, base, code);
 
     const format = (amountInActive: number, opts?: Intl.NumberFormatOptions) =>
       new Intl.NumberFormat(undefined, {
-        style: 'currency',
+        style: "currency",
         currency: code,
-        currencyDisplay: 'symbol',
+        currencyDisplay: "symbol",
         maximumFractionDigits: 2,
         ...opts,
       }).format(amountInActive);
@@ -102,13 +116,18 @@ export function CurrencyProvider({
     };
   }, [code, mergedRates, base]);
 
-  return <CurrencyContext.Provider value={value}>{children}</CurrencyContext.Provider>;
+  return (
+    <CurrencyContext.Provider value={value}>
+      {children}
+    </CurrencyContext.Provider>
+  );
 }
 
 // Hook
 export function useCurrency() {
   const ctx = useContext(CurrencyContext);
-  if (!ctx) throw new Error('useCurrency must be used within a CurrencyProvider');
+  if (!ctx)
+    throw new Error("useCurrency must be used within a CurrencyProvider");
   return ctx;
 }
 
@@ -120,15 +139,21 @@ interface CurrencySwitcherProps {
 }
 
 export function CurrencySwitcher({
-  list = ['NZD', 'AUD', 'USD', 'EUR', 'GBP'],
+  list = ["NZD", "AUD", "USD", "EUR", "GBP"],
+  className,
   compact,
 }: CurrencySwitcherProps) {
   const { code, setCode } = useCurrency();
   return (
     <div className='CurrencySwitcher'>
       <label>
-        <span style={{ color: 'white' }}>Currency</span>
-        <select value={code} onChange={(e) => setCode(e.target.value as CurrencyCode)}>
+        <span style={{ color: "white" }}>
+          Currency
+        </span>
+        <select
+          value={code}
+          onChange={(e) => setCode(e.target.value as CurrencyCode)}
+        >
           {list.map((c) => (
             <option key={c} value={c}>
               {compact ? c : `${c} (${currencySymbols[c]})`}
@@ -154,9 +179,11 @@ export function Price({ amount, from, formatOptions, className }: PriceProps) {
     () => convert(amount, from ?? base, code),
     [amount, from, base, code, convert]
   );
-  return <span className={className}>{format(activeAmount, formatOptions)}</span>;
+  return (
+    <span className={className}>{format(activeAmount, formatOptions)}</span>
+  );
 }
 
 function isCurrencyCode(x: string): x is CurrencyCode {
-  return ['NZD', 'AUD', 'USD', 'EUR', 'GBP'].includes(x as CurrencyCode);
+  return ["NZD", "AUD", "USD", "EUR", "GBP"].includes(x as CurrencyCode);
 }

@@ -1,12 +1,14 @@
 import './Friends.css';
-import NavBar from '@components/NavBar/NavBar';
-import { useFriends } from '@/components/Friends/FriendsHelpers'; // your hook path
+import NavBar from '../../components/NavBar/NavBar.tsx';
+import { useFriends } from '../../components/Friends/friends.tsx';
 import { useState, useEffect } from 'react';
-import { collection, getDocs, query, where } from 'firebase/firestore';
-import { useUser } from '@backend/firebase/UserFunctions';
-import { db } from '@backend/firebase/firebaseConfig';
-import Footer from '@components/Footer/Footer';
-import { Price } from '@components/CurrencySwitcher/currencyswitcher';
+import { collection, doc, getDocs, query, where, getCountFromServer } from 'firebase/firestore';
+import { useUser } from '@backend/firebase/UserFunctions.tsx';
+import { db } from '../../../Backend/firebase/firebaseConfig';
+
+import { getDoc } from 'firebase/firestore';
+import Footer from '../../components/Footer/Footer';
+// import { Price } from '../../components/CurrencySwitcher/currencyswitcher'; // no longer used
 
 // ---------- Types ----------
 type UserLite = {
@@ -15,8 +17,12 @@ type UserLite = {
   email?: string;
   name?: string;
   private?: boolean;
+
+  // kept for compatibility; we just don't render money anymore
   totalWinsCents?: number;
   totalLossesCents?: number;
+
+  // these power the new UI
   winsCount?: number;
   lossesCount?: number;
 };
@@ -31,6 +37,40 @@ const clampCents6 = (cents: number | undefined) => {
   const clamped = Math.min(abs, SIX_FIGURE_CLAMP_CENTS);
   return { cents: sign * clamped, clipped: abs > SIX_FIGURE_CLAMP_CENTS };
 };
+// Count bets/wins from users/{uid}/transactions
+async function fetchCounts(uid: string) {
+  // All the user's tx live here (see your screenshot)
+  const tx = collection(db, 'users', uid, 'transactions');
+
+  // A bet is recorded as type == 'bet'
+  const betsQ = query(tx, where('type', '==', 'bet'));
+
+  // Wins are usually recorded as payouts; some codebases use 'win'
+  const payoutsQ = query(tx, where('type', '==', 'payout'));
+  const winsTypeQ = query(tx, where('type', '==', 'win'));
+
+  // Fallback: if you don't write a 'payout'/'win' type, count positive amounts as wins
+  const positiveQ = query(tx, where('amount', '>', 0));
+
+  const [betsSnap, payoutsSnap, winsTypeSnap] = await Promise.all([
+    getCountFromServer(betsQ),
+    getCountFromServer(payoutsQ),
+    getCountFromServer(winsTypeQ),
+  ]);
+
+  let winsCount = (payoutsSnap.data().count || 0) + (winsTypeSnap.data().count || 0);
+
+  // If no explicit win docs, fall back to positive amounts
+  if (winsCount === 0) {
+    const posSnap = await getCountFromServer(positiveQ);
+    winsCount = posSnap.data().count || 0;
+  }
+
+  const totalBets = betsSnap.data().count || 0;
+  const lossesCount = Math.max(totalBets - winsCount, 0);
+
+  return { winsCount, lossesCount, totalBets };
+}
 
 // ---------- Friends List ----------
 function FriendsList({
@@ -51,14 +91,17 @@ function FriendsList({
             {friends.map((friend) => {
               const name = friend.username || friend.email || friend.uid;
 
-              // raw totals from hook
-              const winsRaw = friend.totalWinsCents ?? 0;
-              const lossesRaw = friend.totalLossesCents ?? 0;
+              // counts for the new UI (fallback to 0 if absent)
               const winsCount = friend.winsCount ?? 0;
               const lossesCount = friend.lossesCount ?? 0;
-              const netRaw = winsRaw - lossesRaw;
+              const totalBets = winsCount + lossesCount;
+              const winRate =
+                totalBets > 0 ? `${((winsCount / totalBets) * 100).toFixed(1)}%` : '—';
 
-              // clamp for display
+              // keep these in case you still need them elsewhere
+              const winsRaw = friend.totalWinsCents ?? 0;
+              const lossesRaw = friend.totalLossesCents ?? 0;
+              const netRaw = winsRaw - lossesRaw;
               const wins = clampCents6(winsRaw);
               const losses = clampCents6(lossesRaw);
               const net = clampCents6(netRaw);
@@ -81,37 +124,12 @@ function FriendsList({
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     <span style={{ fontWeight: 600 }}>{name}</span>
 
-                    {/* Stats row */}
+                    {/* New stats row: bets + win rate (no currency) */}
                     <div style={{ display: 'flex', gap: 16, fontSize: 14, opacity: 0.9 }}>
-                      {/* Wins */}
-                      <span
-                        title={`Wins: ${winsCount} (full ${winsRaw / 100 >= 0 ? '' : '-'}NZ$${Math.abs(
-                          winsRaw / 100
-                        ).toLocaleString()})`}
-                      >
-                        🟢 Wins: {winsCount} (<Price amount={wins.cents / 100} from='NZD' />
-                        {wins.clipped ? '+' : ''})
-                      </span>
-
-                      {/* Losses */}
-                      <span
-                        title={`Losses: ${lossesCount} (full ${lossesRaw / 100 >= 0 ? '' : '-'}NZ$${Math.abs(
-                          lossesRaw / 100
-                        ).toLocaleString()})`}
-                      >
-                        🔴 Losses: {lossesCount} (<Price amount={losses.cents / 100} from='NZD' />
-                        {losses.clipped ? '+' : ''})
-                      </span>
-
-                      {/* Net */}
-                      <span
-                        title={`Net (wins - losses): ${netRaw / 100 >= 0 ? '' : '-'}NZ$${Math.abs(
-                          netRaw / 100
-                        ).toLocaleString()}`}
-                      >
-                        ➕ Net: <Price amount={net.cents / 100} from='NZD' />
-                        {net.clipped ? '+' : ''}
-                      </span>
+                      <span>🧮 Bets: {totalBets}</span>
+                      <span>✅ Wins: {winsCount}</span>
+                      <span>❌ Losses: {lossesCount}</span>
+                      <span>📈 Win rate: {winRate}</span>
                     </div>
                   </div>
 
@@ -344,13 +362,50 @@ export default function Friends() {
   const { friends, pendingRequests, acceptFriendRequest, sendFriendRequest, removeFriend } =
     useFriends();
 
+  // Note: counts are expected to come from your hook (winsCount/lossesCount).
+  // If they don't yet, you can wire them later without touching this UI.
+  const [friendsWithStats, setFriendsWithStats] = useState<UserLite[]>(friends);
+  const [loadingStats, setLoadingStats] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      if (!friends?.length) {
+        setFriendsWithStats([]);
+        return;
+      }
+      setLoadingStats(true);
+      try {
+        const enriched = await Promise.all(
+          friends.map(async (f) => {
+            try {
+              const counts = await fetchCounts(f.uid);
+              return { ...f, ...counts };
+            } catch (e) {
+              console.warn('count fetch failed for', f.uid, e);
+              return f; // will show 0s for this friend
+            }
+          })
+        );
+        if (!cancelled) setFriendsWithStats(enriched);
+      } finally {
+        if (!cancelled) setLoadingStats(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [friends]);
+
   return (
     <>
       <NavBar />
       <div className='FriendsContainer'>
         <div className='FriendsComponent'>
-          <h2>My Friends</h2>
-          <FriendsList friends={friends} removeFriend={removeFriend} />
+          <h2>My Friends {loadingStats ? '· loading stats…' : ''}</h2>
+          <FriendsList friends={friendsWithStats} removeFriend={removeFriend} />
         </div>
 
         <div className='FriendsComponent'>
@@ -366,5 +421,3 @@ export default function Friends() {
     </>
   );
 }
-
-export { useFriends } from '@/components/Friends/FriendsHelpers';
