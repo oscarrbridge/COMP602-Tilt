@@ -18,7 +18,6 @@ import Staff from './pages/Staff/Staff.tsx';
 import Settings from './pages/Settings/Settings.tsx';
 
 // Games
-<<<<<<< HEAD
 import Poker from './Games/Poker/poker';
 import PokerCreate from './Games/Poker/PokerCreate';
 import Blackjack from './Games/Blackjack/Blackjack';
@@ -28,17 +27,6 @@ import Mines from './Games/Mines/mines';
 import CoinFlip from './Games/CoinToss/Cointoss';
 import { BlackjackMRoute } from './Games/Blackjack multiplayer/BlackjackM';
 import Crash from "./Games/Crash/crash";
-=======
-import Poker from './Games/Poker/poker.tsx';
-import PokerCreate from './Games/Poker/PokerCreate.tsx';
-import Blackjack from './Games/Blackjack/Blackjack.tsx';
-import Roulette from './Games/Roulette/roulette.tsx';
-import Slots from './Games/Slots/slots.tsx';
-import Mines from './Games/Mines/mines.tsx';
-import CoinFlip from './Games/CoinToss/Cointoss.tsx';
-import { BlackjackMRoute } from './Games/Blackjack multiplayer/BlackjackM.tsx';
-import Crash from "./Games/Crash/Crash.tsx";
->>>>>>> parent of d7203bd (Merge pull request #60 from oscarrbridge/firebase)
 
 import { InvitePopup } from './components/Friends/FriendsOverlay.tsx';
 import FriendsDock from './components/Friends/FriendsOverlay.tsx';
