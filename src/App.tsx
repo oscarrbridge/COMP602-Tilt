@@ -229,22 +229,14 @@ export default function Dashboard() {
       {/* All Games section uses filteredGames */}
       <div className="SearchGamesContainer">
         <br></br>
-<<<<<<< HEAD
-        <h3>AAAAAAAAAAAAAAAAAAAAAAAAAAAA</h3>
-        <div className='SearchGames'>
-=======
         <h3>All Games</h3>
         <div className="SearchGames">
->>>>>>> parent of d7203bd (Merge pull request #60 from oscarrbridge/firebase)
           {filteredGames.map((game, i) => (
             <SearchGameCard key={`all-${i}`} {...game} />
           ))}
         </div>
       </div>
-<<<<<<< HEAD
-=======
    
->>>>>>> parent of d7203bd (Merge pull request #60 from oscarrbridge/firebase)
 
       
       <div className="Footer">
