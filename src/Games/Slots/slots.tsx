@@ -179,7 +179,7 @@ function Slots() {
           ))}
         </div>
 
-        <div className="slots-bet-controls">
+        <div className="game-bet-controls">
           <CurrencyProvider base="NZD" DefaultCurrency="NZD">
             <BetControls
               balance={balance}

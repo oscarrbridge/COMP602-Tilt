@@ -4,8 +4,8 @@
   top: 120px; /* below navbar */
   right: 0;
   bottom: 0;
-  width: 15vw;
-
+  width: 14vw;
+  min-width: 200px;
   /* Panel gradient background */
   background: linear-gradient(135deg, #042031 0%, #153752 100%);
   border-left: 3px solid #333;

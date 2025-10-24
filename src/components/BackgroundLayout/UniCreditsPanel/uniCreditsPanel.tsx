@@ -44,7 +44,7 @@ export default function UniCreditsPanel() {
     const unsubscribeDoc = onSnapshot(userDoc, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.data();
-        setUniBalance(data.unibalance ?? 0);
+        setUniBalance(data.uniBalance ?? 0);
         setCurrentBooster(data.currentBooster ?? null);
       } else {
         setUniBalance(0);

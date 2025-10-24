@@ -4,6 +4,7 @@
   left: 0;
   bottom: 0;
   width: 14vw;
+  min-width: 200px;
   background: linear-gradient(135deg, #042031 0%, #153752 100%);
   border-right: 3px solid #333;
   border-top: 3px solid #333;
@@ -11,6 +12,7 @@
   padding: 10px;
   color: var(--text-colour);
   text-align: center;
+  
 }
 
 .panel-header {

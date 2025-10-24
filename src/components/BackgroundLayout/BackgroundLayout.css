@@ -36,6 +36,7 @@ html, body {
   border-radius: 30px;
   overflow: hidden;
   background: linear-gradient(135deg, #021b2b 0%, #0137634f 100%);
+  margin-left: 10px;
 }
 
 /* Consolidated panel styles */
@@ -80,10 +81,10 @@ html, body {
   z-index: 1000;
 }
 
-@media (max-width: 1500px) {
+@media (max-width: 1400px) {
   .content-wrapper {
     grid-template-columns: 1fr;
-    width: 90vw;
+    border-radius: 0px !important;
   }
   
   .uni-credits-menu,
@@ -92,10 +93,11 @@ html, body {
   }
 }
 
-@media (max-width: 980px) {
+@media (max-width: 1200px) {
   .content-wrapper {
     width: 95vw;
     height: 80vh;
+    max-width: 800px;
   }
 }
 

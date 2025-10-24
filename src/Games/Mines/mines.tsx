@@ -9,6 +9,7 @@ import {
 import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
 import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx";
 import BetControls from "../BetControls/BetControls.tsx";
+import useCurrentBooster from "../../hooks/useCurrentBooster.tsx";
 
 // Game states during playtime
 type Status = "Idle" | "Playing" | "Lost" | "Cash";
@@ -54,11 +55,14 @@ export default function Mines() {
   const { user, balance, refreshBalance } = useUser(); // balance is in cents
   const [Size, SetSize] = useState(5);
   const [Mines, SetMines] = useState(5);
-  const [bet, setBet] = useState(10); // bet shown in whole dollars
+  const [bet, setBet] = useState(2.0); // bet shown in whole dollars
   const [betInBase, setBetInBase] = useState(0); // bet in cents (NZD base)
   const [Cells, SetCells] = useState<Cell[] | null>(null);
   const [Status, SetStatus] = useState<Status>("Idle");
   const [SafeRevealed, SetSafeRevealed] = useState(0);
+  const [lastWin, setLastWin] = useState(0);
+  const { applyBooster } = useCurrentBooster();
+  const [isCashOutProcessing, setIsCashOutProcessing] = useState(false);
 
   const total = Size * Size;
 
@@ -99,7 +103,6 @@ export default function Mines() {
     return Number((CellsRemaining / SafeRemaining).toFixed(4));
   }
 
-  // --- Computed values ---
   const CurrentMult = useMemo(
     () => multiplier(total, Mines, SafeRevealed),
     [total, Mines, SafeRevealed]
@@ -113,6 +116,12 @@ export default function Mines() {
   const PayoutNow = Math.floor(betInBase * CurrentMult); // payout in cents
   const NextPayout = Math.floor(betInBase * CurrentMult * nextFactor);
 
+  useEffect(() => {
+    // Anytime grid size changes, reset the board and go idle
+    reset();
+    SetStatus("Idle");
+  }, [Size]);
+
   // --- Game actions ---
   const startGame = async (newBetInBase: number) => {
     // newBetInBase is in cents
@@ -122,6 +131,7 @@ export default function Mines() {
     }
 
     setBetInBase(newBetInBase);
+    setLastWin(0);
 
     const validMines = Math.max(1, Math.min(Mines, total - 1));
     SetCells(BoardCreate(Size, validMines));
@@ -148,6 +158,7 @@ export default function Mines() {
       SetCells(revealedAll);
       SetStatus("Lost");
 
+      await applyBooster(0);
       await recordLossTx(user.uid, betInBase, 1, "mines");
       await refreshBalance();
       return;
@@ -158,14 +169,34 @@ export default function Mines() {
   }
 
   const cashOut = async () => {
-    if (SafeRevealed === 0) {
-      reset();
-      return;
-    }
-    if (Status === "Playing" && SafeRevealed > 0) {
-      SetStatus("Cash");
-      await recordWinTx(user.uid, PayoutNow, 1, "mines");
-      await refreshBalance();
+    if (isCashOutProcessing) return; // prevent spamming
+    setIsCashOutProcessing(true);
+
+    try {
+      if (SafeRevealed === 0) {
+        // ✅ Refund the bet if no tiles were revealed
+        await recordWinTx(user.uid, betInBase, 1, "mines_refund");
+        await refreshBalance();
+
+        reset();
+        return;
+      }
+
+      if (Status === "Playing" && SafeRevealed > 0) {
+        let finalAmount = PayoutNow;
+
+        // Apply booster to winnings
+        if (PayoutNow > 0) {
+          finalAmount = await applyBooster(PayoutNow);
+          setLastWin(finalAmount);
+        }
+
+        await recordWinTx(user.uid, finalAmount, 1, "mines");
+        await refreshBalance();
+        SetStatus("Cash");
+      }
+    } finally {
+      setIsCashOutProcessing(false);
     }
   };
 
@@ -173,6 +204,7 @@ export default function Mines() {
     SetCells(null);
     SetSafeRevealed(0);
     SetStatus("Idle");
+    setLastWin(0);
   }
 
   const gameOver = Status === "Lost" || Status === "Cash";
@@ -185,94 +217,128 @@ export default function Mines() {
 
   useEffect(() => {
     if (Status === "Lost" || Status === "Cash") {
-      const timer = setTimeout(() => SetStatus("Idle"), 2000);
+      const timer = setTimeout(() => {
+        SetStatus("Idle");
+        setLastWin(0);
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [Status]);
 
   // --- UI ---
   return (
-    <BackgroundLayout>
+    <BackgroundLayout gameId="mines">
       <CurrencyProvider base="NZD" DefaultCurrency="NZD">
-        <div className="game-container">
-          <div className="app">
-            <h1>Mines</h1>
+        <div className="mines-game-container">
+          <div className="mines-content">
+            {/* Left Panel - Controls */}
+            <div className="mines-controls-panel">
+              <div className="game-settings">
+                <label>
+                  Grid Size
+                  <select
+                    value={Size}
+                    onChange={(e) => SetSize(Number(e.target.value))}
+                    disabled={Status === "Playing"}
+                  >
+                    {[3, 4, 5].map((n) => (
+                      <option key={n} value={n}>
+                        {n} × {n}
+                      </option>
+                    ))}
+                  </select>
+                </label>
 
-            <div className="panel">
-              {/* Shared bet controls */}
-              {(Status === "Idle" ||
-                Status === "Lost" ||
-                Status === "Cash") && (
-                <BetControls
-                  balance={balance} // cents
-                  bet={bet} // dollars
-                  setBet={setBet}
-                  startGame={startGame}
-                />
-              )}
-              <label>
-                Grid
-                <select
-                  value={Size}
-                  onChange={(e) => SetSize(Number(e.target.value))}
-                  disabled={Status === "Playing"}
-                >
-                  {[3, 4, 5, 6].map((n) => (
-                    <option key={n} value={n}>
-                      {n} × {n}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                <label>
+                  Mines
+                  <input
+                    type="number"
+                    min={1}
+                    max={total - 1}
+                    value={Mines}
+                    onChange={(e) => SetMines(Number(e.target.value))}
+                    disabled={Status === "Playing"}
+                  />
+                </label>
+              </div>
 
-              <label>
-                Mines
-                <input
-                  type="number"
-                  min={1}
-                  max={total - 1}
-                  value={Mines}
-                  onChange={(e) => SetMines(Number(e.target.value))}
-                  disabled={Status === "Playing"}
-                />
-              </label>
+              {/* Game Info */}
+              <div className="game-info">
+                <div className="info-row">
+                  <span className="info-label">Safes Found:</span>
+                  <span className="info-value">{SafeRevealed}</span>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Multiplier:</span>
+                  <span className="info-value">×{CurrentMult}</span>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Current Payout:</span>
+                  <span className="info-value">
+                    ${(PayoutNow / 100).toFixed(2)}
+                  </span>
+                </div>
+                {Status === "Playing" && (
+                  <div className="info-row">
+                    <span className="info-label">Next Safe:</span>
+                    <span className="info-value">
+                      ×{nextFactor} (${(NextPayout / 100).toFixed(2)})
+                    </span>
+                  </div>
+                )}
+              </div>
 
+              {/* Cash Out Button */}
               {Status === "Playing" && (
-                <button onClick={cashOut}>Cash out</button>
+                <button className="cash-out-button" onClick={cashOut}>
+                  Cash Out ${(PayoutNow / 100).toFixed(2)}
+                </button>
               )}
             </div>
 
-            <div className="results">
-              <span className="result">Safes Found: {SafeRevealed}</span>
-              <span className="result">Current Multiplier ×{CurrentMult}</span>
-              <span className="result">
-                Current Payout: ${(PayoutNow / 100).toFixed(2)}
-              </span>
-              {Status === "Playing" && (
-                <span className="result">
-                  Next Safe ×{nextFactor} (${(NextPayout / 100).toFixed(2)})
-                </span>
-              )}
-            </div>
+            {/* Center - Game Board */}
+            <div className="mines-board-container">
+              <Board
+                Size={Size}
+                Cells={Cells ?? placeholder}
+                GameOver={gameOver}
+                OnCellClick={HandleCellClick}
+              />
 
-            <div className="status">
-              {Status === "Idle" && (
-                <>
-                  Press <b>Bet</b> to play.
-                </>
-              )}
-              {Status === "Playing" && <>Pick Tiles</>}
-              {Status === "Lost" && <>💣 Mine Hit. You lost.</>}
-              {Status === "Cash" && (
-                <>💰 Cashed Out: ${(PayoutNow / 100).toFixed(2)}</>
-              )}
+              {/* Status Display */}
+              <div className="mines-status">
+                {Status === "Idle" && (
+                  <span className="status-idle">
+                    Press <b>Bet</b> to start playing
+                  </span>
+                )}
+                {Status === "Playing" && (
+                  <span className="status-playing">
+                    Pick safe tiles to multiply your bet!
+                  </span>
+                )}
+                {Status === "Lost" && (
+                  <span className="status-lost">
+                    Mine Hit! You lost ${(betInBase / 100).toFixed(2)}
+                  </span>
+                )}
+                {Status === "Cash" && (
+                  <span className="status-win">
+                    Cashed Out: +${(lastWin / 100).toFixed(2)}
+                  </span>
+                )}
+              </div>
             </div>
+          </div>
 
-            <Board
-              Size={Size}
-              Cells={Cells ?? placeholder}
-              GameOver={gameOver}
-              OnCellClick={HandleCellClick}
+          {/* Bet Controls at Bottom */}
+          <div className="game-bet-controls">
+            <BetControls
+              balance={balance}
+              bet={bet}
+              setBet={setBet}
+              startGame={startGame}
+              disabled={Status === "Playing"}
             />
           </div>
         </div>
