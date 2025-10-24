@@ -229,13 +229,14 @@ export default function Dashboard() {
       {/* All Games section uses filteredGames */}
       <div className="SearchGamesContainer">
         <br></br>
-        <h3>AAAAAAAAAAAAAAAAAAAAAAAAAAAA</h3>
-        <div className='SearchGames'>
+        <h3>All Games</h3>
+        <div className="SearchGames">
           {filteredGames.map((game, i) => (
             <SearchGameCard key={`all-${i}`} {...game} />
           ))}
         </div>
       </div>
+   
 
       
       <div className="Footer">
