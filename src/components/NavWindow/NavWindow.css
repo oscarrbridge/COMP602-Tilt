@@ -47,6 +47,11 @@
 .CurrencySection {
     padding: 0px;
     margin: 0px;
+}
 
-    background-color: red;
+.CurrencySection option {
+  background-color: #f0f0f0;
+  color: #333;
+  padding: 0px !important;
+  margin: 0px !important;
 }
