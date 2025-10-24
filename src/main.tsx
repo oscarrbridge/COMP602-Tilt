@@ -26,7 +26,7 @@ import Slots from './Games/Slots/slots';
 import Mines from './Games/Mines/mines';
 import CoinFlip from './Games/CoinToss/Cointoss';
 import { BlackjackMRoute } from './Games/Blackjack multiplayer/BlackjackM';
-import Crash from "./Games/Crash/Crash";
+import Crash from "./Games/Crash/crash";
 
 import { InvitePopup } from './components/Friends/FriendsOverlay';
 import FriendsDock from './components/Friends/FriendsOverlay';
@@ -46,6 +46,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path='/mines' element={<Mines />} />
           <Route path='/cointoss' element={<CoinFlip />} />
           <Route path='/roulette' element={<Roulette />} />
+          <Route path='/crash' element={<Crash />} />
           <Route path='/blackjack/:gameId' element={<BlackjackMRoute />} />
           <Route path='/poker' element={<PokerCreate />} /> {/* Game creation */}
           <Route path='/poker/:gameId' element={<Poker />} /> {/* Actual game */}
