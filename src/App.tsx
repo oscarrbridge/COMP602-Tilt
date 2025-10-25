@@ -45,8 +45,8 @@ export const PopularGames = [
   { Text: 'Mines',     Image: 'src/assets/mines.png',       LinkTo: '/mines' },
   { Text: 'Coin Toss', Image: 'src/assets/coins.png',       LinkTo: '/cointoss' },
   { Text: 'Roulette', Image: 'src/assets/roulette.png',     LinkTo: '/roulette' },
-  { Text: 'Poker',    Image: 'src/assets/poker.png',           LinkTo: '/poker' },
-  { Text: 'Crash',    Image: 'src/assets/crash.png',           LinkTo: '/crash' },
+  { Text: 'Poker',    Image: 'src/assets/poker.png',        LinkTo: '/poker' },
+  { Text: 'Crash',    Image: 'src/assets/crash.png',        LinkTo: '/crash' },
 ];
 
 export const AllGames = [
