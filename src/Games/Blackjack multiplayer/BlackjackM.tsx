@@ -23,6 +23,25 @@ import { useParams } from 'react-router-dom';
 // Local helpers
 const suits = ['♠', '♥', '♦', '♣'];
 const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+} from "firebase/firestore";
+
+// Local helpers
+const suits = ["♠", "♥", "♦", "♣"];
+const ranks = [
+  "A",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "J",
+  "Q",
+  "K",
+];
 const getCard = () => {
   const suit = suits[Math.floor(Math.random() * suits.length)];
   const rank = ranks[Math.floor(Math.random() * ranks.length)];
@@ -46,6 +65,20 @@ export default function Blackjackm({ gameId = 'testGame' }: { gameId?: string })
   // Local UI state (render-only state; authoritative state lives in Firestore)
   const [playerCards, setPlayerCards] = useState<{ rank: string; suit: string }[]>([]);
   const [dealerCards, setDealerCards] = useState<{ rank: string; suit: string }[]>([]);
+export default function Blackjackm({
+  gameId = "testGame",
+}: {
+  gameId?: string;
+}) {
+  const { user, balance, refreshBalance } = useUser();
+
+  // Local UI state
+  const [playerCards, setPlayerCards] = useState<
+    { rank: string; suit: string }[]
+  >([]);
+  const [dealerCards, setDealerCards] = useState<
+    { rank: string; suit: string }[]
+  >([]);
   const [bet, setBet] = useState(10);
   const [lastWin, setLastWin] = useState(0);
   const [roundResult, setRoundResult] = useState('');
@@ -473,6 +506,20 @@ export default function Blackjackm({ gameId = 'testGame' }: { gameId?: string })
       { bet: newBetInBase, cards: [], status: 'active', paid: false },
       { merge: true }
     );
+    // Set player doc
+    await setDoc(playerRef, {
+      bet: newBetInBase,
+      cards: [getCard(), getCard()],
+      status: "active",
+    });
+
+    // Update game doc
+    await updateDoc(gameRef, {
+      state: "in-progress",
+      dealerHand: [getCard(), getCard()],
+      currentTurn: user.uid,
+      gameType: "blackjack",
+    });
 
     // deduct stake up-front
     await placeBet(user.uid, newBetInBase, 1, 'blackjack');
@@ -486,6 +533,9 @@ export default function Blackjackm({ gameId = 'testGame' }: { gameId?: string })
     const playerRef = doc(db, 'games', gameId, 'players', user.uid);
     const card = getCard();
     await updateDoc(playerRef, { cards: arrayUnion(card) });
+    await updateDoc(playerRef, {
+      cards: arrayUnion(card),
+    });
 
     const newCards = [...playerCards, card];
     if (calcScore(newCards) > 21) {
@@ -530,7 +580,12 @@ export default function Blackjackm({ gameId = 'testGame' }: { gameId?: string })
 
           {/* Place bet to join the next round */}
           {!roundInProgress && (
-            <BetControls balance={balance} bet={bet} setBet={setBet} startGame={startGame} />
+            <BetControls
+              balance={balance}
+              bet={bet}
+              setBet={setBet}
+              startGame={startGame}
+            />
           )}
         </CurrencyProvider>
 
@@ -636,6 +691,22 @@ export default function Blackjackm({ gameId = 'testGame' }: { gameId?: string })
               : roundResult === 'tie'
                 ? 'Tie'
                 : ''}
+            roundResult === "win"
+              ? "win-amount"
+              : roundResult === "loss"
+                ? "loss-amount"
+                : roundResult === "tie"
+                  ? "tie-amount"
+                  : ""
+          }`}
+        >
+          {roundResult === "win"
+            ? `+ $${bet}`
+            : roundResult === "loss"
+              ? `- $${bet}`
+              : roundResult === "tie"
+                ? "Tie"
+                : ""}
         </div>
       </div>
     </BackgroundLayout>

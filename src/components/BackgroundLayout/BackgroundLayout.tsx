@@ -2,21 +2,31 @@ import type { ReactNode } from "react";
 import React from "react";
 import "./BackgroundLayout.css";
 import NavBar from "../NavBar/NavBar";
-import PanelMenu from "./PanelMenu/PanelMenu.tsx";
-import InfoPanel from "./InfoPanel/InfoPanel.tsx";
-import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx";
-import GameRankingPanel from "./gameRankingPanel/gameRankingPanel.tsx";
+import PanelMenu from "./PanelMenu/PanelMenu";
+import InfoPanel from "./InfoPanel/InfoPanel";
+import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher";
+import UniCreditsPanel from "./UniCreditsPanel/uniCreditsPanel";
 import BettingHistoryPanel from "./BettingHistoryPanel/BettingHistoryPanel";
 
 interface BackgroundLayoutProps {
   children: ReactNode;
+  gameId: string;
+  className?: string;
+  gameBackground?: string;
 }
 
-const BackgroundLayout: React.FC<BackgroundLayoutProps> = ({ children }) => {
-  return (
-    <div className="background-container">
-      {/* Navbar */}
+const BackgroundLayout: React.FC<BackgroundLayoutProps> = ({
+  children,
+  gameId,
+  className = "",
+  gameBackground,
+}) => {
+  const gameContainerStyle = gameBackground
+    ? { backgroundImage: `url(${gameBackground})` }
+    : {};
 
+  return (
+    <div className={`full-background-container ${className}`}>
       <CurrencyProvider base="NZD" DefaultCurrency="NZD">
         <div className="NavBar">
           <NavBar />
@@ -25,9 +35,12 @@ const BackgroundLayout: React.FC<BackgroundLayoutProps> = ({ children }) => {
 
       <div className="content-wrapper">
         <div className="uni-credits-menu">
-          <GameRankingPanel />
+          <UniCreditsPanel />
         </div>
-        <div className="game-container">{children}</div>
+
+        <div className="game-container" style={gameContainerStyle}>
+          {children}
+        </div>
 
         <div className="betting-history-menu">
           <BettingHistoryPanel />
@@ -40,7 +53,7 @@ const BackgroundLayout: React.FC<BackgroundLayoutProps> = ({ children }) => {
 
       <div className="info-menu">
         <div className="info-panel">
-          <InfoPanel />
+          <InfoPanel gameId={gameId} />
         </div>
       </div>
     </div>
