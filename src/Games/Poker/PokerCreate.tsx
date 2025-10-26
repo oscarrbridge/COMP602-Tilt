@@ -6,6 +6,8 @@ import { createPokerLobby, joinPokerLobby } from './pokerfunctions';
 import BackgroundLayout from '../../components/BackgroundLayout/BackgroundLayout.tsx';
 import InviteButton from '../../components/Friends/InviteButton';
 
+import '../poker/poker.css';
+
 export default function PokerCreate() {
   const { user } = useUser();
   const navigate = useNavigate();
@@ -19,140 +21,141 @@ export default function PokerCreate() {
   };
 
   const joinGame = async (id: string) => {
-    if (!user) return;
+    if (!user || !id) return;
     await joinPokerLobby(id, user.uid, user.displayName ?? undefined);
     navigate(`/poker/${id}`);
   };
 
-return (
-  <BackgroundLayout>
-    <div className="game-container">
-      <h1>♠ Poker Lobby ♣</h1>
+  return (
+    <BackgroundLayout gameId='Poker' gameBackground='/assets/poker-bg.jpg'>
+      <div
+        className='bj-game-container'
+        style={{
+          backgroundImage: "url('/assets/poker-bg.jpg')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
+        {/* Removed the <h1> Poker Lobby title on purpose */}
 
-      {/* If user not logged in */}
-      {!user && (
-        <p className="small">Sign in to create or join a poker table.</p>
-      )}
-
-      {/* When you already have a gameId, show invite button */}
-      {user && gameId && (
-        <div style={{ marginBottom: 20 }}>
-          <InviteButton
-            game="poker"
-            friendUid={"" /* fill when listing friends */}
-            friendName={""}
-            sessionId={gameId}
-            senderId={user.uid}
-            senderName={user.displayName || user.email || "Player"}
-          />
-        </div>
-      )}
-
-      {/* Lobby Controls */}
-      {user && (
+        {/* Tighter, centered panel that fits better */}
         <div
-          className="lobby-controls"
+          className='bj-table'
           style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "12px",
-            alignItems: "center",
-            width: "100%",
-            maxWidth: 360,
-            margin: "0 auto",
+            padding: 14, // tighter padding
+            width: 'min(560px, 92vw)',
+            margin: '14vh auto 0',
+            display: 'grid', // ✅ ADDED
+            placeItems: 'center', // ✅ ADDED (now effective)
+            minHeight: 260, // ✅ ADDED gives vertical space to center within
+            height: 'auto',
+            maxHeight: 360,
           }}
         >
-          <button
-            onClick={createGame}
-            style={{
-              padding: "10px 16px",
-              borderRadius: 8,
-              background: "var(--secondary-colour)",
-              border: "1px solid rgba(255,255,255,.12)",
-              color: "var(--text-colour)",
-              fontWeight: 600,
-              cursor: "pointer",
-              width: "100%",
-            }}
-          >
-            Create Game
-          </button>
+          {!user && (
+            <p className='small' style={{ opacity: 0.85, textAlign: 'center' }}>
+              Sign in to create or join a poker table.
+            </p>
+          )}
 
-          <input
-            value={gameId}
-            onChange={(e) => setGameId(e.target.value)}
-            placeholder="Enter game ID"
-            style={{
-              width: "100%",
-              padding: "10px",
-              borderRadius: 8,
-              border: "1px solid rgba(255,255,255,.2)",
-              background: "rgba(255,255,255,0.05)",
-              color: "var(--text-colour)",
-              textAlign: "center",
-              fontSize: "1rem",
-            }}
-          />
+          {user && (
+            <div
+              style={{
+                display: 'grid',
+                gap: 14,
+                width: '100%',
+                maxWidth: 440,
+                margin: '0 auto',
+              }}
+            >
+              <button className='bj-btn' onClick={createGame}>
+                Create Game
+              </button>
 
-          <button
-            onClick={() => joinGame(gameId)}
-            disabled={!gameId}
-            style={{
-              padding: "10px 16px",
-              borderRadius: 8,
-              background: "var(--accent-colour)",
-              border: "1px solid rgba(255,255,255,.12)",
-              color: "var(--text-colour)",
-              fontWeight: 600,
-              cursor: "pointer",
-              width: "100%",
-              opacity: gameId ? 1 : 0.5,
-            }}
-          >
-            Join Game
-          </button>
+              <input
+                value={gameId}
+                onChange={(e) => setGameId(e.target.value.trim())}
+                placeholder='Enter game ID'
+                aria-label='Enter game ID'
+                className='bj-input'
+                style={{
+                  width: '95%',
+                  padding: '12px 14px',
+                  borderRadius: 10,
+                  border: '1px solid rgba(255,255,255,.16)',
+                  background: 'rgba(0,0,0,.25)',
+                  color: 'var(--text-colour, #fff)',
+                  fontSize: '1rem',
+                  outline: 'none',
+                  textAlign: 'center',
+                }}
+              />
+
+              <button
+                className='bj-btn'
+                onClick={() => joinGame(gameId)}
+                disabled={!gameId}
+                style={{
+                  opacity: gameId ? 1 : 0.6,
+                  cursor: gameId ? 'pointer' : 'not-allowed',
+                }}
+              >
+                Join Game
+              </button>
+
+              {gameId && (
+                <div
+                  style={{
+                    display: 'grid',
+                    gap: 10,
+                    justifyItems: 'center',
+                    paddingTop: 6,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontWeight: 700,
+                      letterSpacing: 0.5,
+                      opacity: 0.95,
+                    }}
+                  >
+                    Lobby ID: <span style={{ opacity: 0.9 }}>{gameId}</span>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <button
+                      className='bj-btn'
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(gameId || '');
+                          alert('Copied game ID!');
+                        } catch (err) {
+                          console.error('Copy failed', err);
+                        }
+                      }}
+                    >
+                      Copy ID
+                    </button>
+
+                    <InviteButton
+                      game='poker'
+                      friendUid={'' /* fill when listing friends */}
+                      friendName={''}
+                      sessionId={gameId}
+                      senderId={user.uid}
+                      senderName={user.displayName || user.email || 'Player'}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
-      )}
 
-      {/* Show current lobby code if already created */}
-      {user && gameId && (
-        <div style={{ marginTop: 20, textAlign: "center" }}>
-          <p>Lobby ID:</p>
-          <div
-            style={{
-              fontSize: "1.2rem",
-              fontWeight: 700,
-              letterSpacing: 1,
-              marginBottom: 6,
-            }}
-          >
-            {gameId}
-          </div>
-          <button
-            onClick={async () => {
-              try {
-                await navigator.clipboard.writeText(gameId || "");
-                alert("Copied game ID!");
-              } catch (err) {
-                console.error("Copy failed", err);
-              }
-            }}
-            style={{
-              padding: "6px 10px",
-              borderRadius: 6,
-              background: "var(--secondary-colour)",
-              border: "1px solid rgba(255,255,255,.12)",
-              color: "var(--text-colour)",
-              cursor: "pointer",
-              fontSize: "0.9rem",
-            }}
-          >
-            Copy ID
-          </button>
-        </div>
-      )}
-    </div>
-  </BackgroundLayout>
-);
-
+        {/* Spacer row to mirror BJ layout (visual only) */}
+        <div className='bj-controls' />
+      </div>
+    </BackgroundLayout>
+  );
 }

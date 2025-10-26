@@ -77,75 +77,73 @@ export default function NavBar() {
 
   return (
     <>
-      <div className="floating-admin-controls">
-        {/* Show Admin button if roles include 'admin' */}
-        {userProfile?.roles?.includes("admin") && (
-          <button onClick={() => navigate("/admin")}>Admin Dashboard</button>
-        )}
+      <CurrencyProvider base='NZD' DefaultCurrency='NZD'>
+        <div className='NavBarContainer'>
+          {/* LEFT: logo + role buttons (same grid cell) */}
+          <div className='LeftGroup'>
+            <div className='Logo' onClick={() => navigate('/')}>
+              <img src='src/assets/Tilt.png' width={80} />
+            </div>
 
-        {/* Show Staff button if roles include 'staff' */}
-        {userProfile?.roles?.includes("staff") && (
-          <button onClick={() => navigate("/staff")}>Staff Dashboard</button>
-        )}
-      </div>
-     <img src={tiltLogo} width={80} alt='Tilt logo' />
-
-
-      <CurrencyProvider base="NZD" DefaultCurrency="NZD">
-        <div className="NavBarContainer">
-          <div className="Logo" onClick={() => navigate("/")}>
-            <img src="src/assets/Tilt.png" width={80} />
-
+            <div className='RoleLinks'>
+              {userProfile?.roles?.includes('admin') && (
+                <button className='role-btn' onClick={() => navigate('/admin')}>
+                  Admin Dashboard
+                </button>
+              )}
+              {userProfile?.roles?.includes('staff') && (
+                <button className='role-btn' onClick={() => navigate('/staff')}>
+                  Staff Dashboard
+                </button>
+              )}
+            </div>
           </div>
 
-          <div className="UserBalance">
-            <div className="UserBalanceContainer">
+          <div className='UserBalance'>
+            <div className='UserBalanceContainer'>
               {user ? (
                 <>
-
-                  <div className="UserIcon">
-                    <img src="src/assets/user-icon.png" width={25} />
+                  <div className='UserIcon'>
+                    <img src='src/assets/user-icon.png' width={25} />
                   </div>
                   <UserBalance balance={balance} />
                   <div
-                    className="DropArrow"
+                    className='DropArrow'
                     onMouseEnter={() => SetNavActive(true)}
                     onMouseLeave={() => SetNavActive(false)}
                   >
-
-                    <img src="src/assets/caret-icon.png" width={25} />
+                    <img src='src/assets/caret-icon.png' width={25} />
                     {NavActive && <NavWindow />}
                   </div>
                 </>
               ) : (
-
                 // Display a simpler icon or message when logged out
-                <div className="UserIcon">
-                  <img src="src/assets/user-icon.png" width={25} />
+                <div className='UserIcon'>
+                  <img src='src/assets/user-icon.png' width={25} />
                 </div>
               )}
             </div>
           </div>
-          <div className="LoginControls">
+          <div className='LoginControls'>
             {/* If user is logged in, show their info and logout */}
             {user ? (
               <div
-                className="LoggedInBox"
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                className='LoggedInBox'
+                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
               >
                 {/* Display user name/email */}
-                <span>{user.displayName || user.email || "Logged in!"}</span>
+                <span>{user.displayName || user.email || 'Logged in!'}</span>
 
                 {/* Settings button */}
                 <button
-                  onClick={() => navigate("/settings")}
+                  onClick={() => navigate('/settings')}
                   style={{
-                    padding: "4px 10px",
+                    padding: '4px 10px',
                     borderRadius: 6,
-                    border: "1px solid #888",
-                    background: "#444",
-                    color: "#fff",
-                    cursor: "pointer",
+                    border: '1px solid #888',
+                    background: '#444',
+                    color: '#fff',
+                    cursor: 'pointer',
                   }}
                 >
                   Settings
@@ -155,12 +153,12 @@ export default function NavBar() {
                 <button
                   onClick={() => signOut(auth)}
                   style={{
-                    padding: "4px 10px",
+                    padding: '4px 10px',
                     borderRadius: 6,
-                    border: "1px solid #888",
-                    background: "#222",
-                    color: "#fff",
-                    cursor: "pointer",
+                    border: '1px solid #888',
+                    background: '#222',
+                    color: '#fff',
+                    cursor: 'pointer',
                   }}
                 >
                   Logout

@@ -156,11 +156,15 @@ export function InvitePopup() {
     </div>
   );
 }
-
 export default function FriendsDock() {
   const { user } = useUser();
+
+  // ❗ Call these on every render (even if user is null)
   const { friends, pendingRequests, acceptFriendRequest, removeFriend } = useFriends();
   const friendUids = useMemo(() => friends.map((f: any) => f.uid), [friends]);
+
+  // If this uses hooks inside, it should be a hook and named like one.
+  // If you can, rename to useOnline and import { useOnline } and call it here.
   const { onlineByUid } = Online(friendUids);
 
   const [open, setOpen] = useState(true);
@@ -169,6 +173,7 @@ export default function FriendsDock() {
   const [sessionId, setSessionId] = useState(
     localStorage.getItem('sessionId') || 'default-session'
   );
+
   useEffect(() => {
     const onStorage = () => setSessionId(localStorage.getItem('sessionId') || 'default-session');
     window.addEventListener('storage', onStorage);
@@ -179,7 +184,6 @@ export default function FriendsDock() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Determine which game we’re currently on based on route
   const isBlackjack = location.pathname.startsWith('/blackjack');
   const isPoker = location.pathname.startsWith('/poker');
   const enableInvites = isBlackjack || isPoker;
@@ -191,15 +195,11 @@ export default function FriendsDock() {
   });
   const onlineFriends = friendsWithOnline.filter((f: any) => f.online);
 
-  // Create a new lobby for either Poker or Blackjack
   async function createTableAndInvite(friendUid: string) {
-    if (!user) return;
-
-    // Set player count ranges depending on game type
+    if (!user) return; // still guard here
     const minPlayers = gameType === 'poker' ? 2 : 1;
     const maxPlayers = gameType === 'poker' ? 6 : 5;
 
-    // Pass gameType to backend
     const newGameId = await createGameLobby(user.uid, gameType, minPlayers, maxPlayers);
     await joinGameLobby(newGameId, user.uid, user.displayName || user.email || 'Player');
 
@@ -213,13 +213,13 @@ export default function FriendsDock() {
       senderName: user.displayName || user.email || 'Player',
       recipientId: friendUid,
       sessionId: newGameId,
-      game: gameType, // ✅ send correct game type
+      game: gameType,
     });
 
     navigate(`/${gameType}/${newGameId}`);
   }
 
-  // If logged out
+  // ✅ Only branch in JSX. Do NOT early-return before hooks.
   if (!user) {
     return (
       <div className='friends-dock friends-dock-collapsed'>
