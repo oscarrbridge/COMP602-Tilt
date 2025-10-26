@@ -1,72 +1,92 @@
-.NavBarContainer{
-    background-color: var(--secondary-colour);
+.NavBarContainer {
+  background-color: var(--secondary-colour);
 
-    width: 100vw;
-    box-sizing: border-box;
+  width: 100vw;
+  box-sizing: border-box;
 
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
 
-    padding: 10px 25px;
+  padding: 10px 25px;
 }
 
 .DropArrow {
-    width: 25px;
-    height: 25px;
+  width: 25px;
+  height: 25px;
 
-    margin-right: 10px;
-    margin: 0px;
+  margin-right: 10px;
+  margin: 0px;
 }
 
 .DropArrow img {
-    background-color: rgba(255, 255, 255, 0.083);
-    border-radius: 10px;
-    box-shadow: 0px 0px 2px rgba(255, 255, 255, 0.334);
+  background-color: rgba(255, 255, 255, 0.083);
+  border-radius: 10px;
+  box-shadow: 0px 0px 2px rgba(255, 255, 255, 0.334);
 
-    transition: 0.2s all;
+  transition: 0.2s all;
 }
 
 .DropArrow img:hover {
-    box-shadow: 0px 0px 5px rgba(255, 255, 255, 0.334);
+  box-shadow: 0px 0px 5px rgba(255, 255, 255, 0.334);
 }
-
 
 .Logo {
-    justify-self: start;
-    cursor: pointer;
+  justify-self: start;
+  cursor: pointer;
 }
 
-.UserBalanceContainer{
-    min-width: 200px;
+.UserBalanceContainer {
+  min-width: 200px;
 
-    background-color: var(--primary-colour);
-    border-radius: 18px;
+  background-color: var(--primary-colour);
+  border-radius: 18px;
 
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
 
-    justify-content: space-between;
+  justify-content: space-between;
 
-    padding-right: 10px;
+  padding-right: 10px;
 }
 
 .UserBalance {
-    justify-self: center;
+  justify-self: center;
 }
 
 .LoginControls {
-    justify-self: end;
+  justify-self: end;
 }
 
 .LoginControls {
-    display: flex;
-    gap: 10px;
+  display: flex;
+  gap: 10px;
 }
 
-.LoginControls button{
-    background-color: var(--primary-colour);
-    color: var(--text-colour)
+.LoginControls button {
+  background-color: var(--primary-colour);
+  color: var(--text-colour);
+}
+.LeftGroup {
+  justify-self: start; /* stays in left grid column */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.RoleLinks {
+  display: flex;
+  gap: 8px;
+  margin-left: 6px; /* a little space from the logo */
+}
+
+.role-btn {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: linear-gradient(180deg, #2b93d6, #1670b8);
+  color: #e9f4ff;
+  cursor: pointer;
 }

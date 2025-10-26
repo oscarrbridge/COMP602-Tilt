@@ -13,9 +13,7 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 
-/**
- * Join an existing poker lobby
- */
+/** Join an existing poker lobby */
 export async function joinPokerLobby(gameId: string, uid: string, displayName?: string) {
   const playerRef = doc(db, 'games', gameId, 'players', uid);
   const existing = await getDoc(playerRef);
@@ -37,9 +35,7 @@ export async function joinPokerLobby(gameId: string, uid: string, displayName?: 
   );
 }
 
-/**
- * Create a new poker lobby
- */
+/** Create a new poker lobby */
 export async function createPokerLobby(hostUid: string, minPlayers = 2, maxPlayers = 6) {
   const gameRef = doc(collection(db, 'games'));
 
@@ -52,28 +48,25 @@ export async function createPokerLobby(hostUid: string, minPlayers = 2, maxPlaye
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
     gameType: 'poker',
-    communityCards: [],
+    communityCards: [] as string[],
     pot: 0,
     currentBet: 0,
     dealerPosition: 0,
     smallBlind: 10,
     bigBlind: 20,
-    round: 'preflop',
-    playersOrder: [],
-    deck: [],
+    round: 'preflop' as 'preflop',
+    playersOrder: [] as string[],
+    deck: [] as string[],
     deckIndex: 0,
-    dealLock: null,
-    streetLock: null,
+    dealLock: null as any,
+    streetLock: null as any,
   };
 
   await setDoc(gameRef, baseGameData);
-  console.log(`Created poker lobby: ${gameRef.id}`);
   return gameRef.id;
 }
 
-/**
- * Update a poker player's data
- */
+/** Update a poker player's data */
 export async function updatePlayerStatus(
   gameId: string,
   uid: string,
@@ -84,15 +77,14 @@ export async function updatePlayerStatus(
     status: string;
     chips: number;
     ready: boolean;
+    hasActed: boolean;
   }>
 ) {
   const playerRef = doc(db, 'games', gameId, 'players', uid);
   await setDoc(playerRef, { ...updates, updatedAt: serverTimestamp() }, { merge: true });
 }
 
-/**
- * Update poker game state
- */
+/** Update poker game state */
 export async function updatePokerGame(
   gameId: string,
   updates: Partial<{
@@ -103,113 +95,85 @@ export async function updatePokerGame(
     playersOrder: string[];
     dealerPosition: number;
     state: 'waiting' | 'in-progress' | 'finished';
-    currentTurn: string;
+    currentTurn: string | null;
   }>
 ) {
   const gameRef = doc(db, 'games', gameId);
   await updateDoc(gameRef, { ...updates, updatedAt: serverTimestamp() });
 }
 
-export async function setNextTurn(gameId: string, nextPlayerUid: string) {
+export async function setNextTurn(gameId: string, nextPlayerUid: string | null) {
   await updatePokerGame(gameId, { currentTurn: nextPlayerUid });
 }
 
-/**
- * Player Action: Call
- */
+/** Player Action helpers (optional direct calls) */
 export async function playerCall(gameId: string, uid: string) {
   const gameRef = doc(db, 'games', gameId);
   const gameSnap = await getDoc(gameRef);
   if (!gameSnap.exists()) return;
 
-  const gameData = gameSnap.data();
+  const gameData = gameSnap.data() as any;
   const playerRef = doc(db, 'games', gameId, 'players', uid);
   const playerSnap = await getDoc(playerRef);
   if (!playerSnap.exists()) return;
 
-  const player = playerSnap.data();
-  const diff = gameData.currentBet - (player.bet || 0);
+  const player = playerSnap.data() as any;
+  const diff = (gameData.currentBet || 0) - (player.bet || 0);
 
-  if (player.chips >= diff) {
-    await updateDoc(playerRef, {
-      chips: player.chips - diff,
-      bet: gameData.currentBet,
-    });
+  if (player.chips >= diff && diff > 0) {
+    await updateDoc(playerRef, { chips: player.chips - diff, bet: gameData.currentBet });
     await updateDoc(gameRef, { pot: (gameData.pot || 0) + diff });
-    console.log(`${uid} called ${diff}`);
   }
 }
 
-/**
- * Player Action: Raise
- */
 export async function playerRaise(gameId: string, uid: string, raiseAmount: number) {
   const gameRef = doc(db, 'games', gameId);
   const gameSnap = await getDoc(gameRef);
   if (!gameSnap.exists()) return;
 
-  const gameData = gameSnap.data();
+  const gameData = gameSnap.data() as any;
   const playerRef = doc(db, 'games', gameId, 'players', uid);
   const playerSnap = await getDoc(playerRef);
   if (!playerSnap.exists()) return;
 
-  const player = playerSnap.data();
-  const totalBet = gameData.currentBet + raiseAmount;
+  const player = playerSnap.data() as any;
+  const totalBet = (gameData.currentBet || 0) + raiseAmount;
   const diff = totalBet - (player.bet || 0);
 
-  if (player.chips >= diff) {
-    await updateDoc(playerRef, {
-      chips: player.chips - diff,
-      bet: totalBet,
-    });
-    await updateDoc(gameRef, {
-      currentBet: totalBet,
-      pot: (gameData.pot || 0) + diff,
-    });
-    console.log(`${uid} raised to ${totalBet}`);
+  if (player.chips >= diff && diff > 0) {
+    await updateDoc(playerRef, { chips: player.chips - diff, bet: totalBet });
+    await updateDoc(gameRef, { currentBet: totalBet, pot: (gameData.pot || 0) + diff });
   }
 }
 
-/**
- * Player Action: Check
- */
 export async function playerCheck(gameId: string, uid: string) {
   const gameRef = doc(db, 'games', gameId);
   const gameSnap = await getDoc(gameRef);
   if (!gameSnap.exists()) return;
 
-  const gameData = gameSnap.data();
+  const gameData = gameSnap.data() as any;
   const playerRef = doc(db, 'games', gameId, 'players', uid);
   const playerSnap = await getDoc(playerRef);
   if (!playerSnap.exists()) return;
 
-  const player = playerSnap.data();
-
-  if ((player.bet || 0) === gameData.currentBet) {
-    console.log(`${uid} checked`);
-  } else {
-    console.log(`${uid} cannot check, must call or fold`);
+  const player = playerSnap.data() as any;
+  if ((player.bet || 0) !== (gameData.currentBet || 0)) {
+    // cannot check
+    return;
   }
 }
 
-/**
- * Player Action: Fold
- */
 export async function playerFold(gameId: string, uid: string) {
   const playerRef = doc(db, 'games', gameId, 'players', uid);
   await updateDoc(playerRef, { status: 'folded' });
-  console.log(`${uid} folded`);
 }
 
-/**
- * Reset round after a hand finishes
- */
+/** Reset round after a hand finishes */
 export async function resetRound(gameId: string) {
   try {
     const gameRef = doc(db, 'games', gameId);
     const batch = writeBatch(db);
 
-    // numeric guards
     const safeNumber = (n: any, d = 0) => (typeof n === 'number' && Number.isFinite(n) ? n : d);
 
     batch.update(
@@ -248,15 +212,12 @@ export async function resetRound(gameId: string) {
     });
 
     await batch.commit();
-    console.log(`Round reset for poker game ${gameId}`);
   } catch (e: any) {
     console.error('resetRound failed', { code: e.code, message: e.message, e });
   }
 }
 
-/**
- * Delete poker lobby
- */
+/** Delete poker lobby */
 export async function deletePokerLobby(gameId: string) {
   const gameRef = doc(db, 'games', gameId);
   const playersRef = collection(db, 'games', gameId, 'players');
@@ -267,7 +228,7 @@ export async function deletePokerLobby(gameId: string) {
   await deleteFirestoreDoc(gameRef);
 }
 
-// create a 52-card deck in server format
+/** 52-card deck */
 export function buildDeck(): string[] {
   const suits = ['♠', '♥', '♦', '♣'];
   const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
@@ -281,42 +242,6 @@ export function buildDeck(): string[] {
   return deck;
 }
 
-// atomically draw N cards and advance deckIndex
-export async function drawCardsTx(gameId: string, n: number): Promise<string[]> {
-  const gameRef = doc(db, 'games', gameId);
-  return await runTransaction(db, async (tx) => {
-    const snap = await tx.get(gameRef);
-    if (!snap.exists()) throw new Error('game not found');
-    const g: any = snap.data();
-
-    let deck: string[] = g.deck || [];
-    let idx: number = g.deckIndex ?? 0;
-
-    if (!deck.length || idx + n > deck.length) {
-      // rebuild a fresh deck if empty/exhausted
-      deck = buildDeck();
-      idx = 0;
-    }
-
-    const drawn = deck.slice(idx, idx + n);
-    tx.update(gameRef, { deck, deckIndex: idx + n, updatedAt: serverTimestamp() });
-    return drawn;
-  });
-}
-
-const isFiniteNumber = (x: any) => typeof x === 'number' && Number.isFinite(x);
-
-function sanitize<T extends Record<string, any>>(obj: T): T {
-  const out: any = {};
-  for (const [k, v] of Object.entries(obj ?? {})) {
-    if (v === undefined) continue; // Firestore rejects undefined
-    if (typeof v === 'number' && !Number.isFinite(v)) continue; // rejects NaN/Infinity
-    if (Array.isArray(v)) out[k] = v.filter((el) => el !== undefined);
-    else out[k] = v;
-  }
-  return out;
-}
-
 export async function tryStartHand(gameId: string, hostUid: string) {
   const gameRef = doc(db, 'games', gameId);
 
@@ -325,31 +250,31 @@ export async function tryStartHand(gameId: string, hostUid: string) {
     if (!gSnap.exists()) throw new Error('game not found');
     const g: any = gSnap.data();
 
-    if (g.host !== hostUid) return; // host-only
+    // host-only + not already dealing/started
+    if (g.host !== hostUid) return;
     if (g.dealLock || g.state === 'in-progress') return;
 
-    // minPlayers + all ready
+    // read players (outside game doc)
     const playersSnap = await getDocs(collection(db, 'games', gameId, 'players'));
     const players = playersSnap.docs.map((d) => ({ uid: d.id, ...(d.data() as any) }));
     const ready = players.filter((p) => p.ready && p.status !== 'folded');
     if (ready.length < (g.minPlayers ?? 2)) return;
 
-    // LOCK
+    // lock dealing
     tx.update(gameRef, { dealLock: serverTimestamp() });
 
-    // ensure deck exists
-    let deck = g.deck;
+    // ensure deck
+    let deck: string[] = g.deck;
     let deckIndex = g.deckIndex ?? 0;
     if (!deck || deck.length === 0 || deckIndex > deck.length - 10) {
       deck = buildDeck();
       deckIndex = 0;
     }
 
-    // players order (simple seat order: stable by join time)
+    // seat/order
     const order = ready.map((p) => p.uid);
 
-    // deal 2 hole cards per ready player
-    // (read deck locally, then write updated index)
+    // deal 2 to each
     const need = order.length * 2;
     if (deckIndex + need > deck.length) {
       deck = buildDeck();
@@ -363,12 +288,7 @@ export async function tryStartHand(gameId: string, hostUid: string) {
       const c2 = dealSlice[i * 2 + 1];
       tx.set(
         doc(db, 'games', gameId, 'players', uid),
-        {
-          status: 'playing',
-          bet: 0,
-          hasActed: false,
-          holeCards: [c1, c2],
-        },
+        { status: 'playing', bet: 0, hasActed: false, holeCards: [c1, c2] },
         { merge: true }
       );
     });
@@ -381,14 +301,57 @@ export async function tryStartHand(gameId: string, hostUid: string) {
       playersOrder: order,
       currentTurn: firstToAct,
       currentBet: 0,
-      streetBet: 0, // new: bet within street
+      streetBet: 0,
       communityCards: [],
       deck,
       deckIndex,
-      dealLock: null, // UNLOCK
+      dealLock: null, // unlock
       updatedAt: serverTimestamp(),
     });
   });
+}
+
+// add near other helpers
+export async function finishIfSingleSurvivor(gameId: string) {
+  const gameRef = doc(db, 'games', gameId);
+
+  // Use a lock so only one client does the payout
+  await runTransaction(db, async (tx) => {
+    const gSnap = await tx.get(gameRef);
+    if (!gSnap.exists()) return;
+
+    const g: any = gSnap.data();
+    if (g.state !== 'in-progress') return;
+    if (g.payoutLock) return; // already in progress
+
+    // Lock the payout so no one else runs it
+    tx.update(gameRef, { payoutLock: serverTimestamp() });
+
+    // We need current players to see who's alive
+    // (reads outside tx are fine; we validated state and set a lock above)
+  });
+
+  // Do non-transactional reads/writes after the lock is set
+  const [gAfter, playersSnap] = await Promise.all([
+    getDoc(gameRef),
+    getDocs(collection(db, 'games', gameId, 'players')),
+  ]);
+
+  const gData: any = gAfter.data() || {};
+  const pot = gData.pot || 0;
+
+  const aliveDocs = playersSnap.docs.filter((d) => (d.data() as any).status === 'playing');
+
+  // If still exactly 1 survivor, pay them and reset
+  if (aliveDocs.length === 1) {
+    const w = aliveDocs[0];
+    const wData: any = w.data();
+    await updateDoc(w.ref, { chips: (wData.chips || 0) + pot });
+  }
+
+  // Clear lock + reset everything for next hand
+  await updateDoc(gameRef, { payoutLock: null });
+  await resetRound(gameId);
 }
 
 export async function dealNextStreet(gameId: string, hostUid: string) {
@@ -398,15 +361,18 @@ export async function dealNextStreet(gameId: string, hostUid: string) {
     const gSnap = await tx.get(gameRef);
     if (!gSnap.exists()) throw new Error('game not found');
     const g: any = gSnap.data();
+
     if (g.host !== hostUid || g.streetLock) return;
 
+    // lock street
     tx.update(gameRef, { streetLock: serverTimestamp() });
 
     let deck: string[] = g.deck || buildDeck();
     let deckIndex: number = g.deckIndex ?? 0;
     let cc: string[] = g.communityCards || [];
-    let round: string = g.round || 'preflop';
+    let round: 'preflop' | 'flop' | 'turn' | 'river' | 'showdown' = g.round || 'preflop';
 
+    // draw needed cards
     const need = round === 'preflop' ? 3 : 1;
     if (deckIndex + need > deck.length) {
       deck = buildDeck();
@@ -428,7 +394,7 @@ export async function dealNextStreet(gameId: string, hostUid: string) {
       round = 'showdown';
     }
 
-    // reset per-street flags
+    // reset per-street flags + advance
     tx.update(gameRef, {
       communityCards: cc,
       currentBet: 0,
@@ -436,11 +402,11 @@ export async function dealNextStreet(gameId: string, hostUid: string) {
       round,
       deck,
       deckIndex,
-      streetLock: null,
+      streetLock: null, // unlock
       updatedAt: serverTimestamp(),
     });
 
-    // reset player hasActed + bet for active players
+    // reset players' hasActed/bet for active players
     const playersSnap = await getDocs(collection(db, 'games', gameId, 'players'));
     const statuses = new Map<string, string>();
     playersSnap.docs.forEach((d) => {
@@ -451,20 +417,55 @@ export async function dealNextStreet(gameId: string, hostUid: string) {
       }
     });
 
-    // choose next turn = first active in playersOrder
+    // next turn = first alive in order
     const order: string[] = g.playersOrder || [];
     const next = order.find((uid) => statuses.get(uid) === 'playing') ?? null;
     tx.update(gameRef, { currentTurn: next });
   });
 }
 
+/** Atomically draw N cards and advance deckIndex */
+export async function drawCardsTx(gameId: string, n: number): Promise<string[]> {
+  const gameRef = doc(db, 'games', gameId);
+  return await runTransaction(db, async (tx) => {
+    const snap = await tx.get(gameRef);
+    if (!snap.exists()) throw new Error('game not found');
+    const g: any = snap.data();
+
+    let deck: string[] = g.deck || [];
+    let idx: number = g.deckIndex ?? 0;
+
+    if (!deck.length || idx + n > deck.length) {
+      deck = buildDeck();
+      idx = 0;
+    }
+
+    const drawn = deck.slice(idx, idx + n);
+    tx.update(gameRef, { deck, deckIndex: idx + n, updatedAt: serverTimestamp() });
+    return drawn;
+  });
+}
+
+/** keep tx small & safe when advancing turn */
 export async function setNextTurnSafe(gameId: string, expectedUid: string, nextUid: string | null) {
   const gameRef = doc(db, 'games', gameId);
   await runTransaction(db, async (tx) => {
     const snap = await tx.get(gameRef);
     if (!snap.exists()) return;
     const g: any = snap.data();
-    if (g.currentTurn !== expectedUid) return; // someone else already advanced
+    if (g.currentTurn !== expectedUid) return; // already advanced
     tx.update(gameRef, { currentTurn: nextUid, updatedAt: serverTimestamp() });
   });
+}
+
+/** utils */
+function sanitize<T extends Record<string, any>>(obj: T): T {
+  const out: any = {};
+  for (const [k, v] of Object.entries(obj ?? {})) {
+    if (v === undefined) continue;
+    if (typeof v === 'number' && !Number.isFinite(v)) continue;
+    if (Array.isArray(v)) out[k] = v.filter((el) => el !== undefined);
+    else out[k] = v;
+  }
+  return out;
 }

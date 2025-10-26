@@ -1,156 +1,587 @@
-.app-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 3%;
-  min-height: 100vh;
-  min-width: 99vw;
-  background-color: #1a1818;
-  color: #fff;
-  font-family: Arial, sans-serif;
-  background-size: cover;        
-  background-position: center;   
-  background-color: var(--primary-colour);
+/* ================= Blackjack.css (tidy) ================= */
+:root {
+  --bj-card-w: clamp(44px, 8.2vw, 56px);
+  --bj-card-h: clamp(62px, 11vw, 80px);
+  --bj-controls-h: 52px;
 }
 
-h1 {
-  font-size: 3rem;
-  margin-bottom: 20px;
-  font-family: 'Press Start 2P', 'Arial', sans-serif;
-  text-shadow: 2px 2px 4px black;
-}
-
-.table {
-  width: 90%;
-  max-width: 700px;
-  padding: 20px;
-  background: #006600;
-  border-radius: 12px;
-  margin: 20px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-  overflow: visible;
-}
-
-.hand-container, .community, .others {
-  text-align: center;
-}
-
-.cards {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  margin-top: 10px;
+/* ----- layout ----- */
+.bj-game-container {
   position: relative;
-}
-
-.card {
-  width: 60px;
-  height: 90px;
-  background: white;
-  color: black;
-  font-weight: bold;
-  font-size: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
   display: flex;
+  flex-direction: column;
   align-items: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--secondary-colour);
+  background-image: url('/assets/poker-bg.jpg');
+  background-size:
+    100% 90%,
+    cover;
+  background-position:
+    top center,
+    center;
+  background-repeat: no-repeat;
+  padding-bottom: 110px;
+}
+
+.game-bet-controls {
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 999;
+  background: var(--secondary-colour);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.25);
+  animation: controlsSlideUp 0.8s ease-out;
+}
+
+/* Single, consolidated .bj-table block (includes overflow + position) */
+.bj-table {
+  position: relative; /* allow floating panel */
+  overflow: hidden; /* keep contents inside rounded frame */
+  margin: 120px auto;
+  padding: 10px 14px 22px;
+  width: min(740px, 86vw);
+  border-radius: 12px;
+  border: 3px solid var(--accent-colour);
+  background:
+    radial-gradient(circle at 50% 10%, rgba(255, 255, 255, 0.05), transparent 45%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.12)),
+    url('/assets/blackjack-table.jpg'); /* table texture/image */
+  background-size:
+    100% 100%,
+    100% 100%,
+    cover;
+  background-position: center, center, center;
+  background-repeat: no-repeat;
+  box-shadow:
+    0 5px 100px rgba(83, 97, 150, 0.35),
+    inset 0 0 8px rgba(196, 205, 207, 0.25);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+  animation: gridFadeIn 0.9s ease-out;
+  min-height: calc(var(--bj-card-h) * 2 + var(--bj-controls-h) + 160px);
+}
+.bj-table.idle-hover {
+  animation:
+    idleFloat 3s ease-in-out infinite,
+    gridFadeIn 2s ease-out;
+}
+
+/* ----- hands/cards ----- */
+.bj-hand {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 22px 0;
+  min-height: calc(var(--bj-card-h) + 40px);
+}
+
+.bj-hand-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  color: #fff;
+}
+.bj-hand-label {
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+.bj-score {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.9;
+}
+
+.bj-cards {
+  display: flex;
+  gap: 10px;
   justify-content: center;
-  transform: translateY(-150px);
+  align-items: center;
+  flex-wrap: wrap;
+  position: relative;
+  min-height: var(--bj-card-h);
+}
+
+.bj-card {
+  width: var(--bj-card-w);
+  height: var(--bj-card-h);
+  perspective: 800px;
+  border-radius: 10px;
+  transform: translateY(30px) scale(0.92);
   opacity: 0;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition:
+    transform 400ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 300ms ease;
 }
-
-.card.red {
-  color: red;
-}
-
-.card.dealt {
-  transform: translateY(0);
+.bj-card.dealt {
+  transform: translateY(0) scale(1);
   opacity: 1;
 }
+.bj-card.red .bj-card-front {
+  color: #e33b3b;
+}
 
-.controls {
+.bj-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  border-radius: 10px;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.45),
+    inset 0 0 4px rgba(255, 255, 255, 0.2);
+}
+.bj-card-front,
+.bj-card-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 10px;
+}
+.bj-card-front {
+  background: linear-gradient(180deg, #fff, #f3f3f3);
+  color: #111;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 22px;
+}
+.bj-rank {
+  margin-right: 2px;
+}
+.bj-suit {
+  font-size: 20px;
+}
+.bj-card-back {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.25), transparent 25%),
+    repeating-linear-gradient(45deg, #1c3b7a, #1c3b7a 8px, #274a96 8px, #274a96 16px);
+  transform: rotateY(180deg);
+  border: 2px solid #e6e6e6;
+}
+.face-up .bj-card-inner {
+  transform: rotateY(0deg);
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.face-down .bj-card-inner {
+  transform: rotateY(180deg);
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ----- controls / result ----- */
+.bj-controls {
+  min-height: var(--bj-controls-h);
+  margin-top: 18px;
   display: flex;
-  gap: 20px;
-  margin: 20px 0;
-}
-
-.controls button,
-.bet-controls button {
-  padding: 10px 20px;
-  font-size: 16px;
-  border-radius: 8px;
-  border: none;
-  background: #ffcc00;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.controls button:hover,
-.bet-controls button:hover {
-  transform: scale(1.05);
-}
-
-.bet-controls {
-  display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 16px;
 }
-
-.bet-controls input {
-  width: 80px;
-  padding: 6px;
+.bj-btn {
+  padding: 10px 22px;
   font-size: 16px;
-  border-radius: 6px;
-  border: none;
-  text-align: center;
-  background: #ffcc00;
-  color: #000;
-  font-weight: bold;
+  border-radius: 10px;
+  border: 2px solid var(--accent-colour);
+  background: linear-gradient(180deg, #ffd043, #ffb300);
+  color: #111;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+.bj-btn:hover {
+  transform: translateY(-1px) scale(1.03);
+}
+.bj-btn:active {
+  transform: translateY(1px) scale(0.98);
+}
+.bj-btn:disabled {
+  filter: grayscale(0.6) brightness(0.85);
+  cursor: not-allowed;
+  transform: none;
 }
 
 .win-display {
-  margin-top: 20px;
-  font-size: 32px;
-  font-weight: bold;
-  text-align: center;
-  color: gold;
+  font-size: 1.6rem;
+  font-weight: 800;
+  min-height: 42px;
+  display: grid;
+  place-items: center;
+  margin-top: 14px;
+  color: var(--text-colour);
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
-
+.win-display.visible {
+  opacity: 1;
+}
 .win-amount {
-  opacity: 1;
-  animation: popGold 2s ease-in-out infinite;
+  color: gold;
+  animation:
+    popGold 0.6s ease-out forwards,
+    moneyGlow 2s ease-in-out infinite;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
-
-@keyframes popGold {
-  0% { transform: scale(1); text-shadow: 0 0 10px gold; }
-  50% { transform: scale(1.1); text-shadow: 0 0 20px white; }
-  100% { transform: scale(1); text-shadow: 0 0 10px gold; }
-}
-
 .loss-amount {
-  color: red;
-  opacity: 1;
-  font-weight: bold;
-  animation: popRed 1.5s ease-in-out;
+  color: var(--accent-hover, #ff5555);
+  animation:
+    popRed 0.6s ease-out forwards,
+    shake 0.5s ease-in-out;
+}
+.tie-amount {
+  color: #cfd3d6;
+  animation: popGray 0.6s ease-out forwards;
 }
 
-@keyframes popRed {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
+/* ----- floating 'Other Players' panel (single box) ----- */
+.bj-others-float {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: clamp(180px, 24vw, 260px);
+  max-height: calc(100% - 28px);
+  padding: 10px 10px 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(4px);
+  overflow: auto;
+  z-index: 2;
 }
-
-.others div {
-  padding: 6px;
-  border-bottom: 1px solid gray;
-  margin: 4px 0;
-  font-weight: bold;
+.bj-others-title {
+  font-weight: 700;
   color: #fff;
+  margin: 2px 2px 8px;
+}
+.bj-others-row {
+  padding: 6px 4px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+.bj-others-row:last-child {
+  border-bottom: 0;
+}
+.bj-others-head {
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.bj-others-cards {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.bj-others-cards .bj-card {
+  width: calc(var(--bj-card-w) * 0.72);
+  height: calc(var(--bj-card-h) * 0.72);
+  transform: translateY(6px) scale(0.96);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.35),
+    inset 0 0 3px rgba(255, 255, 255, 0.18);
+}
+.bj-others-cards .bj-card.dealt {
+  transform: translateY(0) scale(0.96);
+}
+.bj-others-status {
+  margin-top: 4px;
+}
+
+/* dock the panel below on small screens */
+@media (max-width: 680px) {
+  .bj-others-float {
+    position: static;
+    width: 100%;
+    max-height: 28vh;
+    margin-top: 8px;
+  }
+}
+
+/* ----- micro animations reused ----- */
+@keyframes controlsSlideUp {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes gridFadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.98) rotate(-1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+@keyframes idleFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+@keyframes popGold {
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes moneyGlow {
+  0%,
+  100% {
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  }
+  50% {
+    text-shadow:
+      0 0 20px gold,
+      0 0 30px rgba(255, 215, 0, 0.8);
+  }
+}
+@keyframes popRed {
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes popGray {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-2px);
+  }
+  75% {
+    transform: translateX(2px);
+  }
+}
+
+/* Float the copy button inside the table, top-left */
+.copy-link-fab {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 3; /* above cards/panels */
+}
+
+/* Blue variant to match your UI (overrides yellow .bj-btn) */
+.bj-btn--blue {
+  background: linear-gradient(180deg, #2b93d6, #1670b8);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #e9f4ff;
+}
+.bj-btn--blue:hover {
+  filter: none;
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+}
+.bj-btn--blue:active {
+  transform: translateY(1px) scale(0.98);
+}
+.bj-btn--blue:disabled {
+  filter: grayscale(0.4) opacity(0.85);
+}
+
+.bj-btn.bj-btn--blue {
+  background: linear-gradient(180deg, #2b93d6, #1670b8);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #e9f4ff;
+}
+
+.bj-btn.bj-btn--blue:hover {
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+}
+
+.bj-btn.bj-btn--blue:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+/* ===== Ready overlay (fullscreen CTA) ===== */
+.ready-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200; /* above bet controls (999) and table */
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(2px);
+}
+
+.ready-card {
+  padding: 18px 22px;
+  width: min(520px, 92vw);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background:
+    radial-gradient(circle at 30% 10%, rgba(255, 255, 255, 0.06), transparent 55%),
+    linear-gradient(180deg, rgba(7, 18, 40, 0.9), rgba(14, 26, 54, 0.9));
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  text-align: center;
+  color: #eaf2ff;
+}
+
+.ready-card h3 {
+  margin: 0 0 10px;
+  font-size: 1.25rem;
+  letter-spacing: 0.3px;
+}
+
+.ready-card p {
+  margin: 0 0 16px;
+  opacity: 0.9;
+}
+
+/* Bigger, glowing blue button */
+.bj-btn.bj-btn--blue.bj-btn--cta {
+  padding: 14px 26px;
+  font-size: 18px;
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.4),
+    0 0 22px rgba(45, 150, 230, 0.45);
+  animation: ctaPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes ctaPulse {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+    box-shadow:
+      0 10px 22px rgba(0, 0, 0, 0.4),
+      0 0 12px rgba(45, 150, 230, 0.35);
+  }
+  50% {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow:
+      0 14px 26px rgba(0, 0, 0, 0.45),
+      0 0 28px rgba(45, 150, 230, 0.6);
+  }
+}
+
+/* Sticky action dock that sits above the bet footer */
+.action-dock {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+/* If you want a bit more room at page bottom for both bars */
+.bj-game-container {
+  padding-bottom: 180px; /* was 110px; gives room for action dock + bet footer */
+}
+
+/* Community header stacked with pot under the title (left aligned) */
+.bj-hand-head.community-head {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.bj-pot-inline {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.95;
+}
+
+/* Compact raise strip */
+.pkr-raise {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 6px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-colour);
+}
+
+.pkr-raise-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pkr-raise-label {
+  font-weight: 700;
+  opacity: 0.85;
+}
+
+.pkr-raise-slider {
+  flex: 1;
+}
+
+.pkr-raise-amt {
+  font-weight: 800;
+  min-width: 72px;
+  text-align: right;
+}
+
+.pkr-chip {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: linear-gradient(180deg, #2b93d6, #1670b8); /* blue to match */
+  color: #e9f4ff;
+  cursor: pointer;
+}
+
+.pkr-chip:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pkr-to-call {
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+/* Keep action buttons tidy under table content */
+.action-dock {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 6px;
 }
