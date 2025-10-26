@@ -1,3 +1,8 @@
+:root {
+  --pkr-card-w: clamp(46px, 7vw, 60px);
+  --pkr-card-h: calc(var(--pkr-card-w) * 1.45);
+}
+
 .app-container {
   display: flex;
   flex-direction: column;
@@ -5,36 +10,54 @@
   padding-top: 3%;
   min-height: 100vh;
   min-width: 99vw;
-  background-color: #1a1818;
   color: #fff;
   font-family: Arial, sans-serif;
-  background-size: cover;        
-  background-position: center;   
   background-color: var(--primary-colour);
+  background-size: cover;
+  background-position: center;
 }
 
 h1 {
   font-size: 3rem;
   margin-bottom: 20px;
-  font-family: 'Press Start 2P', 'Arial', sans-serif;
+  font-family: 'Press Start 2P', Arial, sans-serif;
   text-shadow: 2px 2px 4px black;
 }
 
-.table {
+.pkr-subtle {
+  opacity: 0.75;
+  font-size: 0.9rem;
+}
+
+/* TABLE: positioned container + image texture */
+.table.pkr-table {
+  position: relative; /* allow the floating panel inside */
   width: 90%;
-  max-width: 700px;
+  max-width: 740px;
   padding: 20px;
-  background: #006600;
   border-radius: 12px;
   margin: 20px 0;
   display: flex;
   flex-direction: column;
-  gap: 40px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-  overflow: visible;
+  gap: 32px;
+  overflow: hidden; /* keep content within rounded frame */
+  border: 3px solid var(--accent-colour);
+  box-shadow:
+    0 5px 100px rgba(83, 97, 150, 0.35),
+    inset 0 0 8px rgba(196, 205, 207, 0.25);
+  background:
+    radial-gradient(circle at 50% 10%, rgba(255, 255, 255, 0.05), transparent 45%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.12)),
+    url('/assets/poker-table.jpg'); /* place texture in public/assets */
+  background-size:
+    100% 100%,
+    100% 100%,
+    cover;
+  background-position: center, center, center;
+  background-repeat: no-repeat;
 }
 
-.hand-container, .community, .others {
+.hand-container {
   text-align: center;
 }
 
@@ -44,113 +67,125 @@ h1 {
   justify-content: center;
   margin-top: 10px;
   position: relative;
+  flex-wrap: wrap;
 }
 
 .card {
-  width: 60px;
-  height: 90px;
-  background: white;
-  color: black;
-  font-weight: bold;
-  font-size: 20px;
+  width: var(--pkr-card-w);
+  height: var(--pkr-card-h);
+  background: #fff;
+  color: #111;
+  font-weight: 800;
+  font-size: clamp(16px, 2.6vw, 20px);
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   transform: translateY(-150px);
   opacity: 0;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
 }
 
 .card.red {
-  color: red;
+  color: #e33b3b;
 }
-
 .card.dealt {
   transform: translateY(0);
   opacity: 1;
 }
 
+/* Controls */
 .controls {
   display: flex;
-  gap: 20px;
+  gap: 16px;
   margin: 20px 0;
 }
-
-.controls button,
-.bet-controls button {
+.controls button {
   padding: 10px 20px;
   font-size: 16px;
-  border-radius: 8px;
-  border: none;
-  background: #ffcc00;
+  border-radius: 10px;
+  border: 2px solid var(--accent-colour);
+  background: linear-gradient(180deg, #ffd043, #ffb300);
+  color: #111;
   cursor: pointer;
-  transition: transform 0.2s;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+.controls button:hover {
+  transform: translateY(-1px) scale(1.03);
+}
+.controls button:active {
+  transform: translateY(1px) scale(0.98);
 }
 
-.controls button:hover,
-.bet-controls button:hover {
-  transform: scale(1.05);
-}
-
-.bet-controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.bet-controls input {
-  width: 80px;
-  padding: 6px;
-  font-size: 16px;
+/* Copy button near title */
+.pkr-copy-btn {
+  padding: 4px 8px;
+  font-size: 0.8rem;
   border-radius: 6px;
-  border: none;
-  text-align: center;
-  background: #ffcc00;
-  color: #000;
-  font-weight: bold;
+  background: var(--secondary-colour);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-colour);
+  cursor: pointer;
 }
 
-.win-display {
-  margin-top: 20px;
-  font-size: 32px;
-  font-weight: bold;
-  text-align: center;
-  color: gold;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+/* Floating 'Other Players' panel (top-right of table) */
+.pkr-others-float {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: clamp(180px, 24vw, 260px);
+  max-height: calc(100% - 28px);
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(4px);
+  overflow: auto;
+  z-index: 2;
 }
 
-.win-amount {
-  opacity: 1;
-  animation: popGold 2s ease-in-out infinite;
-}
-
-@keyframes popGold {
-  0% { transform: scale(1); text-shadow: 0 0 10px gold; }
-  50% { transform: scale(1.1); text-shadow: 0 0 20px white; }
-  100% { transform: scale(1); text-shadow: 0 0 10px gold; }
-}
-
-.loss-amount {
-  color: red;
-  opacity: 1;
-  font-weight: bold;
-  animation: popRed 1.5s ease-in-out;
-}
-
-@keyframes popRed {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
-}
-
-.others div {
-  padding: 6px;
-  border-bottom: 1px solid gray;
-  margin: 4px 0;
-  font-weight: bold;
+.pkr-others-title {
+  font-weight: 700;
   color: #fff;
+  margin: 2px 2px 8px;
+}
+
+.pkr-others-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.pkr-others-row {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.pkr-others-head {
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.pkr-others-cards {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Responsive: dock below table on small screens */
+@media (max-width: 680px) {
+  .pkr-others-float {
+    position: static;
+    width: 100%;
+    max-height: 28vh;
+    margin-top: 8px;
+  }
 }

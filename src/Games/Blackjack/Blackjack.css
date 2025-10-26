@@ -1,10 +1,11 @@
-/* ================= Blackjack.css ================= */
+/* ================= Blackjack.css (tidy) ================= */
 :root {
   --bj-card-w: clamp(44px, 8.2vw, 56px);
   --bj-card-h: clamp(62px, 11vw, 80px);
   --bj-controls-h: 52px;
 }
 
+/* ----- layout ----- */
 .bj-game-container {
   position: relative;
   display: flex;
@@ -25,25 +26,6 @@
   padding-bottom: 110px;
 }
 
-.bj-header {
-  margin-top: 20px;
-  text-align: center;
-  animation: headerSlideDown 0.8s ease-out;
-}
-
-.bj-title {
-  font-size: clamp(1.8rem, 2.8vw, 3rem);
-  color: var(--text-colour, #fff);
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
-  margin: 0;
-}
-
-.bj-subtle {
-  opacity: 0.75;
-  font-size: 0.9rem;
-  margin-top: 6px;
-}
-
 .game-bet-controls {
   width: 100%;
   position: fixed;
@@ -55,7 +37,10 @@
   animation: controlsSlideUp 0.8s ease-out;
 }
 
+/* Single, consolidated .bj-table block (includes overflow + position) */
 .bj-table {
+  position: relative; /* allow floating panel */
+  overflow: hidden; /* keep contents inside rounded frame */
   margin: 120px auto;
   padding: 10px 14px 22px;
   width: min(740px, 86vw);
@@ -63,7 +48,14 @@
   border: 3px solid var(--accent-colour);
   background:
     radial-gradient(circle at 50% 10%, rgba(255, 255, 255, 0.05), transparent 45%),
-    radial-gradient(ellipse at center, #0a7a1d 0%, #065e14 75%);
+    linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.12)),
+    url('/assets/blackjack-table.jpg'); /* table texture/image */
+  background-size:
+    100% 100%,
+    100% 100%,
+    cover;
+  background-position: center, center, center;
+  background-repeat: no-repeat;
   box-shadow:
     0 5px 100px rgba(83, 97, 150, 0.35),
     inset 0 0 8px rgba(196, 205, 207, 0.25);
@@ -73,13 +65,13 @@
   animation: gridFadeIn 0.9s ease-out;
   min-height: calc(var(--bj-card-h) * 2 + var(--bj-controls-h) + 160px);
 }
-
 .bj-table.idle-hover {
   animation:
     idleFloat 3s ease-in-out infinite,
     gridFadeIn 2s ease-out;
 }
 
+/* ----- hands/cards ----- */
 .bj-hand {
   display: flex;
   flex-direction: column;
@@ -94,7 +86,6 @@
   align-items: baseline;
   color: #fff;
 }
-
 .bj-hand-label {
   font-weight: 700;
   letter-spacing: 0.4px;
@@ -125,7 +116,6 @@
     transform 400ms cubic-bezier(0.22, 1, 0.36, 1),
     opacity 300ms ease;
 }
-
 .bj-card.dealt {
   transform: translateY(0) scale(1);
   opacity: 1;
@@ -144,7 +134,6 @@
     0 4px 12px rgba(0, 0, 0, 0.45),
     inset 0 0 4px rgba(255, 255, 255, 0.2);
 }
-
 .bj-card-front,
 .bj-card-back {
   position: absolute;
@@ -152,7 +141,6 @@
   backface-visibility: hidden;
   border-radius: 10px;
 }
-
 .bj-card-front {
   background: linear-gradient(180deg, #fff, #f3f3f3);
   color: #111;
@@ -161,14 +149,12 @@
   font-weight: 800;
   font-size: 22px;
 }
-
 .bj-rank {
   margin-right: 2px;
 }
 .bj-suit {
   font-size: 20px;
 }
-
 .bj-card-back {
   background:
     radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.25), transparent 25%),
@@ -176,7 +162,6 @@
   transform: rotateY(180deg);
   border: 2px solid #e6e6e6;
 }
-
 .face-up .bj-card-inner {
   transform: rotateY(0deg);
   transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -186,6 +171,7 @@
   transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* ----- controls / result ----- */
 .bj-controls {
   min-height: var(--bj-controls-h);
   margin-top: 18px;
@@ -194,7 +180,6 @@
   align-items: center;
   gap: 16px;
 }
-
 .bj-btn {
   padding: 10px 22px;
   font-size: 16px;
@@ -237,7 +222,6 @@
 .win-display.visible {
   opacity: 1;
 }
-
 .win-amount {
   color: gold;
   animation:
@@ -256,16 +240,68 @@
   animation: popGray 0.6s ease-out forwards;
 }
 
-@keyframes headerSlideDown {
-  0% {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
+/* ----- floating 'Other Players' panel (single box) ----- */
+.bj-others-float {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: clamp(180px, 24vw, 260px);
+  max-height: calc(100% - 28px);
+  padding: 10px 10px 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(4px);
+  overflow: auto;
+  z-index: 2;
+}
+.bj-others-title {
+  font-weight: 700;
+  color: #fff;
+  margin: 2px 2px 8px;
+}
+.bj-others-row {
+  padding: 6px 4px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+.bj-others-row:last-child {
+  border-bottom: 0;
+}
+.bj-others-head {
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.bj-others-cards {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.bj-others-cards .bj-card {
+  width: calc(var(--bj-card-w) * 0.72);
+  height: calc(var(--bj-card-h) * 0.72);
+  transform: translateY(6px) scale(0.96);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.35),
+    inset 0 0 3px rgba(255, 255, 255, 0.18);
+}
+.bj-others-cards .bj-card.dealt {
+  transform: translateY(0) scale(0.96);
+}
+.bj-others-status {
+  margin-top: 4px;
+}
+
+/* dock the panel below on small screens */
+@media (max-width: 680px) {
+  .bj-others-float {
+    position: static;
+    width: 100%;
+    max-height: 28vh;
+    margin-top: 8px;
   }
 }
+
+/* ----- micro animations reused ----- */
 @keyframes controlsSlideUp {
   0% {
     transform: translateY(100%);

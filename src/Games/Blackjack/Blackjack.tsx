@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+// ---- imports (top of file) ----
+import { useEffect, useMemo, useState } from 'react';
 import './Blackjack.css';
 import BackgroundLayout from '../../components/BackgroundLayout/BackgroundLayout';
 import { placeBet, recordWinTx, recordLossTx } from '../../../Backend/transactions';
@@ -10,7 +11,6 @@ type Card = { rank: string; suit: string; id: string };
 
 const suits = ['♠', '♥', '♦', '♣'] as const;
 const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'] as const;
-
 const isRed = (suit: string) => suit === '♥' || suit === '♦';
 
 const getCard = (): Card => {

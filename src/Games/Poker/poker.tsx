@@ -19,10 +19,10 @@ import {
   runTransaction,
   serverTimestamp,
   writeBatch,
+  updateDoc,
 } from 'firebase/firestore';
 import { db } from '../../../Backend/firebase/firebaseConfig';
 import { evaluateHand } from './pokerHandEvaluator';
-import { updateDoc } from 'firebase/firestore';
 
 // ===== Card helpers =====
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -90,7 +90,6 @@ export default function PokerGame() {
 
       // Start once min ready
       if (readyPlayers.length >= min) {
-        console.log('Host detected enough ready players, starting hand...');
         try {
           await tryStartHand(gameId, user.uid);
         } catch (err: any) {
@@ -105,11 +104,9 @@ export default function PokerGame() {
     if (!user || !gameId) return;
     try {
       const meRef = doc(db, 'games', gameId, 'players', user.uid);
-      console.log('ReadyUp ->', { gameId, uid: user.uid });
       await updatePlayerStatus(gameId, user.uid, { ready: true });
-      // extra safety in case merge semantics change elsewhere
       await updateDoc(meRef, { ready: true, updatedAt: serverTimestamp() });
-      setReady(true); // local UX; also mirrored by snapshot above
+      setReady(true);
     } catch (e) {
       console.error('readyUp failed', e);
     }
@@ -118,8 +115,8 @@ export default function PokerGame() {
   const sanitize = (obj: Record<string, any>) => {
     const o: Record<string, any> = {};
     for (const [k, v] of Object.entries(obj)) {
-      if (v === undefined) continue; // Firestore rejects undefined
-      if (typeof v === 'number' && !Number.isFinite(v)) continue; // rejects NaN/Inf
+      if (v === undefined) continue;
+      if (typeof v === 'number' && !Number.isFinite(v)) continue;
       o[k] = Array.isArray(v) ? v.filter((x) => x !== undefined) : v;
     }
     return o;
@@ -137,7 +134,7 @@ export default function PokerGame() {
       // host only
       if (g.host !== user.uid) return;
 
-      // Don't progress/clean while waiting in the lobby
+      // Not in a hand
       if (g.state !== 'in-progress') return;
 
       // also stop at showdown; showdown effect handles payout
@@ -147,7 +144,7 @@ export default function PokerGame() {
 
       // single survivor → pay & reset
       if (active.length <= 1) {
-        const w = active[0]; // undefined if 0 survivors
+        const w = active[0];
         if (w) {
           await updatePlayerStatus(gameId, w.uid, { chips: (w.chips || 0) + (g.pot || 0) });
         }
@@ -182,17 +179,16 @@ export default function PokerGame() {
     })();
   }, [round, gameId, user?.uid]);
 
-  // ===== Player Action Handler (transactional core + post-step) =====
+  // ===== Player Action Handler =====
   const playerAction = async (action: 'fold' | 'call' | 'check' | 'raise', amount = 0) => {
     if (!myTurn || !user || !gameId) return;
 
     const gameRef = doc(db, 'games', gameId);
     const meRef = doc(db, 'games', gameId, 'players', user.uid);
 
-    // 1) Lightweight path: actions that don't need game writes -> don't read the game doc
+    // lightweight: fold/check
     if (action === 'fold' || action === 'check') {
       if (action === 'check') {
-        // Validate using fresh reads (no tx), then mark acted
         const [gSnap, pSnap] = await Promise.all([getDoc(gameRef), getDoc(meRef)]);
         const g = gSnap.data() as any;
         const me = pSnap.data() as any;
@@ -200,14 +196,13 @@ export default function PokerGame() {
         if ((me.bet || 0) < (g.currentBet || 0)) return; // can't check
         await updateDoc(meRef, sanitize({ hasActed: true, updatedAt: serverTimestamp() }));
       } else {
-        // fold: plain update (no tx, no precondition)
         await updateDoc(
           meRef,
           sanitize({ status: 'folded', hasActed: true, updatedAt: serverTimestamp() })
         );
       }
 
-      // Next turn (safe, tiny tx on the game doc)
+      // advance turn (safe)
       const [g2Snap, playersSnap] = await Promise.all([
         getDoc(gameRef),
         getDocs(collection(db, 'games', gameId, 'players')),
@@ -235,7 +230,7 @@ export default function PokerGame() {
       return;
     }
 
-    // 2) Heavy path: actions that change pot/currentBet -> keep the tx, but only read what's needed
+    // heavy: call/raise
     await runTransaction(db, async (tx) => {
       const gSnap = await tx.get(gameRef);
       const pSnap = await tx.get(meRef);
@@ -286,9 +281,9 @@ export default function PokerGame() {
       }
     });
 
-    // After call/raise: reset others' hasActed if a raise happened, and advance turn safely
+    // After call/raise
     const [g2Snap, playersSnap] = await Promise.all([
-      getDoc(gameRef),
+      getDoc(doc(db, 'games', gameId)),
       getDocs(collection(db, 'games', gameId, 'players')),
     ]);
     const g2: any = g2Snap.data() || {};
@@ -340,11 +335,11 @@ export default function PokerGame() {
 
     const maxScore = Math.max(...scores.map((s) => s.handValue));
     const winners = scores.filter((s) => s.handValue === maxScore);
-    const share = Math.floor(pot / winners.length);
+    const share = Math.floor(pot / Math.max(1, winners.length));
 
     for (const w of winners) {
-      const p = players.find((pl) => pl.uid === w.uid);
-      if (p) await updatePlayerStatus(gameId!, p.uid, { chips: p.chips + share });
+      const pl = players.find((x) => x.uid === w.uid);
+      if (pl) await updatePlayerStatus(gameId!, pl.uid, { chips: (pl.chips || 0) + share });
     }
 
     await resetRound(gameId!);
@@ -363,9 +358,10 @@ export default function PokerGame() {
   }
 
   const me = players.find((p) => p.uid === user?.uid);
+  const others = players.filter((p) => p.uid !== user?.uid);
 
   return (
-    <BackgroundLayout>
+    <BackgroundLayout gameId='Poker'>
       <div className='game-container'>
         <h1 style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           ♠ Poker ♣
@@ -378,23 +374,21 @@ export default function PokerGame() {
                 console.error('Copy failed', err);
               }
             }}
-            style={{
-              padding: '4px 8px',
-              fontSize: '0.8rem',
-              borderRadius: 6,
-              background: 'var(--secondary-colour)',
-              border: '1px solid rgba(255,255,255,.12)',
-              color: 'var(--text-colour)',
-              cursor: 'pointer',
-            }}
+            className='pkr-copy-btn'
           >
             Copy Lobby Link
           </button>
         </h1>
-        {/* Community Cards */}
-        <div className='table'>
+
+        <div className='table pkr-table'>
+          {/* Community */}
           <div className='hand-container'>
-            <h2>Community Cards</h2>
+            <h2>
+              Community Cards{' '}
+              <span className='pkr-subtle'>
+                • Pot ${pot} • {round}
+              </span>
+            </h2>
             <div className='cards'>
               {communityCards.map((card: string, i: number) => (
                 <div
@@ -406,24 +400,21 @@ export default function PokerGame() {
               ))}
             </div>
           </div>
-          <h2>
-            Pot: ${pot} / Round: {round}
-          </h2>
 
-          {/* Player Hands */}
+          {/* You */}
           <div className='hand-container'>
             <h2>You</h2>
             <div className='cards'>
-              {players
-                .find((p) => p.uid === user?.uid)
-                ?.holeCards?.map((card: string, i: number) => (
+              {me?.holeCards?.length ? (
+                me.holeCards.map((card: string, i: number) => (
                   <div
                     key={i}
                     className={`card ${card.includes('♥') || card.includes('♦') ? 'red' : ''} dealt`}
                   >
                     {card}
                   </div>
-                )) || (
+                ))
+              ) : (
                 <p className='small' style={{ opacity: 0.7 }}>
                   Waiting for cards...
                 </p>
@@ -431,49 +422,39 @@ export default function PokerGame() {
             </div>
           </div>
 
-          {/* Other Players */}
-          {players.filter((p) => p.uid !== user?.uid).length > 0 && (
-            <div className='hand-container'>
-              <h2>Other Players</h2>
-              <div className='cards' style={{ display: 'grid', gap: 8 }}>
-                {players
-                  .filter((p) => p.uid !== user?.uid)
-                  .map((p) => (
-                    <div
-                      key={p.uid}
-                      style={{
-                        border: '1px solid rgba(255,255,255,.12)',
-                        borderRadius: 8,
-                        padding: 8,
-                      }}
-                    >
-                      <div style={{ marginBottom: 6, fontWeight: 600 }}>
-                        {p.displayName || p.uid.slice(0, 6)} - Chips: {p.chips}
-                        {p.uid === user?.uid && ' (You)'}
-                        {p.status === 'playing' ? ' • playing' : ` (${p.status})`}
-                      </div>
-
-                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                        {(p.holeCards || []).map((card: string, i: number) => (
-                          <div
-                            key={i}
-                            className={`card ${card.includes('♥') || card.includes('♦') ? 'red' : ''} dealt`}
-                            style={{ minWidth: 32, textAlign: 'center' }}
-                          >
-                            {p.uid === user?.uid ? card : '??'}
-                          </div>
-                        ))}
-                      </div>
+          {/* Other Players – single floating panel */}
+          {others.length > 0 && (
+            <aside className='pkr-others-float'>
+              <div className='pkr-others-title'>Other Players</div>
+              <div className='pkr-others-list'>
+                {others.map((p) => (
+                  <div key={p.uid} className='pkr-others-row'>
+                    <div className='pkr-others-head'>
+                      {p.displayName || p.uid.slice(0, 6)} • Chips: {p.chips}
+                      {p.status === 'playing' ? ' • playing' : ` (${p.status})`}
+                      {myTurn && p.uid === me?.uid ? ' • your turn' : ''}
                     </div>
-                  ))}
+                    <div className='cards pkr-others-cards'>
+                      {(p.holeCards || []).map((card: string, i: number) => (
+                        <div
+                          key={i}
+                          className={`card ${card.includes('♥') || card.includes('♦') ? 'red' : ''} dealt`}
+                          style={{ minWidth: 32, textAlign: 'center' }}
+                        >
+                          {/* hide opponents' cards */}
+                          {'??'}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
+            </aside>
           )}
         </div>
 
         {/* Controls */}
         <div className='controls' style={{ marginTop: 20 }}>
-          {/* use Firestore state */}
           {!me?.ready && <button onClick={readyUp}>Ready Up</button>}
 
           {myTurn && round !== 'showdown' && (
