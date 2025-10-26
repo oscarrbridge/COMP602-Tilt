@@ -1,18 +1,22 @@
-import { useState, useEffect } from "react";
-import { onAuthStateChanged, signOut, type User } from "firebase/auth";
-import { doc, onSnapshot } from "firebase/firestore";
-import { useNavigate } from "react-router-dom";
-import { CurrencyProvider } from "../CurrencySwitcher/currencyswitcher.tsx";
+import { useState, useEffect } from 'react';
+import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+import { CurrencyProvider } from '../CurrencySwitcher/currencyswitcher.tsx';
 
-import { auth, db } from "../../../Backend/firebase/firebaseConfig";
-import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
-import "./NavBar.css";
+import { auth, db } from '../../../Backend/firebase/firebaseConfig';
+import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
+import './NavBar.css';
 
-import NavWindow from "../NavWindow/NavWindow.tsx";
-import RegisterUser from "../../components/Auth/RegisterUser";
-import SignInPopup from "../../components/Auth/SignInUser";
-import UserBalance from "../UserBalance/UserBalance";
-import TestTransactions from "./transactionTest";
+import tiltLogo from '../../assets/Tilt.png';
+import userIcon from '../../assets/user-icon.png';
+import caretIcon from '../../assets/caret-icon.png';
+
+import NavWindow from '../NavWindow/NavWindow.tsx';
+import RegisterUser from '../../components/Auth/RegisterUser';
+import SignInPopup from '../../components/Auth/SignInUser';
+import UserBalance from '../UserBalance/UserBalance';
+import TestTransactions from './transactionTest';
 
 export default function NavBar() {
   const navigate = useNavigate();
@@ -84,17 +88,21 @@ export default function NavBar() {
           <button onClick={() => navigate("/staff")}>Staff Dashboard</button>
         )}
       </div>
+     <img src={tiltLogo} width={80} alt='Tilt logo' />
+
 
       <CurrencyProvider base="NZD" DefaultCurrency="NZD">
         <div className="NavBarContainer">
           <div className="Logo" onClick={() => navigate("/")}>
             <img src="src/assets/Tilt.png" width={80} />
+
           </div>
 
           <div className="UserBalance">
             <div className="UserBalanceContainer">
               {user ? (
                 <>
+
                   <div className="UserIcon">
                     <img src="src/assets/user-icon.png" width={25} />
                   </div>
@@ -104,11 +112,13 @@ export default function NavBar() {
                     onMouseEnter={() => SetNavActive(true)}
                     onMouseLeave={() => SetNavActive(false)}
                   >
+
                     <img src="src/assets/caret-icon.png" width={25} />
                     {NavActive && <NavWindow />}
                   </div>
                 </>
               ) : (
+
                 // Display a simpler icon or message when logged out
                 <div className="UserIcon">
                   <img src="src/assets/user-icon.png" width={25} />

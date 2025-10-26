@@ -1,15 +1,67 @@
+# Backend/routers/blackjack.py
 from fastapi import APIRouter
-from Backend import blackjack
-from Backend.blackjack import (
-    draw_card,
-    GameState,
-    CreateGameRequest,
-    JoinGameRequest,
-    StartGameRequest,
-    ActionRequest,
-)
+from typing import List, Literal, Tuple
+from pydantic import BaseModel
+import random
+
 from firebase_admin import firestore as fs_admin
-from Backend.firebase.firebase_config import db
+from ..firebase.firebase_config import db
+
+# ---- Local card helpers (no external blackjack module) ----
+Rank = Literal["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
+Suit = Literal["♠", "♥", "♦", "♣"]
+Card = Tuple[Rank, Suit]
+
+RANKS: List[Rank] = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
+SUITS: List[Suit] = ["♠", "♥", "♦", "♣"]
+
+
+def draw_card() -> Card:
+    return (random.choice(RANKS), random.choice(SUITS))
+
+
+def hand_value(hand: List[Card]) -> int:
+    total = 0
+    aces = 0
+    for r, _ in hand:
+        if r in ["J", "Q", "K"]:
+            total += 10
+        elif r == "A":
+            total += 11
+            aces += 1
+        else:
+            total += int(r)
+    while total > 21 and aces:
+        total -= 10
+        aces -= 1
+    return total
+
+
+# ---- Minimal request/response models kept local ----
+class GameState(BaseModel):
+    player_hand: List[Card] = []
+    dealer_hand: List[Card] = []
+    status: Literal[
+        "playing", "player_bust", "dealer_bust", "player_stand", "finished"
+    ] = "playing"
+
+
+class CreateGameRequest(BaseModel):
+    host_uid: str
+    host_name: str
+
+
+class JoinGameRequest(BaseModel):
+    uid: str
+    name: str
+
+
+class StartGameRequest(BaseModel):
+    pass
+
+
+class ActionRequest(BaseModel):
+    action: Literal["hit", "stand"]
 
 
 # - prefix="/games" = All routes in this router will start with /games (e.g., /games/start)
@@ -17,42 +69,49 @@ from Backend.firebase.firebase_config import db
 router = APIRouter(prefix="/games", tags=["blackjack"])
 
 
+# -------- Optional single-player endpoints (keep or delete) --------
 @router.post("/start")
-def start_game():
-    return blackjack.start_game()
+def start_game() -> GameState:
+    return GameState(
+        player_hand=[draw_card(), draw_card()],
+        dealer_hand=[draw_card(), draw_card()],
+        status="playing",
+    )
 
 
 @router.post("/hit")
-def hit(state: blackjack.GameState):
-    return blackjack.hit(state)
+def hit(state: GameState) -> GameState:
+    state.player_hand.append(draw_card())
+    if hand_value(state.player_hand) > 21:
+        state.status = "player_bust"
+    return state
 
 
 @router.post("/stand")
-def stand(state: blackjack.GameState):
-    return blackjack.stand(state)
+def stand(state: GameState) -> GameState:
+    state.status = "player_stand"
+    while hand_value(state.dealer_hand) < 17:
+        state.dealer_hand.append(draw_card())
+    if hand_value(state.dealer_hand) > 21:
+        state.status = "dealer_bust"
+    else:
+        state.status = "finished"
+    return state
 
 
+# ----------------- Multiplayer (Firestore) endpoints -----------------
 @router.post("", summary="Create a new multiplayer game")
 def create_game(body: CreateGameRequest):
-    # Create a new document reference in the games collection in FireStore
     doc = db.collection("games").document()
-    # Initilise the game state in Firestore with assigned values of:
-    # - Game state: "waiting" until enough players join
-    # - host_uid: unique ID (uid) of the host who created the game
-    # - players: sub collection of players
-    # - turn_order: order of play for the game, starts with host
-    # - dealer_hand: empty
-    # - createdAt: timestamp
-    # - updatedAt: timestamp
     doc.set(
         {
             "state": "waiting",
             "host_uid": body.host_uid,
             "players": {
                 body.host_uid: {
-                    "name": body.host_name,  # Host’s username
-                    "hand": [],  # Empty hand to start
-                    "status": "waiting",  # Player status waiting as game not started
+                    "name": body.host_name,
+                    "hand": [],
+                    "status": "waiting",
                 }
             },
             "turn_order": [body.host_uid],
@@ -62,79 +121,54 @@ def create_game(body: CreateGameRequest):
             "updatedAt": fs_admin.SERVER_TIMESTAMP,
         }
     )
-    # Return the unique game ID
     return {"game_id": doc.id}
 
 
-# Router for getting a game state
 @router.get("/{game_id}", summary="Retrieve game state")
 def get_game(game_id: str):
-    # Receive the game document from Firestore using the given game_id
-    gameData = db.collection("games").document(game_id).get()
-    # Return the game data as a dictionary, merged with the document ID under "id"
-    return gameData.to_dict() | {"id": gameData.id}
+    snap = db.collection("games").document(game_id).get()
+    return snap.to_dict() | {"id": snap.id}
 
 
-# Router for players joining to a game
 @router.post("/{game_id}/join", summary="Join waiting game")
 def join_game(game_id: str, body: JoinGameRequest):
-    # Grab the games document
-    doc = db.collection("games").document(game_id)
-    data = doc.get()
+    doc_ref = db.collection("games").document(game_id)
+    snap = doc_ref.get()
+    game = snap.to_dict() or {}
 
-    gameData = data.to_dict()
-
-    # Get the current players (empty if none exist)
-    players = gameData.get("players", {})
-    # If player has already joined
+    players = game.get("players", {})
     if body.uid in players:
         return {"ok": True, "message": "Already joined"}
-    # Else we add the new player to the players sub collection
-    players[body.uid] = {
-        "name": body.name,  # Player's username
-        "hand": [],  # Empty hand until cards are dealt
-        "status": "waiting",  # Waiting status until the game begins
-    }
-    # Append the new player to the turn order
-    turn_order = gameData.get("turn_order", [])
+
+    players[body.uid] = {"name": body.name, "hand": [], "status": "waiting"}
+    turn_order = game.get("turn_order", [])
     turn_order.append(body.uid)
 
-    # Update Firestore with the new player info and refresh updatedAt time
-    doc.update(
+    doc_ref.update(
         {
             "players": players,
             "turn_order": turn_order,
             "updatedAt": fs_admin.SERVER_TIMESTAMP,
         }
     )
-    # Return a success response
     return {"ok": True}
 
 
-# Initlising game logic
 @router.post("/{game_id}/start", summary="Deal two to each player and dealer")
 def start_multiplayer(game_id: str, body: StartGameRequest):
-    doc = db.collection("games").document(game_id)
-    data = doc.get()
+    doc_ref = db.collection("games").document(game_id)
+    snap = doc_ref.get()
+    game = snap.to_dict() or {}
+    players = game.get("players", {})
 
-    gameData = data.to_dict()
-    players = gameData["players"]
-
-    # Deal 2 cards to each player using your existing draw_card(), update to playing status
+    # deal 2 to each player
     for uid in players.keys():
         players[uid]["hand"] = [draw_card(), draw_card()]
         players[uid]["status"] = "playing"
 
-    # Deal two cards to the dealer
     dealer_hand = [draw_card(), draw_card()]
 
-    # Update Firestore with the new state changes we did to initilise:
-    # - "state": game is now in progress
-    # - "players": updated hands and statuses
-    # - "dealer_hand": dealer's starting cards
-    # - "turn_index": reset to 0 (host starts first turn)
-    # - "updatedAt": Firestore server timestamp
-    doc.update(
+    doc_ref.update(
         {
             "state": "playing",
             "players": players,

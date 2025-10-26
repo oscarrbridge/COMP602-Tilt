@@ -30,6 +30,10 @@ export default function CoinFlip() {
     new Promise((resolve) => setTimeout(resolve, ms));
 
   const startGame = async (newBetInBase: number) => {
+      if (!user) {
+        alert('You must be logged in to play!');
+        return;
+      }
     if (newBetInBase > balance) {
       alert("Not enough balance!");
       return;
@@ -48,7 +52,12 @@ export default function CoinFlip() {
     await refreshBalance();
   };
 
-  const chooseSide = async (choice: "heads" | "tails") => {
+  const chooseSide = async (choice: 'heads' | 'tails') => {
+      if (!user) {
+        alert('You must be logged in to play!');
+        return;
+      }
+
     setPlayerChoice(choice);
     setIsFlipping(true);
 

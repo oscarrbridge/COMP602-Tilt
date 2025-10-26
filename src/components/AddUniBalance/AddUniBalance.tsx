@@ -13,12 +13,6 @@ const VALID_CODES: Record<string, number> = {
   'PROMO200': 200,
 };
 
-
-
-
-
-
-
 export default function AddUniBalance() {
   // States for uid, code input, submit status, error/success messages
   const [uid, setUid] = useState(auth.currentUser?.uid ?? null);
@@ -50,14 +44,20 @@ export default function AddUniBalance() {
 
     // Validate code input
     const trimmedCode = code.trim().toUpperCase();
+    console.log(trimmedCode.length);
     if (!trimmedCode) {
       setError('Please enter a code.');
       return;
     }
-
+  
     // Check if code is valid
-    const uniAmount = VALID_CODES[trimmedCode];
-    if (!uniAmount) {
+    // const uniAmount = VALID_CODES[trimmedCode];
+    // if (!uniAmount) {
+      //setError('Invalid code. Please check and try again.');
+      //return;
+    //}
+
+    if(trimmedCode.length != 16){
       setError('Invalid code. Please check and try again.');
       return;
     }
@@ -66,10 +66,14 @@ export default function AddUniBalance() {
       setSubmitting(true);
       
       // Add uni balance using the backend function
-      await addUniBalance(uid, uniAmount);
-
+    if(trimmedCode.length == 16){
+      await addUniBalance(uid, 100);
+    }
+    //else{
+      //await addUniBalance(uid, uniAmount);
+    //}
       // Success: show message and clear code
-      setOk(`Success! Added ${uniAmount} uni balance to your account.`);
+      setOk(`Success! Added ${100} uni balance to your account.`);
       setCode('');
     } catch (err: any) {
       // Failed: show error message

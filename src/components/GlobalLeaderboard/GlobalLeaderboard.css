@@ -1,0 +1,66 @@
+.LocalLeaderboard {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.LocalLeaderboard table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed; /* predictable widths */
+}
+
+/* header */
+.LocalLeaderboard thead th {
+  padding: 10px 12px;
+  color: var(--muted);
+  font-weight: 800;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* body rows – compact so more fit without scroll */
+.LocalLeaderboard tbody td {
+  padding: 8px 12px;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+  height: 36px;
+}
+
+.LocalLeaderboard tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* rank + amount */
+.LocalLeaderboard thead th:first-child,
+.LocalLeaderboard tbody td:first-child {
+  width: 72px;
+  text-align: center;
+}
+.LocalLeaderboard tbody td:first-child {
+  font-weight: 800;
+  color: #cfefff;
+  border-radius: 9999px;
+}
+
+.LocalLeaderboard thead th:last-child,
+.LocalLeaderboard tbody td:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* never let children force horizontal overflow */
+.LocalLeaderboard,
+.LocalLeaderboard * {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}

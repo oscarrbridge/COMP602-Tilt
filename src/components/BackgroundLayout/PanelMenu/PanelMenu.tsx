@@ -24,6 +24,9 @@ export default function PanelMenu() {
               <span>Home</span>
             </Link>
           </li>
+                    <li>
+            <Link to="/poker">🃏 Poker</Link>
+          </li>
 
           {availableGames.map((game, index) => (
             <li key={index}>
