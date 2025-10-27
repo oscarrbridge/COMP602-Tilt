@@ -132,7 +132,7 @@
 }
 
 /* Game Info */
-.game-info {
+.mines-game-info {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -154,7 +154,7 @@
   }
 }
 
-.info-row {
+.mines-info-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -162,12 +162,12 @@
   transition: all 0.3s ease;
 }
 
-.info-label {
+.mines-info-label {
   font-weight: 500;
   color: var(--text-colour);
 }
 
-.info-value {
+.mines-info-value {
   font-weight: bold;
   color: var(--accent-colour);
   transition: all 0.3s ease;

@@ -179,24 +179,24 @@
   padding: 20px;
   background: #173347;
   border-radius: 8px;
-  border: 1px solid var(--border-colour);
+  border: 1px solid #01c4ff;
 }
 
-.info-row {
+.roulette-info-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
 }
 
-.info-label {
+.roulette-info-row {
   font-weight: 500;
   color: var(--text-colour);
 }
 
-.info-value {
+.roulette-info-row {
   font-weight: bold;
-  color: var(--accent-colour);
+  color:#bdedfc;
 }
 
 /* Wheel Container */

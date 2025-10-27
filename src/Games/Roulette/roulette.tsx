@@ -284,23 +284,23 @@ export default function Roulette(): JSX.Element {
 
               {/* Game Info */}
               <div className="roulette-game-info">
-                <div className="info-row">
-                  <span className="info-label">Selected Bet:</span>
-                  <span className="info-value">
+                <div className="roulette-info-row">
+                  <span className="roulette-info-label">Selected Bet:</span>
+                  <span className="roulette-info-value">
                     {selectedBet === "Number" && chosenNumber !== null
                       ? `${chosenNumber}`
                       : selectedBet}
                   </span>
                 </div>
-                <div className="info-row">
-                  <span className="info-label">Multiplier:</span>
-                  <span className="info-value">
+                <div className="roulette-info-row">
+                  <span className="roulette-info-label">Multiplier:</span>
+                  <span className="roulette-info-value">
                     {selectedBet === "Number" ? "36x" : "2x"}
                   </span>
                 </div>
-                <div className="info-row">
-                  <span className="info-label">Potential Win:</span>
-                  <span className="info-value">
+                <div className="roulette-info-row">
+                  <span className="roulette-info-label">Potential Win:</span>
+                  <span className="roulette-info-value">
                     $
                     {(
                       (betInBase * (selectedBet === "Number" ? 36 : 2)) /

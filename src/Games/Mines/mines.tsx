@@ -314,29 +314,29 @@ export default function Mines() {
               </div>
 
               {/* Game Info */}
-              <div className="game-info">
-                <div className="info-row">
-                  <span className="info-label">Safes Found:</span>
-                  <span className="info-value">{SafeRevealed}</span>
+              <div className="mines-game-info">
+                <div className="mines-info-row">
+                  <span className="mines-info-label">Safes Found:</span>
+                  <span className="mines-info-value">{SafeRevealed}</span>
                 </div>
-                <div className="info-row">
-                  <span className="info-label">Multiplier:</span>
+                <div className="mines-info-row">
+                  <span className="mines-info-label">Multiplier:</span>
                   <span
-                    className={`info-value ${CurrentMult > 3 ? "high-multiplier" : ""}`}
+                    className={`mines-info-value ${CurrentMult > 3 ? "high-multiplier" : ""}`}
                   >
                     ×{CurrentMult}
                   </span>
                 </div>
-                <div className="info-row">
-                  <span className="info-label">Current Payout:</span>
-                  <span className="info-value">
+                <div className="mines-info-row">
+                  <span className="mines-info-label">Current Payout:</span>
+                  <span className="mines-info-value">
                     ${(PayoutNow / 100).toFixed(2)}
                   </span>
                 </div>
                 {Status === "Playing" && (
-                  <div className="info-row">
-                    <span className="info-label">Next Safe:</span>
-                    <span className="info-value">
+                  <div className="mines-info-row">
+                    <span className="mines-info-label">Next Safe:</span>
+                    <span className="mines-info-value">
                       ×{nextFactor} (${(NextPayout / 100).toFixed(2)})
                     </span>
                   </div>
