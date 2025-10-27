@@ -37,8 +37,18 @@ export default function Settings() {
           <div className='leftMenu'>
             <h2>Category</h2>
             <div className='settingItems'>
-              <p onClick={() => setSettingsPage('general')}>General</p>
-              <p onClick={() => setSettingsPage('account')}>Account</p>
+              <p
+                className={settingsPage === 'general' ? 'active' : ''}
+                onClick={() => setSettingsPage('general')}
+              >
+                General
+              </p>
+              <p
+                className={settingsPage === 'account' ? 'active' : ''}
+                onClick={() => setSettingsPage('account')}
+              >
+                Account
+              </p>
             </div>
           </div>
           <div className='rightMenu'>{renderContent()}</div>

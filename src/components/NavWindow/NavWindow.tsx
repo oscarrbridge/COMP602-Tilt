@@ -21,9 +21,6 @@ export default function NavWindow() {
         <div onClick={() => navigate('/statistics')}>
           <p className='NavItem'>Statistics</p>
         </div>
-        <div onClick={() => navigate('/friends')}>
-          <p className='NavItem'>Friends</p>
-        </div>
 
         <br></br>
 

@@ -14,8 +14,12 @@
   overflow: hidden;
 
   background-image: url('/assets/slots-bg.jpg'); /* Replace with your image path */
-  background-size: 100% 90%, cover;        /* Cover the entire grid area */    /* Center the image */
-background-position: top center, center;
+  background-size:
+    100% 90%,
+    cover; /* Cover the entire grid area */ /* Center the image */
+  background-position:
+    top center,
+    center;
 }
 
 @keyframes headerSlideDown {
@@ -36,7 +40,7 @@ background-position: top center, center;
   left: 0;
   z-index: 999;
   background: var(--secondary-colour);
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.25);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.25);
   animation: controlsSlideUp 0.8s ease-out;
 }
 
@@ -53,25 +57,21 @@ background-position: top center, center;
 
 /* Slot grid */
 .slot-grid {
-
   display: grid;
   grid-template-rows: repeat(5, auto);
   gap: 8px;
   margin: 160px;
   padding: 12px;
-  background: radial-gradient(
-    circle at center,
-    var(--secondary-colour),
-    var(--primary-colour)
-  );
+  background: radial-gradient(circle at center, var(--secondary-colour), var(--primary-colour));
   border: 3px solid var(--accent-colour);
   border-radius: 12px;
   box-shadow:
     0 5px 100px rgba(83, 97, 150, 0.541),
     inset 0 0 8px rgba(196, 205, 207, 0.568);
-  transition: background 0.3s ease, border-color 0.3s ease;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease;
   animation: gridFadeIn 1s ease-out;
-  
 }
 
 @keyframes gridFadeIn {
@@ -87,15 +87,18 @@ background-position: top center, center;
 
 /* Idle hover animation for the entire grid */
 .slot-grid.idle-hover {
-  animation: idleFloat 3s ease-in-out infinite, gridFadeIn 2s ease-out;
+  animation:
+    idleFloat 3s ease-in-out infinite,
+    gridFadeIn 2s ease-out;
 }
 
 @keyframes idleFloat {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0) rotate(0);
   }
   33% {
-    transform: translateY(-5px) rotate(0 );
+    transform: translateY(-5px) rotate(0);
   }
   66% {
     transform: translateY(-5px) rotate(0);
@@ -143,11 +146,21 @@ background-position: top center, center;
 }
 
 /* Stagger animation for cells */
-.slot-row:nth-child(1) .slot-cell { animation-delay: 0.1s; }
-.slot-row:nth-child(2) .slot-cell { animation-delay: 0.2s; }
-.slot-row:nth-child(3) .slot-cell { animation-delay: 0.3s; }
-.slot-row:nth-child(4) .slot-cell { animation-delay: 0.4s; }
-.slot-row:nth-child(5) .slot-cell { animation-delay: 0.5s; }
+.slot-row:nth-child(1) .slot-cell {
+  animation-delay: 0.1s;
+}
+.slot-row:nth-child(2) .slot-cell {
+  animation-delay: 0.2s;
+}
+.slot-row:nth-child(3) .slot-cell {
+  animation-delay: 0.3s;
+}
+.slot-row:nth-child(4) .slot-cell {
+  animation-delay: 0.4s;
+}
+.slot-row:nth-child(5) .slot-cell {
+  animation-delay: 0.5s;
+}
 
 /* Hover effects for cells */
 .slot-cell:hover {
@@ -195,7 +208,9 @@ background-position: top center, center;
 
 /* Winning highlight */
 .winning {
-  animation: winGlow 1s ease-in-out infinite alternate, winPulse 0.6s ease-out 3;
+  animation:
+    winGlow 1s ease-in-out infinite alternate,
+    winPulse 0.6s ease-out 3;
   border-color: gold !important;
   box-shadow:
     0 0 15px gold,
@@ -206,20 +221,21 @@ background-position: top center, center;
 @keyframes winGlow {
   0% {
     transform: scale(1);
-    box-shadow: 
+    box-shadow:
       0 0 10px gold,
       0 0 20px rgba(255, 215, 0, 0.5);
   }
   100% {
     transform: scale(1.1);
-    box-shadow: 
+    box-shadow:
       0 0 25px gold,
       0 0 40px rgba(255, 215, 0, 0.8);
   }
 }
 
 @keyframes winPulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {
@@ -229,11 +245,14 @@ background-position: top center, center;
 
 /* Jackpot special animation */
 .winning.jackpot {
-  animation: jackpotFlash 0.8s ease-in-out infinite, winPulse 0.6s ease-out infinite;
+  animation:
+    jackpotFlash 0.8s ease-in-out infinite,
+    winPulse 0.6s ease-out infinite;
 }
 
 @keyframes jackpotFlash {
-  0%, 100% {
+  0%,
+  100% {
     background: var(--primary-colour);
     border-color: gold;
   }
@@ -270,13 +289,17 @@ background-position: top center, center;
 
 .win-amount {
   color: gold;
-  animation: popGold 0.6s ease-out forwards, moneyGlow 2s ease-in-out infinite;
+  animation:
+    popGold 0.6s ease-out forwards,
+    moneyGlow 2s ease-in-out infinite;
   text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
 
 .loss-amount {
   color: var(--accent-hover, #ff5555);
-  animation: popRed 0.6s ease-out forwards, shake 0.5s ease-in-out;
+  animation:
+    popRed 0.6s ease-out forwards,
+    shake 0.5s ease-in-out;
 }
 
 .no-result {
@@ -314,16 +337,20 @@ background-position: top center, center;
 }
 
 @keyframes moneyGlow {
-  0%, 100% {
+  0%,
+  100% {
     text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
   }
   50% {
-    text-shadow: 0 0 20px gold, 0 0 30px rgba(255, 215, 0, 0.8);
+    text-shadow:
+      0 0 20px gold,
+      0 0 30px rgba(255, 215, 0, 0.8);
   }
 }
 
 @keyframes shake {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0);
   }
   25% {
@@ -342,11 +369,7 @@ background-position: top center, center;
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(
-    circle at center,
-    transparent 0%,
-    var(--accent-colour) 150%
-  );
+  background: radial-gradient(circle at center, transparent 0%, var(--accent-colour) 150%);
   opacity: 0;
   animation: backgroundPulse 4s ease-in-out infinite;
   pointer-events: none;
@@ -354,11 +377,11 @@ background-position: top center, center;
 }
 
 @keyframes backgroundPulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.03;
   }
   50% {
     opacity: 0.08;
   }
 }
-
