@@ -63,56 +63,70 @@ const InfoPanel: React.FC<InfoPanelProps> = ({ gameId }) => {
     <aside className="info-panel">
       <h2 className="info-panel-title">{game?.name || "Game Info"}</h2>
       <div className="info-panel-content">
-        <div className="info-panel-header">
-          <h3>Description</h3>
-        </div>
+        {/* Only show description header if description exists */}
         {game?.description && (
-          <div className="description-section">
-            {game.description.split("\n").map((paragraph, idx) => (
-              <p key={idx}>{paragraph.trim()}</p>
-            ))}
-          </div>
+          <>
+            <div className="info-panel-header">
+              <h3>Description</h3>
+            </div>
+            <div className="description-section">
+              {game.description.split("\n").map((paragraph, idx) => (
+                <p key={idx}>{paragraph.trim()}</p>
+              ))}
+            </div>
+          </>
         )}
 
-        <div className="info-panel-header">
-          <h3>How to Play</h3>
-        </div>
-
+        {/* Only show how to play header if howToPlay exists */}
         {game?.howToPlay && (
-          <div className="how-to-play-section">
-            {game.howToPlay.split("\n\n").map((paragraph, idx) => (
-              <p key={idx}>{paragraph.trim()}</p>
-            ))}
-          </div>
+          <>
+            <div className="info-panel-header">
+              <h3>How to Play</h3>
+            </div>
+            <div className="how-to-play-section">
+              {game.howToPlay.split("\n\n").map((paragraph, idx) => (
+                <p key={idx}>{paragraph.trim()}</p>
+              ))}
+            </div>
+          </>
         )}
 
-        <div className="info-panel-header">
-          <h3>Multipliers</h3>
-        </div>
-
+        {/* Only show multipliers header if multipliers exists */}
         {game?.multipliers && (
-          <div className="multipliers-section">
-            <table className="multipliers-table">
-              <thead>
-                <tr>
-                  <th>Value</th>
-                  <th>Multiplier</th>
-                </tr>
-              </thead>
-              <tbody>
-                {game.multipliers.split("\n").map((line, index) => {
-                  const [label, value] = line
-                    .split("→")
-                    .map((part) => part?.trim());
-                  return (
-                    <tr key={index}>
-                      <td>{label}</td>
-                      <td>{value}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <>
+            <div className="info-panel-header">
+              <h3>Multipliers</h3>
+            </div>
+            <div className="multipliers-section">
+              <table className="multipliers-table">
+                <thead>
+                  <tr>
+                    <th>Value</th>
+                    <th>Multiplier</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {game.multipliers.split("\n").map((line, index) => {
+                    const [label, value] = line
+                      .split("→")
+                      .map((part) => part?.trim());
+                    return (
+                      <tr key={index}>
+                        <td>{label}</td>
+                        <td>{value}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+
+        {/* Show message if no content is available */}
+        {!game?.description && !game?.howToPlay && !game?.multipliers && (
+          <div className="no-content-message">
+            No additional information available for this game.
           </div>
         )}
       </div>

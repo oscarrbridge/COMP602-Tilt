@@ -19,6 +19,8 @@ type Cell = {
   Index: number;
   IsMine: boolean;
   Revealed: boolean;
+  IsAnimating?: boolean;
+  IsNewReveal?: boolean;
 };
 
 // Board component
@@ -40,6 +42,8 @@ function Board({
           key={cell.Index}
           className={`cell ${cell.Revealed ? "revealed" : ""} ${
             cell.Revealed && cell.IsMine ? "mine" : ""
+          } ${cell.IsAnimating ? "animating" : ""} ${
+            cell.IsNewReveal ? "new-reveal" : ""
           }`}
           onClick={() => !GameOver && !cell.Revealed && OnCellClick(cell.Index)}
         >
@@ -63,6 +67,8 @@ export default function Mines() {
   const [lastWin, setLastWin] = useState(0);
   const { applyBooster } = useCurrentBooster();
   const [isCashOutProcessing, setIsCashOutProcessing] = useState(false);
+  const [isBoardPulsing, setIsBoardPulsing] = useState(false);
+  const [showWinEffect, setShowWinEffect] = useState(false);
 
   const total = Size * Size;
 
@@ -84,6 +90,8 @@ export default function Mines() {
       Index: i,
       IsMine: mines.has(i),
       Revealed: false,
+      IsAnimating: false,
+      IsNewReveal: false,
     }));
   }
 
@@ -122,6 +130,15 @@ export default function Mines() {
     SetStatus("Idle");
   }, [Size]);
 
+  // Start pulsing animation when multiplier gets high
+  useEffect(() => {
+    if (Status === "Playing" && CurrentMult > 3) {
+      setIsBoardPulsing(true);
+    } else {
+      setIsBoardPulsing(false);
+    }
+  }, [CurrentMult, Status]);
+
   // --- Game actions ---
   const startGame = async (newBetInBase: number) => {
     // newBetInBase is in cents
@@ -132,9 +149,17 @@ export default function Mines() {
 
     setBetInBase(newBetInBase);
     setLastWin(0);
+    setShowWinEffect(false);
 
     const validMines = Math.max(1, Math.min(Mines, total - 1));
-    SetCells(BoardCreate(Size, validMines));
+    const newCells = BoardCreate(Size, validMines);
+
+    // Animate board creation
+    SetCells(newCells.map((cell) => ({ ...cell, IsAnimating: true })));
+    setTimeout(() => {
+      SetCells(newCells);
+    }, 500);
+
     SetSafeRevealed(0);
     SetStatus("Playing");
 
@@ -149,14 +174,20 @@ export default function Mines() {
     if (tile.Revealed) return;
 
     const next = Cells.slice();
-    next[index] = { ...tile, Revealed: true };
+    next[index] = { ...tile, Revealed: true, IsNewReveal: true };
 
     if (tile.IsMine) {
-      const revealedAll = next.map((c) =>
-        c.IsMine ? { ...c, Revealed: true } : c
+      // Animate mine reveal with cascade effect
+      const revealedAll = next.map((c, i) =>
+        c.IsMine ? { ...c, Revealed: true, IsAnimating: true } : c
       );
       SetCells(revealedAll);
-      SetStatus("Lost");
+
+      // Cascade animation for mines
+      setTimeout(() => {
+        SetCells(revealedAll.map((cell) => ({ ...cell, IsAnimating: false })));
+        SetStatus("Lost");
+      }, 600);
 
       await applyBooster(0);
       await recordLossTx(user.uid, betInBase, 1, "mines");
@@ -166,18 +197,29 @@ export default function Mines() {
 
     SetCells(next);
     SetSafeRevealed((v) => v + 1);
+
+    // Remove new reveal animation after delay
+    setTimeout(() => {
+      SetCells((prev) => {
+        if (!prev) return prev; // stays null ✅
+
+        return prev.map((cell) =>
+          cell.Index === index ? { ...cell, IsNewReveal: false } : cell
+        );
+      });
+    }, 500);
   }
 
   const cashOut = async () => {
     if (isCashOutProcessing) return; // prevent spamming
     setIsCashOutProcessing(true);
+    setShowWinEffect(true);
 
     try {
       if (SafeRevealed === 0) {
-        // ✅ Refund the bet if no tiles were revealed
+        // Refund the bet if no tiles were revealed
         await recordWinTx(user.uid, betInBase, 1, "mines_refund");
         await refreshBalance();
-
         reset();
         return;
       }
@@ -190,6 +232,10 @@ export default function Mines() {
           finalAmount = await applyBooster(PayoutNow);
           setLastWin(finalAmount);
         }
+
+        // Animate cash out
+        setIsBoardPulsing(true);
+        setTimeout(() => setIsBoardPulsing(false), 2000);
 
         await recordWinTx(user.uid, finalAmount, 1, "mines");
         await refreshBalance();
@@ -205,6 +251,8 @@ export default function Mines() {
     SetSafeRevealed(0);
     SetStatus("Idle");
     setLastWin(0);
+    setShowWinEffect(false);
+    setIsBoardPulsing(false);
   }
 
   const gameOver = Status === "Lost" || Status === "Cash";
@@ -213,6 +261,8 @@ export default function Mines() {
     Index: i,
     IsMine: false,
     Revealed: false,
+    IsAnimating: false,
+    IsNewReveal: false,
   }));
 
   useEffect(() => {
@@ -220,6 +270,7 @@ export default function Mines() {
       const timer = setTimeout(() => {
         SetStatus("Idle");
         setLastWin(0);
+        setShowWinEffect(false);
       }, 4000);
       return () => clearTimeout(timer);
     }
@@ -227,7 +278,7 @@ export default function Mines() {
 
   // --- UI ---
   return (
-    <BackgroundLayout gameId="mines">
+    <BackgroundLayout gameId="Mines">
       <CurrencyProvider base="NZD" DefaultCurrency="NZD">
         <div className="mines-game-container">
           <div className="mines-content">
@@ -270,7 +321,11 @@ export default function Mines() {
                 </div>
                 <div className="info-row">
                   <span className="info-label">Multiplier:</span>
-                  <span className="info-value">×{CurrentMult}</span>
+                  <span
+                    className={`info-value ${CurrentMult > 3 ? "high-multiplier" : ""}`}
+                  >
+                    ×{CurrentMult}
+                  </span>
                 </div>
                 <div className="info-row">
                   <span className="info-label">Current Payout:</span>
@@ -290,23 +345,36 @@ export default function Mines() {
 
               {/* Cash Out Button */}
               {Status === "Playing" && (
-                <button className="cash-out-button" onClick={cashOut}>
-                  Cash Out ${(PayoutNow / 100).toFixed(2)}
+                <button
+                  className={`cash-out-button ${isCashOutProcessing ? "processing" : ""} ${
+                    CurrentMult > 2 ? "pulsing" : ""
+                  }`}
+                  onClick={cashOut}
+                >
+                  {isCashOutProcessing
+                    ? "Cashing..."
+                    : `Cash Out $${(PayoutNow / 100).toFixed(2)}`}
                 </button>
               )}
             </div>
 
             {/* Center - Game Board */}
             <div className="mines-board-container">
-              <Board
-                Size={Size}
-                Cells={Cells ?? placeholder}
-                GameOver={gameOver}
-                OnCellClick={HandleCellClick}
-              />
+              <div
+                className={`board-wrapper ${isBoardPulsing ? "pulsing" : ""} ${
+                  showWinEffect ? "win-effect" : ""
+                }`}
+              >
+                <Board
+                  Size={Size}
+                  Cells={Cells ?? placeholder}
+                  GameOver={gameOver}
+                  OnCellClick={HandleCellClick}
+                />
+              </div>
 
               {/* Status Display */}
-              <div className="mines-status">
+              <div className={`mines-status status-${Status.toLowerCase()}`}>
                 {Status === "Idle" && (
                   <span className="status-idle">
                     Press <b>Bet</b> to start playing
@@ -328,6 +396,15 @@ export default function Mines() {
                   </span>
                 )}
               </div>
+
+              {/* Win Effect Overlay */}
+              {showWinEffect && (
+                <div className="win-effect-overlay">
+                  <div className="confetti"></div>
+                  <div className="confetti"></div>
+                  <div className="confetti"></div>
+                </div>
+              )}
             </div>
           </div>
 

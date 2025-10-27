@@ -1,306 +1,535 @@
-/* =========================================================
-   PAGE LAYOUT
-   ========================================================= */
-.casino-container {
-  display: flex;
-  justify-content: center;
-  padding: 28px;
-  min-height: 100vh;
-  color: #fff;
-  font-family: "Segoe UI", Roboto, Arial, sans-serif;
-}
+/* ================= Roulette.css (Slots Themed) ================= */
 
-/* =========================================================
-   APP SHELL
-   ========================================================= */
-.roulette-app {
-  width: 100%;
-  max-width: 1100px;
-  text-align: center;
-}
-
-/* =========================================================
-   BETTING PANEL
-   ========================================================= */
-.roulette-panel {
-  margin-top: -16px;
-  background: #086917;  /* casino green felt */
-  border: 2px solid #dfd226;
-  border-radius: 12px;
-  padding: 10px;
+.roulette-game-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  
-  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+  justify-content: space-between;
+  width: 100%;
+  height: 100vh;
+  background: var(--secondary-colour);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+  padding: 0;
 }
 
-
-/* =========================================================
-   BETTING BOX & CONTROLS
-   ========================================================= */
-
-/* ===================== Betting Box ===================== */
-.betting-box {
+.roulette-content {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 12px;
-  background: #134107;
+  gap: 0px;
   padding: 10px;
-  border-radius: 10px;
-  border: 2px solid #b9b989;
-  max-width: 100%;
-  margin-left: auto;
-  margin-right: auto;
+  width: 100%;
+  max-width: 1200px;
+  flex: 1;
+  align-items: flex-start;
+  justify-content: center;
+  background-image: url('/assets/roulette-bg.jpg');
+  background-size: 100% 90%, cover;
+  background-position: top center, center;
 }
 
-/* ===================== Buttons ===================== */
-.bet-btn {
-  padding: 8px 12px;
-  font-size: 0.9rem;
-  font-weight: bold;
-  border: 1px solid #555;
-  border-radius: 6px;
-  cursor: pointer;
-  color: #fff;
-  background: #222;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border 0.15s ease, background 0.15s ease;
-  min-width: 60px; /* consistent width */
-  
+/* Controls Panel */
+.roulette-controls-panel {
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 25%;
+  padding: 15px;
+  background: var(--primary-colour);
+  border: 3px solid var(--accent-colour);
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(83, 97, 150, 0.541);
+  animation: roulette-panelSlideIn 0.8s ease-out;
+}
+
+.bet-type-selector h3,
+.number-selection h3 {
+  color: var(--text-colour);
+  margin: 0 0 15px 0;
+  font-size: 1.3rem;
   text-align: center;
 }
 
-.bet-btn:hover:not(:disabled) {
-  transform: scale(1.05);
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+.bet-type-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
-.bet-btn:disabled {
+.bet-type-btn {
+  padding: 5px 10px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: var(--secondary-colour);
+  color: var(--text-colour);
+  border: 1px solid rgb(147, 215, 236);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.bet-type-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: var(--accent-colour);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+  
+}
+
+.bet-type-btn.active {
+  background: var(--accent-colour);
+  color: var(--primary-colour);
+  border: 1px solid rgb(147, 215, 236);
+  
+}
+
+.bet-type-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-/* Active / last clicked button */
-.bet-btn.active {
-  border: 2px solid #e2dfd3; /* gold border */
-  box-shadow: 0 0 10px #e2dfd3, inset 0 0 6px rgba(153, 152, 145, 0.6);
-  background: #333;
-}
-
-/* ===================== Number Input ===================== */
-.number-grid-wrapper {
+/* Number Selection */
+.number-selection {
   display: flex;
   flex-direction: column;
-  gap: 6px;
 }
 
-/* Zero row spans full width */
+.number-grid-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .zero-row {
   display: flex;
-  justify-content: center; /* center if the grid width < total width */
+  justify-content: center;
 }
 
 .number-item.zero {
-  flex: 1;                 /* take full available width */
-  max-width: 100%;
-  height: 30px;
-  line-height: 30px;
+  width: 100%;
+  height: 40px;
+  line-height: 40px;
   text-align: center;
-  background: #0a7d1c;
-  color: #fff;
+  background: #02c4ff;
+  color: white;
   font-weight: bold;
-  border: 1px solid #555;
+  border: 2px solid #02c4ff;
   border-radius: 6px;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border 0.15s ease;
+  transition: all 0.3s ease;
 }
 
-/* Numbers grid: 3 rows x 12 columns */
 .number-grid {
   display: grid;
-  grid-template-columns: repeat(12, 40px);
-  grid-auto-rows: 25px;
-  gap: 6px;
+  grid-template-columns: repeat(6, 1fr); /* Changed from 12 to 6 columns */
+  grid-auto-rows: 25px; /* Added fixed row height */
+  gap: 7px;
 }
 
-/* Standard number items */
 .number-item {
-  width: 40px;
-  height: 25px;
-  line-height: 25px;
-  text-align: center;
-  border: 1px solid #555;
-  border-radius: 6px;
-  color: #fff;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: bold;
+  
+
+  
+  border: 1px solid rgb(147, 215, 236);
+  
+  border-radius: 4px;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border 0.15s ease;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
 }
 
-/* Colors */
-.number-item.red { background: #b71c1c; }
-.number-item.black { background: #111; }
 
-/* Hover */
+.number-item.black {
+  background-color: #020c14;
+  color: white;
+}
+
+.number-item.blue {
+  background-color: #1481ff;
+  color: white;
+}
+
+.number-item.teal {
+  background-color: #02c4ff;
+  color: white;
+}
+
+
 .number-item:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 8px rgba(255,255,255,0.3);
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* Selected */
 .number-item.active {
-  border: 2px solid #e2dfd3; /* gold border */
-  box-shadow: 0 0 10px #e2dfd3, inset 0 0 6px rgba(153, 152, 145, 0.6);
+  animation: select-pulse 0.8s infinite ease-in-out;
+}
+/* Game Info */
+.roulette-game-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 20px;
+  background: #173347;
+  border-radius: 8px;
+  border: 1px solid var(--border-colour);
 }
 
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
 
+.info-label {
+  font-weight: 500;
+  color: var(--text-colour);
+}
 
+.info-value {
+  font-weight: bold;
+  color: var(--accent-colour);
+}
 
+/* Wheel Container */
+.roulette-wheel-container {
+  display: flex;
+  margin-top: 45px;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+  max-width: 500px;
+  animation: roulette-wheelSlideDown 1s ease-out; /* Added slide down animation */
+}
 
-/* =========================================================
-   WHEEL CONTAINER
-   ========================================================= */
 .wheel-viewport {
-  top: 25px;
-    width: 400px;
-  height: 400px;
   position: relative;
-  display: inline-block;
+  width: 90%;
+  height: 90%;
+  margin-left: 10px;
+  animation: roulette-wheelFloat 3s ease-in-out infinite;
 }
 
-/* =========================================================
-   WHEEL SVG & ROTATION
-   ========================================================= */
 .wheel-svg {
-    width: 100%;  /* ensures it scales with viewport */
-    height: 100%;
-    display: block;
-    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.8));
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 8px 25px rgba(0, 0, 0, 0.6));
 }
 
 .wheel-g {
   transition: transform 5.2s cubic-bezier(0.33, 1, 0.68, 1);
-  transform-origin: 50% 50%;
 }
 
-/* =========================================================
-   WHEEL RIM & HUB
-   ========================================================= */
 .rim {
-  fill: #111;
-  stroke: #b8860b;
+  fill: var(--primary-colour);
+  stroke: var(--accent-colour);
   stroke-width: 6;
 }
 
 .hub {
-  fill: #0b0b0b;
-  stroke: #2b2b2b;
+  fill: var(--secondary-colour);
+  stroke: var(--border-colour);
   stroke-width: 2;
 }
 
 .hub-text {
-  fill: #ffd54f;
+  fill: var(--accent-colour);
   font-weight: 700;
-  font-size: 14px;
+  font-size: 24px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
 }
 
-/* =========================================================
-   WHEEL SLICES
-   ========================================================= */
-.slice.red {
-  fill: #b71c1c;
-}
-
 .slice.black {
-  fill: #111111;
+  fill: #020c14;
 }
 
-.slice.green {
-  fill: #0a7d1c;
+.slice.blue {
+  fill: #1481ff;
 }
 
-/* =========================================================
-   WHEEL NUMBER LABELS
-   ========================================================= */
+.slice.teal {
+  fill: #02c4ff;
+}
+
 .slot-label {
   font-size: 12px;
   font-weight: 700;
   fill: #fff;
-  paint-order: stroke;
-  stroke: rgba(0,0,0,0.6);
-  stroke-width: 0.7px;
-
-  text-anchor: middle;   /* ✅ center text horizontally */
-  dominant-baseline: middle; /* ✅ center text vertically */
+  text-anchor: middle;
+  dominant-baseline: middle;
 }
 
-.slot-label.red {
-  fill: #fff;
-}
-
-.slot-label.black {
-  fill: #fff;
-}
-
-.slot-label.green {
-  fill: #fff;
-}
-
-/* =========================================================
-   POINTER (FIXED INDICATOR)
-   ========================================================= */
 .pointer {
   position: absolute;
-  top: -18px; /* adjust if needed */
+  top: -28px;
   left: 50%;
   transform: translateX(-50%);
   width: 0;
   height: 0;
   border-left: 14px solid transparent;
   border-right: 14px solid transparent;
-  border-top: 22px solid #ffd54f; /* changed from border-bottom to border-top */
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  border-top: 22px solid rgb(0, 217, 255);
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.6));
 }
 
-/* =========================================================
-   RESULTS PANEL
-   ========================================================= */
-.roulette-results {
-  margin-top: 40px;
-  padding: 8px 8px;
-  background: #134107;       /* casino green */
-  border: 2px solid #b4b4a4; /* subtle gold-ish border */
-  border-radius: 10px;
+/* Status Display */
+.roulette-status {
+  font-size: 1.3rem;
+  font-weight: bold;
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  color: #fff;
-  font-family: "Segoe UI", Roboto, Arial, sans-serif;
-  font-size: 1rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  padding: 15px 25px;
+  border-radius: 8px;
+  min-width: 300px;
+  animation: roulette-statusSlideUp 0.5s ease-out;
+  opacity: 100%;
+  
 }
 
-/* Individual result spans */
-.roulette-result {
-  display: block;
-  font-weight: 600;
+.status-idle {
+  color: var(--text-colour);
+  background: var(--primary-colour);
+  border: 2px solid var(--border-colour);
+  color: var(--accent-hover) !important; 
 }
 
-/* Win highlight */
-.roulette-result.win {
-  color: #ffd54f;            /* gold */
-  font-weight: 700;
-  text-shadow: 0 0 4px rgba(255, 215, 0, 0.7);
+.status-spinning {
+  color: var(--accent-colour);
+  background: rgba(33, 150, 243, 0.8);
+  border: 2px solid var(--accent-colour);
 }
 
-/* Lose highlight */
-.roulette-result.lose {
-  color: #ff5252;            /* red */
-  font-weight: 700;
-  text-shadow: 0 0 3px rgba(255, 0, 0, 0.6);
+.status-result.win {
+  color: #4CAF50;
+  background: rgba(76, 175, 80, 0.8);
+  border: 2px solid #4CAF50;
+  animation: roulette-winPulse 0.6s ease-out;
 }
+
+.status-result.loss {
+  color: #f44336;
+  background: rgba(244, 67, 54, 0.8);
+  border: 2px solid #f44336;
+  animation: roulette-shake 0.5s ease-in-out;
+}
+
+/* Win/Loss Display */
+.roulette-win-display {
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+  padding: 20px 40px;
+  border-radius: 12px;
+  margin-top: -35px;
+  animation: roulette-winDisplaySlide 0.8s ease-out;
+}
+
+.win-amount {
+  color: gold;
+  animation: roulette-popGold 0.6s ease-out forwards, roulette-moneyGlow 2s ease-in-out infinite;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.loss-amount {
+  color: #f44336;
+  animation: roulette-popRed 0.6s ease-out forwards, roulette-shake 0.5s ease-in-out;
+}
+
+/* Bet Controls */
+.roulette-bet-controls {
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 999;
+  background: var(--secondary-colour);
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.25);
+  animation: roulette-controlsSlideUp 0.8s ease-out;
+}
+
+/* Animations */
+@keyframes roulette-headerSlideDown {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes roulette-panelSlideIn {
+  0% {
+    transform: translateX(-50px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Added wheel slide down animation */
+@keyframes roulette-wheelSlideDown {
+  0% {
+    transform: translateY(-100px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes roulette-wheelFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0);
+  }
+  33% {
+    transform: translateY(-8px) rotate(0);
+  }
+  66% {
+    transform: translateY(-4px) rotate(-0);
+  }
+}
+
+@keyframes roulette-controlsSlideUp {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes roulette-statusSlideUp {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes roulette-winDisplaySlide {
+  0% {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes roulette-winPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes select-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+
+@keyframes roulette-shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+@keyframes roulette-popGold {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes roulette-popRed {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes roulette-moneyGlow {
+  0%, 100% {
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  }
+  50% {
+    text-shadow: 0 0 20px gold, 0 0 30px rgba(255, 215, 0, 0.8);
+  }
+}
+
+/* Background pulse effect */
+.roulette-game-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    circle at center,
+    transparent 0%,
+    var(--accent-colour) 150%
+  );
+  opacity: 0;
+  animation: roulette-backgroundPulse 4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes roulette-backgroundPulse {
+  0%, 100% {
+    opacity: 0.03;
+  }
+  50% {
+    opacity: 0.08;
+  }
+} 
