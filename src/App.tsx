@@ -30,7 +30,7 @@ import FriendsDock from '@components/Friends/FriendsOverlay';
 
 const theme = createTheme({ palette: { background: { default: 'var(--background)' } } });
 
-// fallback card (only if zero approved yet)
+// fallback card only if not approved
 const DEFAULT_CARD = {
   EventHook: 'Hook',
   EventTitle: 'Title',
