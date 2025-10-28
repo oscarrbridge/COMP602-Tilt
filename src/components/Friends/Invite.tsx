@@ -41,6 +41,7 @@ export function sendInvite({
     recipientId,
     sessionId: sessionId || null,
     game: game || 'blackjack',
+    status: 'pending',
     createdAt: serverTimestamp(),
   });
 }

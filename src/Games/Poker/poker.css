@@ -577,11 +577,35 @@
   opacity: 0.85;
 }
 
-/* Keep action buttons tidy under table content */
-.action-dock {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 6px;
+/* When the float is present, make the table a 2-column grid */
+.bj-table:has(.bj-others-float) {
+  display: grid;
+  grid-template-columns: 1fr clamp(180px, 24vw, 260px);
+  column-gap: 16px;
+  align-items: start;
+}
+
+/* Put everything except the float in the left (main) column */
+.bj-table:has(.bj-others-float) > *:not(.bj-others-float) {
+  grid-column: 1;
+}
+
+/* The float becomes a normal block in the right column */
+.bj-others-float {
+  position: static; /* was absolute */
+  grid-column: 2;
+  width: auto; /* let the grid control width */
+  max-height: calc(100% - 28px);
+}
+
+/* Mobile: stack it under the table, like before */
+@media (max-width: 680px) {
+  .bj-table:has(.bj-others-float) {
+    grid-template-columns: 1fr;
+  }
+  .bj-others-float {
+    grid-column: 1;
+    width: 100%;
+    max-height: 28vh;
+  }
 }

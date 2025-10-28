@@ -5,6 +5,7 @@ import { placeBet, recordWinTx, recordLossTx } from '../../../Backend/transactio
 import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
 import { CurrencyProvider } from '../../components/CurrencySwitcher/currencyswitcher.tsx';
 import BetControls from '../BetControls/BetControls.tsx';
+import ResultFX from '../../components/Animations/Animations'; // <-- ADD
 
 import { db } from '../../../Backend/firebase/firebaseConfig';
 import {
@@ -68,6 +69,11 @@ export default function Blackjackm({ gameId = 'testGame' }: { gameId?: string })
     }[]
   >([]);
   const [hostUid, setHostUid] = useState<string | null>(null);
+
+  // --- FX overlay state (ADD) ---
+  const [fxShow, setFxShow] = useState(false);
+  const [fxType, setFxType] = useState<'win' | 'loss'>('win');
+  const [fxAmount, setFxAmount] = useState<number | undefined>(undefined);
 
   const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
   const gameRef = useMemo(() => doc(db, 'games', gameId), [gameId]);
@@ -185,8 +191,10 @@ export default function Blackjackm({ gameId = 'testGame' }: { gameId?: string })
       const gSnap = await tx.get(gameRef);
       if (!gSnap.exists()) return false;
       const g: any = gSnap.data();
-      if (g.host && g.host !== user.uid) return false;
+
+      // Let any client acquire the lock; transaction ensures only one succeeds
       if (g.state === 'in-progress' || g.state === 'dealer' || g.dealLock) return false;
+
       tx.update(gameRef, { dealLock: serverTimestamp() });
       return true;
     });
@@ -430,6 +438,23 @@ export default function Blackjackm({ gameId = 'testGame' }: { gameId?: string })
     await advanceTurnOrFinish();
   };
 
+  // --- Show ResultFX on my outcome (ADD) ---
+  useEffect(() => {
+    // Only show FX when the local player's status becomes a terminal state
+    if (roundResult === 'win') {
+      setFxType('win');
+      setFxAmount(bet); // shows the round win amount (your UI banner used bet here)
+      setFxShow(true);
+    } else if (roundResult === 'loss' || roundResult === 'bust') {
+      setFxType('loss');
+      setFxAmount(bet);
+      setFxShow(true);
+    } else if (roundResult === 'tie') {
+      // No FX for tie (keeping behavior consistent with your singleplayer integration)
+      setFxShow(false);
+    }
+  }, [roundResult, bet]);
+
   // UI
   const isMyTurn = roundInProgress && currentTurn === user.uid;
 
@@ -561,24 +586,15 @@ export default function Blackjackm({ gameId = 'testGame' }: { gameId?: string })
             </div>
           )}
 
-          {/* Result banner */}
-          <div
-            className={[
-              'win-display',
-              roundResult ? 'visible' : '',
-              roundResult === 'win' ? 'win-amount' : '',
-              roundResult === 'loss' ? 'loss-amount' : '',
-              roundResult === 'tie' ? 'tie-amount' : '',
-            ].join(' ')}
-          >
-            {roundResult === 'win'
-              ? `+ $${bet}`
-              : roundResult === 'loss'
-                ? `- $${bet}`
-                : roundResult === 'tie'
-                  ? 'Tie'
-                  : ''}
-          </div>
+          {/* --- Win/Loss overlay FX --- */}
+          <ResultFX
+            show={fxShow}
+            type={fxType}
+            amount={fxAmount}
+            currency='$'
+            align='center'
+            onDone={() => setFxShow(false)}
+          />
         </div>
       </div>
     </BackgroundLayout>

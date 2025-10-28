@@ -6,6 +6,7 @@ import { placeBet, recordWinTx, recordLossTx } from '../../../Backend/transactio
 import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
 import { CurrencyProvider } from '../../components/CurrencySwitcher/currencyswitcher.tsx';
 import BetControls from '../BetControls/BetControls.tsx';
+import ResultFX from '../../components/Animations/Animations';
 
 type Card = { rank: string; suit: string; id: string };
 
@@ -43,6 +44,11 @@ export default function Blackjack() {
 
   const [result, setResult] = useState<'' | 'win' | 'loss' | 'tie'>('');
   const [lastWin, setLastWin] = useState<number>(0);
+
+  // --- FX overlay state (ADD) ---
+  const [fxShow, setFxShow] = useState(false);
+  const [fxType, setFxType] = useState<'win' | 'loss'>('win');
+  const [fxAmount, setFxAmount] = useState<number | undefined>(undefined);
 
   // block rapid spam on Hit/Stand during animations
   const controlsLocked = isDealing || !roundInProgress;
@@ -203,6 +209,19 @@ export default function Blackjack() {
     await refreshBalance();
   };
 
+  // --- Show ResultFX on win/loss (ADD) ---
+  useEffect(() => {
+    if (result === 'win') {
+      setFxType('win');
+      setFxAmount(lastWin);
+      setFxShow(true);
+    } else if (result === 'loss') {
+      setFxType('loss');
+      setFxAmount(bet);
+      setFxShow(true);
+    }
+  }, [result, lastWin, bet]);
+
   // Keyboard shortcuts for snappy play
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -304,24 +323,15 @@ export default function Blackjack() {
             </div>
           )}
 
-          {/* Result banner */}
-          <div
-            className={[
-              'win-display',
-              result === 'win' ? 'win-amount' : '',
-              result === 'loss' ? 'loss-amount' : '',
-              result === 'tie' ? 'tie-amount' : '',
-              result ? 'visible' : '',
-            ].join(' ')}
-          >
-            {result === 'win'
-              ? `+ $${lastWin}`
-              : result === 'loss'
-                ? `- $${bet}`
-                : result === 'tie'
-                  ? 'Tie'
-                  : ''}
-          </div>
+          {/* --- Win/Loss overlay FX --- */}
+          <ResultFX
+            show={fxShow}
+            type={fxType}
+            amount={fxAmount}
+            currency='$'
+            align='center'
+            onDone={() => setFxShow(false)}
+          />
         </div>
       </div>
     </BackgroundLayout>

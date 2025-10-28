@@ -200,6 +200,17 @@ export default function FriendsDock() {
   const pendingCount = pendingRequests.length;
   const navigate = useNavigate();
   const location = useLocation();
+  const parts = location.pathname.split('/');
+  const idFromUrl = parts[1] === 'blackjack' || parts[1] === 'poker' ? parts[2] : null;
+
+  useEffect(() => {
+    if (idFromUrl && idFromUrl !== sessionId) {
+      setSessionId(idFromUrl);
+      try {
+        localStorage.setItem('sessionId', idFromUrl);
+      } catch {}
+    }
+  }, [idFromUrl]);
 
   // Detect which game page we’re on to decide if invites should be shown and which game type to use
   const isBlackjack = location.pathname.startsWith('/blackjack');
@@ -315,6 +326,7 @@ export default function FriendsDock() {
                       {enableInvites &&
                         (sessionId && sessionId !== 'default-session' ? (
                           <InviteButton
+                            key={`${sessionId}-${f.uid}`}
                             friendUid={f.uid}
                             friendName={f.username || f.email}
                             sessionId={sessionId}
@@ -353,6 +365,7 @@ export default function FriendsDock() {
                       {enableInvites &&
                         (sessionId && sessionId !== 'default-session' ? (
                           <InviteButton
+                            key={`${sessionId}-${f.uid}`}
                             friendUid={f.uid}
                             friendName={f.username || f.email}
                             sessionId={sessionId}
@@ -396,6 +409,7 @@ export default function FriendsDock() {
                       {enableInvites &&
                         (sessionId && sessionId !== 'default-session' ? (
                           <InviteButton
+                            key={`${sessionId}-${req.senderId}`}
                             friendUid={req.senderId}
                             friendName={req.senderUsername || req.senderEmail}
                             sessionId={sessionId}
