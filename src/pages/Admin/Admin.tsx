@@ -39,7 +39,7 @@ interface User {
 }
 
 export default function Admin() {
-  // --- Special Events State ---
+  // Special Events State
   const [pending, setPending] = useState<Event[]>([]);
   const [liveEvents, setLiveEvents] = useState<Event[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
@@ -48,11 +48,11 @@ export default function Admin() {
   const [liveEventsErr, setLiveEventsErr] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
-  // --- Users State ---
+  // Users State
   const [users, setUsers] = useState<User[]>([]);
   const { user: currentUser } = useUser();
 
-  // --- Fetch Pending Events ---
+  // Fetch Pending Events
   useEffect(() => {
     const q = query(collection(db, 'specialEvents'), where('status', '==', 'pending'));
     const unsub = onSnapshot(
@@ -69,7 +69,7 @@ export default function Admin() {
     return () => unsub();
   }, []);
 
-  // --- Fetch Live Events ---
+  // Fetch Live Events
   useEffect(() => {
     const q = query(collection(db, 'specialEvents'), where('status', '==', 'approved'));
     const unsub = onSnapshot(
@@ -137,7 +137,7 @@ export default function Admin() {
     }
   }
 
-  // --- Fetch Users ---
+  // Fetch Users
   useEffect(() => {
     const usersCollectionRef = collection(db, 'users');
     const unsubscribe = onSnapshot(usersCollectionRef, (querySnapshot) => {
@@ -154,7 +154,7 @@ export default function Admin() {
     return () => unsubscribe();
   }, []);
 
-  // --- User Management Functions ---
+  // User Management Functions
   const handleRolesChange = async (
     id: string,
     role: string,
@@ -193,7 +193,6 @@ export default function Admin() {
       <NavBar />
 
       <main className='AdminPage'>
-        {/* --- Special Events Section --- */}
         {/* --- Special Events Section --- */}
         <div className='userTableContainer'>
           <h2>Pending Special Events</h2>

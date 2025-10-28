@@ -20,11 +20,12 @@ interface FriendRequest {
   senderId: string;
   recipientId: string;
   timestamp: any;
-  senderUsername?: string; // Added by listener
-  senderEmail?: string; // Added by listener
+  senderUsername?: string;
+  senderEmail?: string;
 }
 
-// Helper to fetch full user details
+// Pull minimal public profile info for a single user
+// Note: we only return what's needed for the UI
 const getFriendDetails = async (uid: string) => {
   const docRef = doc(db, 'users', uid);
   const docSnap = await getDoc(docRef);
@@ -37,7 +38,7 @@ const getFriendDetails = async (uid: string) => {
       email: data.email,
     } as { uid: string; username: string; email: string };
   }
-  return null;
+  return null; // If the user doc doesn't exist (deleted or never created)
 };
 
 export function useFriends() {
@@ -46,8 +47,11 @@ export function useFriends() {
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
   const userId = user?.uid;
 
+  // Fire off a friend request from the current user to the given recipient.
+  // We use a deterministic doc id `${sender}_${recipient}` to avoid duplicates.
   const sendFriendRequest = async (recipientUid: string) => {
     if (!user) return;
+
     const requestRef = doc(db, 'friendRequests', `${user.uid}_${recipientUid}`);
     try {
       await setDoc(requestRef, {
@@ -59,6 +63,8 @@ export function useFriends() {
     } catch (error) {
       console.error('Failed to send request:', error);
     }
+
+    // This listener keeps the local friends array in sync with Firestore.
     const friendsCollectionRef = collection(db, 'users', userId, 'friends');
     const unsubscribe = onSnapshot(friendsCollectionRef, async (snapshot) => {
       const friendIDs = snapshot.docs.map((d) => d.id);
@@ -67,17 +73,24 @@ export function useFriends() {
     });
   };
 
+  // Accept a pending request:
+  // - add each other to /users/{uid}/friends/
+  // - remove the pending friendRequests doc
   const acceptFriendRequest = async (senderUid: string) => {
     if (!user) return;
+
     const batch = writeBatch(db);
     const now = serverTimestamp();
 
+    // Add friend to my list
     const currentUserFriendRef = doc(db, 'users', user.uid, 'friends', senderUid);
     batch.set(currentUserFriendRef, { status: 'accepted', since: now });
 
+    // Add me to their list
     const senderFriendRef = doc(db, 'users', senderUid, 'friends', user.uid);
     batch.set(senderFriendRef, { status: 'accepted', since: now });
 
+    // Remove the pending request document
     const requestRef = doc(db, 'friendRequests', `${senderUid}_${user.uid}`);
     batch.delete(requestRef);
 
@@ -88,13 +101,17 @@ export function useFriends() {
     }
   };
 
+  // Remove a friend relationship for both sides using a batch delete.
   const removeFriend = async (friendUid: string) => {
     if (!user) return;
-    const batch = writeBatch(db); // 1. Delete relationship from current user's list
 
+    const batch = writeBatch(db);
+
+    // Me -> them
     const currentUserRef = doc(db, 'users', user.uid, 'friends', friendUid);
-    batch.delete(currentUserRef); // 2. Delete relationship from the friend's list
+    batch.delete(currentUserRef);
 
+    // Them -> me
     const friendUserRef = doc(db, 'users', friendUid, 'friends', user.uid);
     batch.delete(friendUserRef);
 
@@ -106,7 +123,7 @@ export function useFriends() {
     }
   };
 
-  // 1. Accepted Friends Listener (Fetches user details for display)
+  // Watches /users/{me}/friends and expands each id into user display info.
   useEffect(() => {
     if (loading || !userId) {
       setFriends([]);
@@ -116,15 +133,21 @@ export function useFriends() {
     const friendsCollectionRef = collection(db, 'users', userId, 'friends');
     const unsubscribe = onSnapshot(friendsCollectionRef, async (snapshot) => {
       const friendIDs = snapshot.docs.map((doc) => doc.id);
+
+      // For each friend id, load basic profile (username/email).
+      // This keeps the UI display friendly without duplicating data in the friends subcollection.
       const detailPromises = friendIDs.map(getFriendDetails);
       const detailedFriends = (await Promise.all(detailPromises)).filter((f) => f !== null);
 
       setFriends(detailedFriends);
     });
 
+    // Clean up listener when user changes or component unmounts
     return () => unsubscribe();
-  }, [userId, loading]); // 2. Incoming Friend Requests Listener (Fetches sender details)
+  }, [userId, loading]);
 
+  // Keeps a list of requests where I'm the recipient and status is 'pending'.
+  // We also expand the sender into a displayable object (username/email).
   useEffect(() => {
     if (loading || !userId) {
       setPendingRequests([]);
@@ -140,9 +163,11 @@ export function useFriends() {
     const unsubscribe = onSnapshot(requestsQuery, async (snapshot) => {
       const requestsData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
+      // Pull all sender details in parallel.
       const detailPromises = requestsData.map((req) => getFriendDetails(req.senderId));
       const senderDetails = (await Promise.all(detailPromises)).filter((d) => d !== null);
 
+      // Merge the user info back onto each request item for display.
       const detailedRequests = requestsData.map((req) => {
         const sender = senderDetails.find((d) => d.uid === req.senderId);
         return {
@@ -151,12 +176,14 @@ export function useFriends() {
           senderEmail: sender?.email,
         };
       });
+
       setPendingRequests(detailedRequests);
     });
 
     return () => unsubscribe();
   }, [userId, loading]);
 
+  // Expose data + actions to components.
   return {
     friends,
     pendingRequests,

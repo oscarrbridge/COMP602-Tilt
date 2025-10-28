@@ -7,7 +7,7 @@ export default function InviteButton({
   sessionId,
   senderId,
   senderName,
-  game = 'blackjack', // can be 'blackjack' or 'poker'
+  game = 'blackjack',
 }: {
   friendUid: string;
   friendName?: string;

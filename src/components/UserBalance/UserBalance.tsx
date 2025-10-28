@@ -2,7 +2,7 @@ import './UserBalance.css';
 import { Price } from '../CurrencySwitcher/currencyswitcher';
 
 export default function UserBalance({ balance }: { balance: number | null }) {
-  // Convert NZD cents -> NZD dollars (major units)
+  // Convert NZD cents -> NZD dollars
   const balanceNZDMajor = balance !== null ? balance / 100 : null;
 
   return (

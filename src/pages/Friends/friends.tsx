@@ -8,9 +8,7 @@ import { db } from '../../../Backend/firebase/firebaseConfig';
 
 import { getDoc } from 'firebase/firestore';
 import Footer from '../../components/Footer/Footer';
-// import { Price } from '../../components/CurrencySwitcher/currencyswitcher'; // no longer used
 
-// ---------- Types ----------
 type UserLite = {
   uid: string;
   username?: string;
@@ -27,9 +25,7 @@ type UserLite = {
   lossesCount?: number;
 };
 
-// ---------- Utils ----------
 const SIX_FIGURE_CLAMP_CENTS = 999_999 * 100;
-/** clamp cents to 6 figures while preserving sign */
 const clampCents6 = (cents: number | undefined) => {
   const n = Math.trunc(cents ?? 0);
   const sign = Math.sign(n) || 1;
@@ -72,7 +68,7 @@ async function fetchCounts(uid: string) {
   return { winsCount, lossesCount, totalBets };
 }
 
-// ---------- Friends List ----------
+// Friends List
 function FriendsList({
   friends,
   removeFriend,
@@ -98,7 +94,6 @@ function FriendsList({
               const winRate =
                 totalBets > 0 ? `${((winsCount / totalBets) * 100).toFixed(1)}%` : '—';
 
-              // keep these in case you still need them elsewhere
               const winsRaw = friend.totalWinsCents ?? 0;
               const lossesRaw = friend.totalLossesCents ?? 0;
               const netRaw = winsRaw - lossesRaw;
@@ -161,7 +156,7 @@ function FriendsList({
   );
 }
 
-// ---------- Friend Requests (search) ----------
+// Friend Requests (search)
 type FriendRequestsProps = {
   pendingRequests: {
     id: string;
@@ -192,6 +187,7 @@ export function FriendRequests({
     return () => clearTimeout(timer);
   }, [feedbackMessage]);
 
+  // Search users by email/username
   const handleSearch = async () => {
     const term = searchQuery.trim().toLowerCase();
     setHasSearched(true);
@@ -228,6 +224,7 @@ export function FriendRequests({
     }
   };
 
+  // Send friend request
   const handleSendClick = async (recipientUid: string, label: string) => {
     try {
       await sendFriendRequest(recipientUid);
@@ -240,6 +237,7 @@ export function FriendRequests({
     }
   };
 
+  // Accept friend request
   const handleAcceptClick = async (senderUid: string, label: string) => {
     try {
       await acceptFriendRequest(senderUid);
@@ -357,7 +355,7 @@ export function FriendRequests({
   );
 }
 
-// ---------- Page ----------
+// Page
 export default function Friends() {
   const { friends, pendingRequests, acceptFriendRequest, sendFriendRequest, removeFriend } =
     useFriends();

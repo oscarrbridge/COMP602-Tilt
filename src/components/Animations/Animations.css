@@ -1,0 +1,398 @@
+.resultfx-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.98);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+.resultfx-wrap.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.resultfx-wrap.align-top {
+  align-content: start;
+  padding-top: 12vh;
+}
+.resultfx-wrap.align-bottom {
+  align-content: end;
+  padding-bottom: 12vh;
+}
+
+.resultfx-core {
+  position: relative;
+  display: grid;
+  gap: 0.35rem;
+  place-items: center;
+  filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.45));
+  perspective: 1000px;
+}
+
+/* ====== TITLES ====== */
+.resultfx-title {
+  font-family:
+    system-ui,
+    ui-sans-serif,
+    Segoe UI,
+    Helvetica,
+    Arial;
+  font-size: clamp(48px, 8vw, 120px);
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  line-height: 0.9;
+  text-transform: uppercase;
+  transform: translateZ(0) rotateX(8deg);
+  position: relative;
+}
+
+/* Chrome-gold gradient + subtle bevel */
+.resultfx-wrap.win .resultfx-title {
+  background: conic-gradient(
+    from 10deg,
+    #fff7c9,
+    #e6b800 20%,
+    #8f5c00 45%,
+    #ffe680 65%,
+    #fff7c9 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.8),
+    0 3px 0 rgba(180, 120, 0, 0.6),
+    0 6px 18px rgba(0, 0, 0, 0.35);
+  animation: fxWinPulse 1.2s ease-out forwards;
+}
+
+/* Crimson neon for loss */
+.resultfx-wrap.loss .resultfx-title {
+  color: #ff3159;
+  text-shadow:
+    0 0 10px rgba(255, 49, 89, 0.8),
+    0 0 22px rgba(255, 49, 89, 0.65),
+    0 14px 28px rgba(0, 0, 0, 0.45);
+  animation: fxLossFlash 0.9s ease-out forwards;
+}
+
+/* sheen sweep */
+.resultfx-title::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    75deg,
+    rgba(255, 255, 255, 0) 20%,
+    rgba(255, 255, 255, 0.9) 45%,
+    rgba(255, 255, 255, 0) 60%
+  );
+  transform: translateX(-120%) skewX(-12deg);
+  mix-blend-mode: screen;
+}
+.resultfx-wrap.visible .resultfx-title::after {
+  animation: fxSheen 1100ms ease-out 120ms forwards;
+}
+
+/* Amount line */
+.resultfx-amount {
+  font-weight: 800;
+  font-size: clamp(22px, 3vw, 42px);
+  letter-spacing: 0.04em;
+  color: #eaf2ff;
+  text-shadow:
+    0 0 10px rgba(255, 255, 255, 0.35),
+    0 4px 18px rgba(0, 0, 0, 0.5);
+  transform: translateZ(0);
+  animation: fxAmountPop 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+}
+.resultfx-wrap.win .resultfx-amount {
+  color: #ffe28a;
+  text-shadow:
+    0 0 14px rgba(255, 209, 84, 0.6),
+    0 4px 20px rgba(0, 0, 0, 0.55);
+}
+.resultfx-wrap.loss .resultfx-amount {
+  color: #ff9fb0;
+}
+
+/* ====== BURSTS / PARTICLES ====== */
+
+.resultfx-burst {
+  position: absolute;
+  width: 28vmax;
+  height: 28vmax;
+  border-radius: 999px;
+  filter: blur(18px);
+  opacity: 0;
+  transform: scale(0.65);
+}
+.resultfx-wrap.win .resultfx-burst {
+  background: radial-gradient(
+    circle,
+    rgba(255, 214, 96, 0.55),
+    rgba(255, 164, 0, 0.18) 60%,
+    transparent 70%
+  );
+  animation: fxBurst 900ms ease-out both;
+}
+.resultfx-wrap.loss .resultfx-burst {
+  background: radial-gradient(
+    circle,
+    rgba(255, 60, 90, 0.35),
+    rgba(160, 0, 30, 0.16) 55%,
+    transparent 70%
+  );
+  animation: fxBurst 700ms ease-out both;
+}
+
+/* confetti / shards – three parallax layers */
+.resultfx-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.resultfx-wrap.win .resultfx-layer.layer-a {
+  --n: 28;
+}
+.resultfx-wrap.win .resultfx-layer.layer-b {
+  --n: 22;
+}
+.resultfx-wrap.win .resultfx-layer.layer-c {
+  --n: 16;
+}
+
+.resultfx-wrap.loss .resultfx-layer.layer-a {
+  --n: 18;
+}
+.resultfx-wrap.loss .resultfx-layer.layer-b {
+  --n: 14;
+}
+.resultfx-wrap.loss .resultfx-layer.layer-c {
+  --n: 10;
+}
+
+.resultfx-layer::before,
+.resultfx-layer::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.01px;
+  height: 0.01px;
+  pointer-events: none;
+  background: transparent;
+  box-shadow:
+    /* generated via multiple shadows for perf; each layer color differs */
+    /* WIN: confetti */ 0
+    0 #0000;
+}
+
+.resultfx-wrap.win .layer-a::before {
+  box-shadow: var(--confetti-a, 0 0 #0000);
+}
+.resultfx-wrap.win .layer-b::before {
+  box-shadow: var(--confetti-b, 0 0 #0000);
+}
+.resultfx-wrap.win .layer-c::before {
+  box-shadow: var(--confetti-c, 0 0 #0000);
+}
+.resultfx-wrap.loss .layer-a::before {
+  box-shadow: var(--shards-a, 0 0 #0000);
+}
+.resultfx-wrap.loss .layer-b::before {
+  box-shadow: var(--shards-b, 0 0 #0000);
+}
+.resultfx-wrap.loss .layer-c::before {
+  box-shadow: var(--shards-c, 0 0 #0000);
+}
+
+/* Motion paths */
+.resultfx-wrap.win .layer-a::before {
+  animation: confettiDrift 1200ms ease-out forwards;
+}
+.resultfx-wrap.win .layer-b::before {
+  animation: confettiDrift 1400ms ease-out 0.04s forwards;
+}
+.resultfx-wrap.win .layer-c::before {
+  animation: confettiDrift 1650ms ease-out 0.08s forwards;
+}
+
+.resultfx-wrap.loss .layer-a::before {
+  animation: shardBurst 800ms cubic-bezier(0.2, 0.9, 0.1, 1) forwards;
+}
+.resultfx-wrap.loss .layer-b::before {
+  animation: shardBurst 900ms cubic-bezier(0.2, 0.9, 0.1, 1) 0.02s forwards;
+}
+.resultfx-wrap.loss .layer-c::before {
+  animation: shardBurst 1000ms cubic-bezier(0.2, 0.9, 0.1, 1) 0.04s forwards;
+}
+
+/* ====== KEYFRAMES ====== */
+@keyframes fxSheen {
+  0% {
+    transform: translateX(-120%) skewX(-12deg);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(120%) skewX(-12deg);
+    opacity: 0;
+  }
+}
+
+@keyframes fxWinPulse {
+  0% {
+    transform: translateZ(0) rotateX(12deg) scale(0.92);
+  }
+  60% {
+    transform: translateZ(40px) rotateX(0deg) scale(1.06);
+  }
+  100% {
+    transform: translateZ(0) rotateX(0deg) scale(1);
+  }
+}
+
+@keyframes fxLossFlash {
+  0% {
+    filter: brightness(1.1);
+    transform: translateZ(0) rotateX(8deg) scale(0.96);
+  }
+  40% {
+    filter: brightness(1.35);
+    transform: translateZ(22px) rotateX(0) scale(1.05);
+  }
+  100% {
+    filter: brightness(1);
+    transform: translateZ(0) rotateX(0) scale(1);
+  }
+}
+
+@keyframes fxAmountPop {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fxBurst {
+  0% {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+}
+
+/* WIN confetti motion (we simulate many pieces via multi-shadow) */
+@keyframes confettiDrift {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(-50% + 12vw), calc(-50% + 18vh)) rotate(240deg);
+    opacity: 0;
+  }
+}
+
+/* LOSS shards streak outward */
+@keyframes shardBurst {
+  0% {
+    transform: translate(-50%, -50%) scale(1) rotate(0);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(calc(-50% - 16vw), calc(-50% + 10vh)) scale(1.2) rotate(-40deg);
+    opacity: 0;
+  }
+}
+
+/* Screen shake on loss (subtle) */
+.resultfx-wrap.loss.visible {
+  animation: fxShake 0.42s ease-in-out;
+}
+@keyframes fxShake {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-3px, 1px);
+  }
+  50% {
+    transform: translate(3px, -2px);
+  }
+  75% {
+    transform: translate(-2px, 2px);
+  }
+}
+
+/* ====== PARTICLE FIELDS (multi-shadow presets) ====== */
+/* (tuned counts; cheap vs DOM nodes)  */
+:root {
+  /* WIN color sets */
+  --confetti-a:
+    -140px -30px 0 6px #ffd44a, -40px -60px 0 5px #ff6ec7, 50px -35px 0 6px #57dfff,
+    120px -45px 0 5px #9dff57, -90px 40px 0 5px #ffd44a, 20px 55px 0 6px #ff6ec7,
+    110px 30px 0 5px #57dfff, 160px 15px 0 6px #9dff57, -190px 5px 0 6px #ffe07a,
+    -10px 10px 0 5px #ff9966;
+
+  --confetti-b:
+    -120px -10px 0 5px #ffd44a, -60px -50px 0 6px #66ff99, 40px -25px 0 6px #57dfff,
+    100px -35px 0 5px #ff9966, -80px 30px 0 5px #ffd44a, 10px 45px 0 6px #66ff99,
+    95px 20px 0 6px #57dfff, 150px 5px 0 5px #ff9966;
+
+  --confetti-c:
+    -100px -20px 0 6px #ffe07a, -50px -40px 0 6px #57dfff, 20px -15px 0 5px #9dff57,
+    80px -28px 0 6px #ff6ec7, -60px 20px 0 6px #ffe07a, 0px 35px 0 5px #57dfff,
+    70px 10px 0 6px #9dff57, 120px 0px 0 5px #ff6ec7;
+
+  /* LOSS shard tones */
+  --shards-a:
+    -120px -20px 0 7px rgba(255, 60, 90, 0.9), -40px -50px 0 6px rgba(255, 90, 120, 0.8),
+    50px -30px 0 6px rgba(255, 60, 90, 0.9), 110px -40px 0 6px rgba(255, 90, 120, 0.8),
+    -80px 30px 0 6px rgba(255, 60, 90, 0.85), 20px 40px 0 6px rgba(255, 40, 70, 0.9);
+
+  --shards-b:
+    -100px -15px 0 6px rgba(255, 90, 120, 0.85), -60px -45px 0 6px rgba(255, 60, 90, 0.85),
+    40px -25px 0 6px rgba(255, 40, 70, 0.8), 95px -30px 0 6px rgba(255, 60, 90, 0.85);
+
+  --shards-c:
+    -80px -10px 0 6px rgba(255, 40, 70, 0.75), -40px -35px 0 5px rgba(255, 60, 90, 0.75),
+    20px -18px 0 5px rgba(255, 90, 120, 0.75), 75px -20px 0 5px rgba(255, 60, 90, 0.75);
+}
+
+/* ====== A11y: reduce motion ====== */
+@media (prefers-reduced-motion: reduce) {
+  .resultfx-wrap,
+  .resultfx-title::after,
+  .resultfx-layer::before {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+.rf-letter {
+  display: inline-block;
+  will-change: transform, opacity;
+}

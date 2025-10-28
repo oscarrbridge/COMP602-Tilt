@@ -15,20 +15,22 @@ import { createPokerLobby, joinPokerLobby } from '../../Games/Poker/pokerfunctio
 
 type TabKey = 'online' | 'all' | 'requests';
 
-// The invite popup UI component
+// Popup that shows incoming invites and lets you accept/decline
 export function InvitePopup() {
   const [invites, setInvites] = useState<Invite[]>([]);
   const { user } = useUser();
   const navigate = useNavigate();
 
-  // Listen for new invites
+  // Start a live listener for invites addressed to the current user.
+  // When user changes or unmounts, clean it up.
   useEffect(() => {
     if (!user?.uid) return;
     const unsub = listenIncomingInvites(user.uid, setInvites);
     return () => unsub();
   }, [user?.uid]);
 
-  // Watch for accepted invites from others (host acknowledgement)
+  // If an invite is sent and it gets accepted, it moves me into that game.
+  // Set hostAck so we don't re-handle the same invite multiple times.
   useEffect(() => {
     if (!user?.uid) return;
 
@@ -41,9 +43,10 @@ export function InvitePopup() {
     const unsub = onSnapshot(qAccepted, async (snap) => {
       for (const d of snap.docs) {
         const inv = { id: d.id, ...(d.data() as any) } as Invite;
-        if (!inv.sessionId || inv.hostAck) continue;
+        if (!inv.sessionId || inv.hostAck) continue; // skip if already handled or missing session
 
         try {
+          // Join the correct lobby type
           if (inv.game === 'poker') {
             await joinPokerLobby(
               inv.sessionId,
@@ -58,8 +61,10 @@ export function InvitePopup() {
             );
           }
 
+          // Mark that we've processed this acceptance on the host side
           await updateDoc(doc(db, 'invites', inv.id!), { hostAck: true });
 
+          // Push the user straight into the room
           const route =
             inv.game === 'poker' ? `/poker/${inv.sessionId}` : `/blackjack/${inv.sessionId}`;
           navigate(route, { replace: true });
@@ -72,13 +77,15 @@ export function InvitePopup() {
     return () => unsub();
   }, [user?.uid, navigate]);
 
+  // Accept handler for an invite that has been received.
+  // Creates a session if missing, persists status, joins, stores sessionId, then navigates.
   const onAccept = async (inv: Invite) => {
     if (!user) return;
 
     try {
       let sessionId = inv.sessionId;
 
-      // Create session if missing
+      // If the invite didn't include a session yet, make one
       if (!sessionId) {
         sessionId =
           inv.game === 'poker'
@@ -90,19 +97,22 @@ export function InvitePopup() {
         await updateDoc(doc(db, 'invites', inv.id!), { status: 'accepted' });
       }
 
-      // Join session
+      // Join the new/existing session
       if (inv.game === 'poker') {
         await joinPokerLobby(sessionId, user.uid, user.displayName || user.email || 'Player');
       } else {
         await joinGameLobby(sessionId, user.uid, user.displayName || user.email || 'Player');
       }
 
+      // Keep sessionId locally so other parts of the UI can pick it up
       try {
         localStorage.setItem('sessionId', sessionId);
       } catch {}
 
+      // Remove this invite from the popup list
       setInvites((prev) => prev.filter((i) => i.id !== inv.id));
 
+      // Go to the table
       navigate(inv.game === 'poker' ? `/poker/${sessionId}` : `/blackjack/${sessionId}`, {
         replace: true,
       });
@@ -111,10 +121,12 @@ export function InvitePopup() {
     }
   };
 
+  // Update the invite with a declined status inside declineInvite
   const onDecline = async (inv: Invite) => {
     await declineInvite(inv.id!);
   };
 
+  // No invites = no popup
   if (!invites.length) return null;
 
   return (
@@ -156,24 +168,29 @@ export function InvitePopup() {
     </div>
   );
 }
+
 export default function FriendsDock() {
   const { user } = useUser();
 
-  // ❗ Call these on every render (even if user is null)
+  // Always call hooks in the same order. This hook pulls friends + requests and actions.
   const { friends, pendingRequests, acceptFriendRequest, removeFriend } = useFriends();
+
+  // Precompute uid list for online presence lookup
   const friendUids = useMemo(() => friends.map((f: any) => f.uid), [friends]);
 
-  // If this uses hooks inside, it should be a hook and named like one.
-  // If you can, rename to useOnline and import { useOnline } and call it here.
+  // This is implemented as a function component but acts like a hook:
+  // It returns presence info keyed by uid. Ideally rename to useOnline() later.
   const { onlineByUid } = Online(friendUids);
 
   const [open, setOpen] = useState(true);
   const [tab, setTab] = useState<TabKey>('online');
 
+  // Share current session across tabs/windows
   const [sessionId, setSessionId] = useState(
     localStorage.getItem('sessionId') || 'default-session'
   );
 
+  // Keep sessionId state in sync with localStorage changes (e.g. other components writing to it)
   useEffect(() => {
     const onStorage = () => setSessionId(localStorage.getItem('sessionId') || 'default-session');
     window.addEventListener('storage', onStorage);
@@ -184,30 +201,36 @@ export default function FriendsDock() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Detect which game page we’re on to decide if invites should be shown and which game type to use
   const isBlackjack = location.pathname.startsWith('/blackjack');
   const isPoker = location.pathname.startsWith('/poker');
   const enableInvites = isBlackjack || isPoker;
   const gameType = isPoker ? 'poker' : 'blackjack';
 
+  // Merge online presence onto friend objects for rendering
   const friendsWithOnline = friends.map((f: any) => {
     const p = onlineByUid[f.uid];
     return { ...f, online: p?.online || false, lastSeen: p?.lastSeen || 0 };
   });
   const onlineFriends = friendsWithOnline.filter((f: any) => f.online);
 
+  // Creates a fresh table, joins it as the current user, stores sessionId, then sends an invite
   async function createTableAndInvite(friendUid: string) {
-    if (!user) return; // still guard here
+    if (!user) return;
     const minPlayers = gameType === 'poker' ? 2 : 1;
     const maxPlayers = gameType === 'poker' ? 6 : 5;
 
+    // Always create a blackjack/poker game via the blackjack path here (by design)
     const newGameId = await createGameLobby(user.uid, gameType, minPlayers, maxPlayers);
     await joinGameLobby(newGameId, user.uid, user.displayName || user.email || 'Player');
 
+    // Persist the session id locally so other components know which table we’re at
     try {
       localStorage.setItem('sessionId', newGameId);
     } catch {}
     setSessionId(newGameId);
 
+    // Send the invite to the selected friend
     await sendInvite({
       senderId: user.uid,
       senderName: user.displayName || user.email || 'Player',
@@ -216,10 +239,12 @@ export default function FriendsDock() {
       game: gameType,
     });
 
+    // Move straight to the table
     navigate(`/${gameType}/${newGameId}`);
   }
 
-  // ✅ Only branch in JSX. Do NOT early-return before hooks.
+  // If no user, still render the dock shell so the UI doesn’t jump around
+  // and we can show a gentle sign-in prompt.
   if (!user) {
     return (
       <div className='friends-dock friends-dock-collapsed'>
@@ -244,6 +269,7 @@ export default function FriendsDock() {
   return (
     <div className={`friends-dock ${open ? 'open' : 'closed'}`}>
       {!open ? (
+        // Collapsed pillar with a badge if there are pending requests
         <button className='friends-pillar' onClick={() => setOpen(true)}>
           Friends{pendingCount > 0 ? <span className='badge'>{pendingCount}</span> : null}
         </button>
@@ -294,7 +320,7 @@ export default function FriendsDock() {
                             sessionId={sessionId}
                             senderId={user.uid}
                             senderName={user.displayName || user.email || 'Player'}
-                            game={gameType} // ✅ dynamic
+                            game={gameType} // Use current page’s game
                           />
                         ) : (
                           <button className='btn' onClick={() => createTableAndInvite(f.uid)}>
@@ -332,7 +358,7 @@ export default function FriendsDock() {
                             sessionId={sessionId}
                             senderId={user.uid}
                             senderName={user.displayName || user.email || 'Player'}
-                            game={gameType} // ✅ dynamic
+                            game={gameType} // Use current page’s game
                           />
                         ) : (
                           <button className='btn' onClick={() => createTableAndInvite(f.uid)}>
@@ -375,7 +401,7 @@ export default function FriendsDock() {
                             sessionId={sessionId}
                             senderId={user.uid}
                             senderName={user.displayName || user.email || 'Player'}
-                            game={gameType} // ✅ dynamic
+                            game={gameType} // Use current page’s game
                           />
                         ) : (
                           <button

@@ -2,13 +2,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '../../../Backend/firebase/firebaseConfig';
-import { useCurrency } from '../CurrencySwitcher/currencyswitcher'; // same hook you used in BetControls
+import { useCurrency } from '../CurrencySwitcher/currencyswitcher';
 import './AutoPayment.css';
 
 // FastAPI URL
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:4000';
 
-// ---- helpers ----
+// Helpers for parsing amounts
 const clamp = (n: number, lo: number, hi: number) => Math.min(Math.max(n, lo), hi);
 const parseAmount = (s: string) => {
   const n = Number(String(s).replace(/[^0-9.]/g, ''));
@@ -19,13 +19,13 @@ export default function AutoPayment() {
   const [uid, setUid] = useState<string | null>(null);
   const [isEnabled, setIsEnabled] = useState(false);
 
-  // UI amount is in *active currency* dollars (string for the input)
+  // UI amount is in active currency dollars (string for the input)
   const [amountInput, setAmountInput] = useState('20.00');
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // currency utils (same shape as your BetControls)
+  // currency utils
   const { convertFromBase, convert, code, base } = useCurrency(); // base is NZD in your app
 
   // --- auth ---
@@ -34,7 +34,7 @@ export default function AutoPayment() {
     return () => unsub();
   }, []);
 
-  // --- load settings (stored in NZD cents), render in active currency dollars ---
+  // load settings (stored in NZD cents), render in active currency dollars
   useEffect(() => {
     if (!uid) {
       setIsLoading(false);
@@ -48,8 +48,8 @@ export default function AutoPayment() {
       const data = snap.data() as any;
       setIsEnabled(!!data.autoPayEnabled);
 
-      // Prefer cents canonical; fall back to dollars mirror if present.
-      // Values in DB are NZD cents (integer).
+      // Prefer cents fall back to dollars if present
+      // Values in DB are NZD cents (integer)
       let nzdCents: number | null = null;
       if (typeof data.autoPayAmountCents === 'number') {
         nzdCents = data.autoPayAmountCents;
@@ -70,7 +70,7 @@ export default function AutoPayment() {
   const amountNzdCents = useMemo(() => {
     const activeDollars = parseAmount(amountInput); // e.g. USD 20.00 if user switched
     const nzdDollars = convert(activeDollars, code, base); // active -> NZD
-    return Math.round(nzdDollars * 100); // NZD cents (int)
+    return Math.round(nzdDollars * 100); // NZD cents
   }, [amountInput, convert, code, base]);
 
   const sendUpdate = async (enabled: boolean, nzdCents: number) => {
@@ -84,7 +84,7 @@ export default function AutoPayment() {
         body: JSON.stringify({
           uid,
           autoPayEnabled: enabled,
-          autoPayAmountCents: nzdCents, // backend expects NZD cents (canonical)
+          autoPayAmountCents: nzdCents, // backend expects NZD cents
         }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -97,7 +97,7 @@ export default function AutoPayment() {
     }
   };
 
-  // --- save button ---
+  // save button
   const handleSaveSettings = async () => {
     if (!uid) return;
     // enforce a reasonable min ($5 in current currency) before converting
@@ -106,7 +106,7 @@ export default function AutoPayment() {
     await sendUpdate(isEnabled, amountNzdCents);
   };
 
-  // --- toggle ---
+  // toggle
   const handleToggle = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!uid) return;
     const nextEnabled = e.target.checked;

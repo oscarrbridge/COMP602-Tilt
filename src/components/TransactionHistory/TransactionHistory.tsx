@@ -121,6 +121,7 @@ export default function TransactionHistory() {
     return () => detach();
   }, [uid]);
 
+  // Filtering by range and type
   function rangeStart(kind: 'all' | '7d' | '30d' | '365d'): Date | null {
     if (kind === 'all') return null;
     const now = new Date();
@@ -130,7 +131,6 @@ export default function TransactionHistory() {
     if (kind === '365d') start.setDate(now.getDate() - 365);
     return start;
   }
-
   function matchesType(t: Transaction, filter: typeof typeFilter) {
     const type = t.TransactionType.toLowerCase();
     if (filter === 'all') return true;

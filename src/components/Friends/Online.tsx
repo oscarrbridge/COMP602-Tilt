@@ -14,7 +14,7 @@ import { useUser } from '../../../Backend/firebase/UserFunctions';
 
 // Treat someone as "online" if their lastSeen was within this window
 const ONLINE_WINDOW_MS = 30_000; // 30s
-const CHUNK_SIZE = 10; // Firestore "in" filter is limited (keep it small & safe)
+const CHUNK_SIZE = 10; // Firestore "in" filter is limited
 
 export function Online(friendUids: string[]) {
   const { user } = useUser();
@@ -32,7 +32,6 @@ export function Online(friendUids: string[]) {
     };
     // initial write
     ping();
-    // heartbeat
     const interval = setInterval(ping, 20_000);
 
     // visibility -> bump lastSeen when user focuses the tab
@@ -44,10 +43,7 @@ export function Online(friendUids: string[]) {
     // best-effort bump on unload (not guaranteed, but helps)
     const onUnload = () => {
       try {
-        navigator.sendBeacon?.(
-          '/online-beacon', // noop endpoint (optional)
-          ''
-        );
+        navigator.sendBeacon?.('/online-beacon', '');
       } catch {}
     };
     window.addEventListener('beforeunload', onUnload);
@@ -59,7 +55,7 @@ export function Online(friendUids: string[]) {
     };
   }, [user?.uid]);
 
-  // --- Read friends' online (chunked "in" queries) ---
+  // Read friends' online
   const chunks = useMemo(() => {
     const ids = (friendUids || []).filter(Boolean);
     const out: string[][] = [];
@@ -69,7 +65,7 @@ export function Online(friendUids: string[]) {
 
   useEffect(() => {
     if (!user?.uid) return;
-    // if no friends to watch, clear instantly (prevents stale online bubbles)
+    // if no friends to watch, clear instantly
     if (chunks.length === 0) {
       setOnlineByUid({});
       return;

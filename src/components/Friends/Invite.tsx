@@ -40,8 +40,7 @@ export function sendInvite({
     senderName: senderName || null,
     recipientId,
     sessionId: sessionId || null,
-    game: game || 'blackjack', // default to blackjack if not specified
-    status: 'pending',
+    game: game || 'blackjack',
     createdAt: serverTimestamp(),
   });
 }

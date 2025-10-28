@@ -1,18 +1,15 @@
-import { useState } from "react";
-import "./Cointoss.css";
-import BackgroundLayout from "../../components/BackgroundLayout/BackgroundLayout";
-import {
-  placeBet,
-  recordWinTx,
-  recordLossTx,
-} from "../../../Backend/transactions";
-import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
-import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx";
-import BetControls from "../BetControls/BetControls.tsx";
-import useCurrentBooster from "../../hooks/useCurrentBooster.tsx";
-import coinBase from "../../assets/coin.png";
-import coinHead from "../../assets/head.png";
-import coinTail from "../../assets/tail.png";
+import { useState } from 'react';
+import './Cointoss.css';
+import BackgroundLayout from '../../components/BackgroundLayout/BackgroundLayout';
+import { placeBet, recordWinTx, recordLossTx } from '../../../Backend/transactions';
+import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
+import { CurrencyProvider } from '../../components/CurrencySwitcher/currencyswitcher.tsx';
+import BetControls from '../BetControls/BetControls.tsx';
+import useCurrentBooster from '../../hooks/useCurrentBooster.tsx';
+import coinBase from '../../assets/coin.png';
+import coinHead from '../../assets/head.png';
+import coinTail from '../../assets/tail.png';
+import ResultFX from '../../components/Animations/Animations'; // [FX] add
 
 export default function CoinFlip() {
   const { user, balance, refreshBalance } = useUser();
@@ -20,44 +17,47 @@ export default function CoinFlip() {
 
   const [bet, setBet] = useState(2.0);
   const [betInBase, setBetInBase] = useState(0);
-  const [roundResult, setRoundResult] = useState<"win" | "loss" | "">("");
+  const [roundResult, setRoundResult] = useState<'win' | 'loss' | ''>('');
   const [lastWin, setLastWin] = useState(0);
   const [roundInProgress, setRoundInProgress] = useState(false);
-  const [playerChoice, setPlayerChoice] = useState<"heads" | "tails" | null>(
-    null
-  );
-  const [flipResult, setFlipResult] = useState<"heads" | "tails" | null>(null);
+  const [playerChoice, setPlayerChoice] = useState<'heads' | 'tails' | null>(null);
+  const [flipResult, setFlipResult] = useState<'heads' | 'tails' | null>(null);
   const [isFlipping, setIsFlipping] = useState(false);
   const [showResult, setShowResult] = useState(false);
 
+  // [FX] overlay state
+  const [showFx, setShowFx] = useState(false);
+  const [fxType, setFxType] = useState<'win' | 'loss'>('win');
+  const [fxAmount, setFxAmount] = useState<number | undefined>(undefined);
+
   const startGame = async (newBetInBase: number) => {
-      if (!user) {
-        alert('You must be logged in to play!');
-        return;
-      }
+    if (!user) {
+      alert('You must be logged in to play!');
+      return;
+    }
     if (newBetInBase > balance) {
-      alert("Not enough balance!");
+      alert('Not enough balance!');
       return;
     }
 
     setBetInBase(newBetInBase);
     setLastWin(0);
-    setRoundResult("");
+    setRoundResult('');
     setPlayerChoice(null);
     setFlipResult(null);
     setIsFlipping(false);
     setShowResult(false);
     setRoundInProgress(true);
 
-    await placeBet(user.uid, newBetInBase, 1, "coinflip");
+    await placeBet(user.uid, newBetInBase, 1, 'coinflip');
     await refreshBalance();
   };
 
   const chooseSide = async (choice: 'heads' | 'tails') => {
-      if (!user) {
-        alert('You must be logged in to play!');
-        return;
-      }
+    if (!user) {
+      alert('You must be logged in to play!');
+      return;
+    }
 
     setPlayerChoice(choice);
     setIsFlipping(true);
@@ -70,7 +70,7 @@ export default function CoinFlip() {
 
     const spinAnim = setInterval(() => {
       const elapsed = Date.now() - spinStart;
-      const randomFace = Math.random() < 0.5 ? "heads" : "tails";
+      const randomFace = Math.random() < 0.5 ? 'heads' : 'tails';
       setFlipResult(randomFace);
 
       if (elapsed >= spinDuration) {
@@ -80,24 +80,34 @@ export default function CoinFlip() {
     }, spinInterval);
   };
 
-  const finalizeRound = async (choice: "heads" | "tails") => {
-    const result = Math.random() < 0.5 ? "heads" : "tails";
+  const finalizeRound = async (choice: 'heads' | 'tails') => {
+    const result = Math.random() < 0.5 ? 'heads' : 'tails';
     setFlipResult(result);
     setIsFlipping(false);
 
     let finalWin = 0;
 
     if (choice === result) {
-      finalWin = betInBase * 2;
-      finalWin = await applyBooster(finalWin);
+      finalWin = betInBase * 2; // cents
+      finalWin = await applyBooster(finalWin); // cents
       setLastWin(finalWin);
-      await recordWinTx(user.uid, finalWin, 1, "coinflip");
-      setRoundResult("win");
+      await recordWinTx(user.uid, finalWin, 1, 'coinflip');
+      setRoundResult('win');
+
+      // [FX] show win (display dollars)
+      setFxType('win');
+      setFxAmount(finalWin / 100);
+      setShowFx(true);
     } else {
       await applyBooster(0);
       setLastWin(0);
-      await recordLossTx(user.uid, betInBase, 1, "coinflip");
-      setRoundResult("loss");
+      await recordLossTx(user.uid, betInBase, 1, 'coinflip');
+      setRoundResult('loss');
+
+      // [FX] show loss (display dollars)
+      setFxType('loss');
+      setFxAmount(betInBase / 100);
+      setShowFx(true);
     }
 
     setShowResult(true);
@@ -113,57 +123,62 @@ export default function CoinFlip() {
     setRoundInProgress(false);
     setPlayerChoice(null);
     setFlipResult(null);
-    setRoundResult("");
+    setRoundResult('');
     setShowResult(false);
   };
 
   return (
-    <BackgroundLayout gameId="Coin Toss">
-      <CurrencyProvider base="NZD" DefaultCurrency="NZD">
-        <div className="cointoss-game-container">
+    <BackgroundLayout gameId='Coin Toss'>
+      <CurrencyProvider base='NZD' DefaultCurrency='NZD'>
+        <div className='cointoss-game-container'>
           {/* Game Header */}
 
-          <div className="cointoss-content">
+          <div className='cointoss-content'>
             {/* Game Area */}
-            <div className="cointoss-game-area">
+            <div className='cointoss-game-area'>
               {/* Coin Display */}
               <div
-                className={`coin-container ${isFlipping ? "flipping" : ""} ${showResult ? "result-visible" : ""}`}
+                className={`coin-container ${isFlipping ? 'flipping' : ''} ${showResult ? 'result-visible' : ''}`}
               >
-                <div className="coin">
-                  <img src={coinBase} alt="Coin" className="coin-base" />
+                <div className='coin'>
+                  <img src={coinBase} alt='Coin' className='coin-base' />
 
                   {/* Heads */}
                   <img
                     src={coinHead}
-                    alt="Heads"
-                    className={`coin-face heads ${flipResult === "heads" ? "show" : ""}`}
+                    alt='Heads'
+                    className={`coin-face heads ${flipResult === 'heads' ? 'show' : ''}`}
                   />
 
                   {/* Tails */}
                   <img
                     src={coinTail}
-                    alt="Tails"
-                    className={`coin-face tails ${flipResult === "tails" ? "show" : ""}`}
+                    alt='Tails'
+                    className={`coin-face tails ${flipResult === 'tails' ? 'show' : ''}`}
                   />
                 </div>
               </div>
 
+              {/* [FX] Overlay */}
+              <ResultFX
+                show={showFx}
+                type={fxType}
+                amount={fxAmount} // already dollars
+                currency='NZ$'
+                durationMs={2200}
+                align='center'
+                onDone={() => setShowFx(false)}
+              />
+
               {/* Choice Buttons */}
               {roundInProgress && !playerChoice && (
-                <div className="choice-buttons">
+                <div className='choice-buttons'>
                   <h2>Choose Your Side</h2>
-                  <div className="buttons-container">
-                    <button
-                      className="choice-btn heads-btn"
-                      onClick={() => chooseSide("heads")}
-                    >
+                  <div className='buttons-container'>
+                    <button className='choice-btn heads-btn' onClick={() => chooseSide('heads')}>
                       Heads
                     </button>
-                    <button
-                      className="choice-btn tails-btn"
-                      onClick={() => chooseSide("tails")}
-                    >
+                    <button className='choice-btn tails-btn' onClick={() => chooseSide('tails')}>
                       Tails
                     </button>
                   </div>
@@ -171,29 +186,21 @@ export default function CoinFlip() {
               )}
 
               {/* Game Status */}
-              <div className="cointoss-status">
+              <div className='cointoss-status'>
                 {!roundInProgress && !showResult && (
-                  <div className="status-idle">
-                    Place your bet and choose heads or tails!
-                  </div>
+                  <div className='status-idle'>Place your bet and choose heads or tails!</div>
                 )}
 
                 {roundInProgress && playerChoice && !showResult && (
-                  <div className="status-spinning">
-                    The coin is flipping... Good luck!
-                  </div>
+                  <div className='status-spinning'>The coin is flipping... Good luck!</div>
                 )}
 
                 {showResult && roundResult && (
                   <div className={`status-result ${roundResult}`}>
-                    {roundResult === "win" ? (
-                      <span className="win-text">
-                        You Win! {playerChoice} was correct!
-                      </span>
+                    {roundResult === 'win' ? (
+                      <span className='win-text'>You Win! {playerChoice} was correct!</span>
                     ) : (
-                      <span className="loss-text">
-                        You Lost! It was {flipResult}
-                      </span>
+                      <span className='loss-text'>You Lost! It was {flipResult}</span>
                     )}
                   </div>
                 )}
@@ -201,7 +208,7 @@ export default function CoinFlip() {
 
               {/* Reset Button */}
               {showResult && !roundInProgress && (
-                <button className="reset-btn" onClick={resetGame}>
+                <button className='reset-btn' onClick={resetGame}>
                   Play Again
                 </button>
               )}
@@ -209,7 +216,7 @@ export default function CoinFlip() {
           </div>
 
           {/* Bet Controls */}
-          <div className="cointoss-bet-controls">
+          <div className='cointoss-bet-controls'>
             <BetControls
               balance={balance}
               bet={bet}

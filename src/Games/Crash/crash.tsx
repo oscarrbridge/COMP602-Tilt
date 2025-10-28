@@ -1,22 +1,14 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import "./Crash.css";
-import BackgroundLayout from "../../components/BackgroundLayout/BackgroundLayout";
-import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx";
-import BetControls from "../BetControls/BetControls.tsx";
-import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
-import {
-  placeBet,
-  recordWinTx,
-  recordLossTx,
-} from "../../../Backend/transactions";
-import useCurrentBooster from "../../hooks/useCurrentBooster.tsx";
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import './Crash.css';
+import BackgroundLayout from '../../components/BackgroundLayout/BackgroundLayout';
+import { CurrencyProvider } from '../../components/CurrencySwitcher/currencyswitcher.tsx';
+import BetControls from '../BetControls/BetControls.tsx';
+import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
+import { placeBet, recordWinTx, recordLossTx } from '../../../Backend/transactions';
+import useCurrentBooster from '../../hooks/useCurrentBooster.tsx';
+import ResultFX from '../../components/Animations/Animations'; // [FX] add
 
-type RoundState =
-  | "idle"
-  | "countdown"
-  | "in-progress"
-  | "crashed"
-  | "cashed-out";
+type RoundState = 'idle' | 'countdown' | 'in-progress' | 'crashed' | 'cashed-out';
 
 function generateCrashPoint(): number {
   const lambda = 0.45;
@@ -37,7 +29,7 @@ export default function Crash() {
 
   const [bet, setBet] = useState<number>(2.0);
   const [betInBase, setBetInBase] = useState<number>(0);
-  const [state, setState] = useState<RoundState>("idle");
+  const [state, setState] = useState<RoundState>('idle');
   const [countdown, setCountdown] = useState<number>(COUNTDOWN_SECS);
   const [currentMult, setCurrentMult] = useState<number>(1);
   const [crashPoint, setCrashPoint] = useState<number | null>(null);
@@ -50,16 +42,19 @@ export default function Crash() {
   const animRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
 
-  // points represent the *actual emitted* points over time (past progress)
-  const [points, setPoints] = useState<{ x: number; y: number }[]>([
-    { x: 0, y: 1 },
-  ]);
+  // [FX] overlay state
+  const [showFx, setShowFx] = useState(false);
+  const [fxType, setFxType] = useState<'win' | 'loss'>('win');
+  const [fxAmount, setFxAmount] = useState<number | undefined>(undefined);
 
-  const canCashOut = state === "in-progress" && !cashedOutAt;
+  // points represent the *actual emitted* points over time (past progress)
+  const [points, setPoints] = useState<{ x: number; y: number }[]>([{ x: 0, y: 1 }]);
+
+  const canCashOut = state === 'in-progress' && !cashedOutAt;
 
   // Animation loop (emits points as time progresses)
   useEffect(() => {
-    if (state !== "in-progress" || crashPoint == null) return;
+    if (state !== 'in-progress' || crashPoint == null) return;
 
     const durationToCrash = secondsToReach(crashPoint);
     const step = (nowMs: number) => {
@@ -87,7 +82,7 @@ export default function Crash() {
           if (last && Math.abs(last.y - crashPoint) < 1e-6) return prev;
           return [...prev, { x: durationToCrash, y: crashPoint }];
         });
-        setState("crashed");
+        setState('crashed');
         if (animRef.current) cancelAnimationFrame(animRef.current);
       } else {
         animRef.current = requestAnimationFrame(step);
@@ -105,7 +100,7 @@ export default function Crash() {
 
   // Countdown logic — generate crashPoint *just before* entering in-progress
   useEffect(() => {
-    if (state !== "countdown") return;
+    if (state !== 'countdown') return;
     let remaining = COUNTDOWN_SECS;
     setCountdown(remaining);
 
@@ -120,7 +115,7 @@ export default function Crash() {
         // generate crash point right before the round begins
         setCrashPoint(generateCrashPoint());
 
-        setState("in-progress");
+        setState('in-progress');
         setGoFlash(true);
         setTimeout(() => setGoFlash(false), 700);
       }
@@ -140,22 +135,24 @@ export default function Crash() {
       setCrashPoint(null);
       setCashedOutAt(undefined);
       resetGraph();
-      setState("idle");
+      setState('idle');
       setRoundId((r) => r + 1);
+      // [FX] ensure overlay is hidden when a new round is queued
+      setShowFx(false);
     }, afterMs);
   }
 
   async function startGame(newBetInBase: number) {
     if (newBetInBase > balance) {
-      alert("Not enough balance!");
+      alert('Not enough balance!');
       return;
     }
     setBetInBase(newBetInBase);
     setLastWin(0);
     setCashedOutAt(undefined);
     resetGraph();
-    setState("countdown");
-    await placeBet(user.uid, newBetInBase, 1, "crash");
+    setState('countdown');
+    await placeBet(user.uid, newBetInBase, 1, 'crash');
     await refreshBalance();
   }
 
@@ -171,19 +168,31 @@ export default function Crash() {
     }
 
     setCashedOutAt(m);
-    setState("cashed-out");
+    setState('cashed-out');
 
-    await recordWinTx(user.uid, finalAmount, 1, "crash");
+    await recordWinTx(user.uid, finalAmount, 1, 'crash');
     await refreshBalance();
+
+    // [FX] show win overlay (display dollars)
+    setFxType('win');
+    setFxAmount(finalAmount / 100);
+    setShowFx(true);
+
     queueNextRound();
   }
 
   useEffect(() => {
-    if (state !== "crashed") return;
+    if (state !== 'crashed') return;
     (async () => {
       await applyBooster(0);
-      await recordLossTx(user.uid, betInBase, 1, "crash");
+      await recordLossTx(user.uid, betInBase, 1, 'crash');
       await refreshBalance();
+
+      // [FX] show loss overlay (display dollars lost = stake)
+      setFxType('loss');
+      setFxAmount(betInBase / 100);
+      setShowFx(true);
+
       queueNextRound();
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -196,24 +205,18 @@ export default function Crash() {
     const W = 1000;
     const H = 500;
 
-    const displayPoints =
-      state === "idle" || state === "countdown" ? [{ x: 0, y: 1 }] : points;
+    const displayPoints = state === 'idle' || state === 'countdown' ? [{ x: 0, y: 1 }] : points;
 
     const maxX = Math.max(12, displayPoints[displayPoints.length - 1]?.x ?? 12);
 
     // IMPORTANT: do NOT include crashPoint while in-progress to avoid leaking final value.
     // Only include crashPoint in maxY after the round is finished (crashed or cashed-out).
-    const includeCrashInMax =
-      (state === "crashed" || state === "cashed-out") && crashPoint != null;
+    const includeCrashInMax = (state === 'crashed' || state === 'cashed-out') && crashPoint != null;
 
     // compute maxY from actual emitted points (and crash point only after finish)
     const measuredYs = displayPoints.map((p) => p.y);
     const fallback = 3;
-    const maxY = Math.max(
-      fallback,
-      ...measuredYs,
-      includeCrashInMax ? crashPoint! : 1
-    );
+    const maxY = Math.max(fallback, ...measuredYs, includeCrashInMax ? crashPoint! : 1);
 
     const mapX = (x: number) => {
       // avoid div by zero if maxX is zero
@@ -226,102 +229,66 @@ export default function Crash() {
       return H - ((y - 1) / span) * (H - 80) - 40;
     };
 
-    const poly = displayPoints
-      .map((p) => `${mapX(p.x)},${mapY(p.y)}`)
-      .join(" ");
+    const poly = displayPoints.map((p) => `${mapX(p.x)},${mapY(p.y)}`).join(' ');
     const yTicks = [1, 1.5, 2, 2.5, 3, 4, 5, 7, 10].filter((v) => v <= maxY);
 
     return { W, H, poly, mapX, mapY, yTicks, maxY, displayPoints };
   }, [points, crashPoint, state]);
 
   return (
-    <BackgroundLayout gameId="Crash">
-      <CurrencyProvider base="NZD" DefaultCurrency="NZD">
-        <div className="crash-game-container">
-          <div className="crash-content">
+    <BackgroundLayout gameId='Crash'>
+      <CurrencyProvider base='NZD' DefaultCurrency='NZD'>
+        <div className='crash-game-container'>
+          <div className='crash-content'>
             {/* Top Section - Crash Graph */}
-            <div className="crash-graph-section">
-              <div className="crash-multiplier-display">
-                {fmtMult(Math.max(1, currentMult))}
-              </div>
+            <div className='crash-graph-section'>
+              <div className='crash-multiplier-display'>{fmtMult(Math.max(1, currentMult))}</div>
 
-              {state === "countdown" && (
-                <div
-                  key={`count-${countdown}`}
-                  className="crash-countdown overlay-text"
-                >
+              {state === 'countdown' && (
+                <div key={`count-${countdown}`} className='crash-countdown overlay-text'>
                   {countdown}
                 </div>
               )}
-              {goFlash && (
-                <div className="crash-go-flash overlay-text">GO!</div>
-              )}
+              {goFlash && <div className='crash-go-flash overlay-text'>GO!</div>}
 
               <svg
                 ref={svgRef}
                 viewBox={`0 0 ${graph.W} ${graph.H}`}
-                width="100%"
-                height="100%"
-                className="crash-graph"
-                preserveAspectRatio="xMidYMid meet"
+                width='100%'
+                height='100%'
+                className='crash-graph'
+                preserveAspectRatio='xMidYMid meet'
               >
                 <defs>
-                  <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#0f172a" />
-                    <stop offset="100%" stopColor="#0b1020" />
+                  <linearGradient id='bgGrad' x1='0' y1='0' x2='0' y2='1'>
+                    <stop offset='0%' stopColor='#0f172a' />
+                    <stop offset='100%' stopColor='#0b1020' />
                   </linearGradient>
 
-                  <linearGradient id="crashLine" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0" stopColor="#22d3ee" />
-                    <stop offset="40%" stopColor="#8b5cf6" />
-                    <stop offset="70%" stopColor="#f472b6" />
-                    <stop offset="100%" stopColor="#f59e0b" />
+                  <linearGradient id='crashLine' x1='0' y1='0' x2='1' y2='0'>
+                    <stop offset='0' stopColor='#22d3ee' />
+                    <stop offset='40%' stopColor='#8b5cf6' />
+                    <stop offset='70%' stopColor='#f472b6' />
+                    <stop offset='100%' stopColor='#f59e0b' />
                   </linearGradient>
 
-                  <filter
-                    id="glow"
-                    x="-50%"
-                    y="-50%"
-                    width="200%"
-                    height="200%"
-                  >
-                    <feGaussianBlur
-                      in="SourceGraphic"
-                      stdDeviation="4"
-                      result="blur"
-                    />
+                  <filter id='glow' x='-50%' y='-50%' width='200%' height='200%'>
+                    <feGaussianBlur in='SourceGraphic' stdDeviation='4' result='blur' />
                     <feMerge>
-                      <feMergeNode in="blur" />
-                      <feMergeNode in="SourceGraphic" />
+                      <feMergeNode in='blur' />
+                      <feMergeNode in='SourceGraphic' />
                     </feMerge>
                   </filter>
                 </defs>
 
-                <rect
-                  x="0"
-                  y="0"
-                  width={graph.W}
-                  height={graph.H}
-                  fill="url(#bgGrad)"
-                />
+                <rect x='0' y='0' width={graph.W} height={graph.H} fill='url(#bgGrad)' />
 
                 {graph.yTicks.map((v, i) => {
                   const y = graph.mapY(v);
                   return (
                     <g key={i}>
-                      <line
-                        x1={40}
-                        x2={graph.W - 40}
-                        y1={y}
-                        y2={y}
-                        stroke="#172036"
-                      />
-                      <text
-                        x={graph.W - 30}
-                        y={y - 6}
-                        fill="#a3a3a3"
-                        fontSize={12}
-                      >
+                      <line x1={40} x2={graph.W - 40} y1={y} y2={y} stroke='#172036' />
+                      <text x={graph.W - 30} y={y - 6} fill='#a3a3a3' fontSize={12}>
                         {v.toFixed(1)}x
                       </text>
                     </g>
@@ -329,122 +296,110 @@ export default function Crash() {
                 })}
 
                 {/* Trailing polyline: draws only emitted (past) points while the round is live or after it finished */}
-                {(state === "in-progress" ||
-                  state === "crashed" ||
-                  state === "cashed-out") && (
+                {(state === 'in-progress' || state === 'crashed' || state === 'cashed-out') && (
                   <polyline
-                    fill="none"
-                    stroke="url(#crashLine)"
+                    fill='none'
+                    stroke='url(#crashLine)'
                     strokeWidth={6}
-                    filter="url(#glow)"
+                    filter='url(#glow)'
                     points={graph.poly}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
                   />
                 )}
 
                 {/* Dot representing the current multiplier (only during gameplay and after crash) */}
-                {((state === "in-progress" ||
-                  state === "crashed" ||
-                  state === "cashed-out") &&
+                {((state === 'in-progress' || state === 'crashed' || state === 'cashed-out') &&
                   graph.displayPoints.length > 0 &&
                   (() => {
-                    const last =
-                      graph.displayPoints[graph.displayPoints.length - 1];
+                    const last = graph.displayPoints[graph.displayPoints.length - 1];
                     if (!last) return null;
                     const cx = graph.mapX(last.x);
                     const cy = graph.mapY(last.y);
                     return (
                       <g>
-                        <circle
-                          cx={cx}
-                          cy={cy}
-                          r={8}
-                          fill="#ffffff"
-                          opacity="0.95"
-                        />
-                        <circle
-                          cx={cx}
-                          cy={cy}
-                          r={16}
-                          fill="#ffffff"
-                          opacity="0.15"
-                        />
+                        <circle cx={cx} cy={cy} r={8} fill='#ffffff' opacity='0.95' />
+                        <circle cx={cx} cy={cy} r={16} fill='#ffffff' opacity='0.15' />
                       </g>
                     );
                   })()) ||
                   null}
               </svg>
+
+              {/* [FX] overlay, above the graph */}
+              <ResultFX
+                show={showFx}
+                type={fxType}
+                amount={fxAmount} // already dollars
+                currency='NZ$'
+                durationMs={2200}
+                align='center'
+                onDone={() => setShowFx(false)}
+              />
             </div>
-            <div className="crash-title"></div>
+
+            <div className='crash-title'></div>
+
             {/* Bottom Section - Status & Info Panels */}
-            <div className="crash-controls-section">
+            <div className='crash-controls-section'>
               {/* Status Panel */}
-              <div className="crash-status-panel">
-                <div className="crash-status">
-                  {state === "idle" && (
-                    <div className="status-idle">
-                      Place your bet and watch the multiplier grow!
-                    </div>
+              <div className='crash-status-panel'>
+                <div className='crash-status'>
+                  {state === 'idle' && (
+                    <div className='status-idle'>Place your bet and watch the multiplier grow!</div>
                   )}
-                  {state === "countdown" && (
-                    <div className="status-countdown">
-                      Round starting in {countdown}...
-                    </div>
+                  {state === 'countdown' && (
+                    <div className='status-countdown'>Round starting in {countdown}...</div>
                   )}
-                  {state === "in-progress" && (
-                    <div className="status-in-progress">Press to Cash Out</div>
+                  {state === 'in-progress' && (
+                    <div className='status-in-progress'>Press to Cash Out</div>
                   )}
-                  {(state === "crashed" || state === "cashed-out") && (
-                    <div
-                      className={`status-result ${state === "cashed-out" ? "win" : "loss"}`}
-                    >
-                      {state === "cashed-out"
-                        ? "Successfully cashed out!"
+                  {(state === 'crashed' || state === 'cashed-out') && (
+                    <div className={`status-result ${state === 'cashed-out' ? 'win' : 'loss'}`}>
+                      {state === 'cashed-out'
+                        ? 'Successfully cashed out!'
                         : `Crashed at ${fmtMult(crashPoint ?? currentMult)}`}
                     </div>
                   )}
                 </div>
 
-                {state !== "idle" && (
+                {state !== 'idle' && (
                   <button
                     onClick={cashOut}
                     disabled={!canCashOut}
-                    className={`crash-cashout-button ${!canCashOut ? "disabled" : ""}`}
+                    className={`crash-cashout-button ${!canCashOut ? 'disabled' : ''}`}
                   >
-                    {canCashOut
-                      ? `Cash Out ${fmtMult(currentMult)}`
-                      : "Cash Out"}
+                    {canCashOut ? `Cash Out ${fmtMult(currentMult)}` : 'Cash Out'}
                   </button>
                 )}
               </div>
 
               {/* Info Panel */}
-              <div className="crash-info-panel">
-                <div className="game-info">
+              <div className='crash-info-panel'>
+                <div className='game-info'>
                   <h3>Game Information</h3>
-                  <div className="info-row">
-                    <span className="info-label">Current Bet:</span>
-                    <span className="info-value">${bet.toFixed(2)}</span>
+                  <div className='info-row'>
+                    <span className='info-label'>Current Bet:</span>
+                    <span className='info-value'>${bet.toFixed(2)}</span>
                   </div>
-                  <div className="info-row">
-                    <span className="info-label">Potential Win:</span>
-                    <span className="info-value">
+                  <div className='info-row'>
+                    <span className='info-label'>Potential Win:</span>
+                    <span className='info-value'>
                       ${((betInBase * currentMult) / 100).toFixed(2)}
                     </span>
                   </div>
-                  <div className="info-row">
-                    <span className="info-label">Round:</span>
-                    <span className="info-value">#{roundId}</span>
+                  <div className='info-row'>
+                    <span className='info-label'>Round:</span>
+                    <span className='info-value'>#{roundId}</span>
                   </div>
-                  <div className="info-row">
-                    <span className="info-label">Status:</span>
-                    <span className="info-value">
-                      {state === "idle" && "Waiting"}
-                      {state === "countdown" && "Starting"}
-                      {state === "in-progress" && "Live"}
-                      {state === "crashed" && "Crashed"}
-                      {state === "cashed-out" && "Cashed Out"}
+                  <div className='info-row'>
+                    <span className='info-label'>Status:</span>
+                    <span className='info-value'>
+                      {state === 'idle' && 'Waiting'}
+                      {state === 'countdown' && 'Starting'}
+                      {state === 'in-progress' && 'Live'}
+                      {state === 'crashed' && 'Crashed'}
+                      {state === 'cashed-out' && 'Cashed Out'}
                     </span>
                   </div>
                 </div>
@@ -453,13 +408,13 @@ export default function Crash() {
           </div>
 
           {/* Bet Controls */}
-          <div className="crash-bet-controls">
+          <div className='crash-bet-controls'>
             <BetControls
               balance={balance}
               bet={bet}
               setBet={setBet}
               startGame={startGame}
-              disabled={state !== "idle"}
+              disabled={state !== 'idle'}
             />
           </div>
         </div>

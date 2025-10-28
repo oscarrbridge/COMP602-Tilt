@@ -1,15 +1,12 @@
-import { useState, useEffect } from "react";
-import "./Slots.css";
-import {
-  placeBet,
-  recordWinTx,
-  recordLossTx,
-} from "../../../Backend/transactions";
-import { useUser } from "../../../Backend/firebase/UserFunctions.tsx";
-import { CurrencyProvider } from "../../components/CurrencySwitcher/currencyswitcher.tsx";
-import BetControls from "../BetControls/BetControls.tsx";
-import BackgroundLayout from "../../components/BackgroundLayout/BackgroundLayout";
-import useCurrentBooster from "../../hooks/useCurrentBooster.tsx";
+import { useState, useEffect } from 'react';
+import './Slots.css';
+import { placeBet, recordWinTx, recordLossTx } from '../../../Backend/transactions';
+import { useUser } from '../../../Backend/firebase/UserFunctions.tsx';
+import { CurrencyProvider } from '../../components/CurrencySwitcher/currencyswitcher.tsx';
+import BetControls from '../BetControls/BetControls.tsx';
+import BackgroundLayout from '../../components/BackgroundLayout/BackgroundLayout';
+import useCurrentBooster from '../../hooks/useCurrentBooster.tsx';
+import ResultFX from '../../components/Animations/Animations'; // [FX] import
 
 // ---------------- Slot Logic ----------------
 function generateNum(): number {
@@ -75,13 +72,18 @@ function Slots() {
   const [showResult, setShowResult] = useState<boolean>(false);
   const { applyBooster } = useCurrentBooster();
 
+  // [FX] local overlay state (moved here from top-level)
+  const [showFx, setShowFx] = useState(false);
+  const [fxType, setFxType] = useState<'win' | 'loss'>('win');
+  const [fxAmount, setFxAmount] = useState<number | undefined>(undefined);
+
   useEffect(() => {
     setDisplayGrid(spinSlots());
   }, []);
 
   const spin = async (betInBase: number) => {
     if (betInBase > balance || isSpinning) {
-      if (betInBase > balance) alert("Insufficient balance for this bet.");
+      if (betInBase > balance) alert('Insufficient balance for this bet.');
       return;
     }
 
@@ -92,7 +94,7 @@ function Slots() {
 
     const finalGrid = spinSlots();
 
-    await placeBet(user.uid, betInBase, 1, "slots");
+    await placeBet(user.uid, betInBase, 1, 'slots');
     await refreshBalance();
 
     // Start spinning animation
@@ -112,10 +114,7 @@ function Slots() {
         const matches = winningData.map((row) => row.match);
         const multipliers = winningData.map((row) => row.multiplier);
 
-        let totalMultiplier = multipliers.reduce(
-          (acc, val) => (val > 0 ? acc + val : acc),
-          0
-        );
+        let totalMultiplier = multipliers.reduce((acc, val) => (val > 0 ? acc + val : acc), 0);
 
         setWinningCells(matches);
 
@@ -128,16 +127,21 @@ function Slots() {
           // Apply booster immediately after animation
           if (winAmount > 0) {
             finalAmount = await applyBooster(winAmount);
-            await recordWinTx(user.uid, finalAmount, 1, "slots");
+            await recordWinTx(user.uid, finalAmount, 1, 'slots');
           } else {
             // Even on losses, consume the booster
             await applyBooster(0);
-            await recordLossTx(user.uid, betInBase, 1, "slots");
+            await recordLossTx(user.uid, betInBase, 1, 'slots');
           }
 
           // Set the win amount and show result AFTER processing
           setLastWin(finalAmount);
           setShowResult(true);
+
+          // [FX] trigger overlay
+          setFxType(finalAmount > 0 ? 'win' : 'loss');
+          setFxAmount(finalAmount > 0 ? finalAmount : betInBase / 100);
+          setShowFx(true);
 
           await refreshBalance();
           setIsSpinning(false);
@@ -151,27 +155,21 @@ function Slots() {
   };
 
   return (
-    <BackgroundLayout gameId="Slots">
-      <div className="slots-game-container">
-        <div className={`slot-grid ${!isSpinning ? "idle-hover" : ""}`}>
+    <BackgroundLayout gameId='Slots'>
+      <div className='slots-game-container'>
+        <div className={`slot-grid ${!isSpinning ? 'idle-hover' : ''}`}>
           {displayGrid.map((row, rowIndex) => (
-            <div key={rowIndex} className="slot-row">
+            <div key={rowIndex} className='slot-row'>
               {row.map((cell, cellIndex) => {
                 const isWinning =
-                  showResult &&
-                  winningCells[rowIndex] !== 0 &&
-                  cell === winningCells[rowIndex];
+                  showResult && winningCells[rowIndex] !== 0 && cell === winningCells[rowIndex];
 
                 return (
                   <div
                     key={`${rowIndex}-${cellIndex}`}
-                    className={`slot-cell ${isWinning ? "winning" : ""}`}
+                    className={`slot-cell ${isWinning ? 'winning' : ''}`}
                   >
-                    <img
-                      src={`/assets/${cell}.png`}
-                      alt={`Slot ${cell}`}
-                      className="slot-image"
-                    />
+                    <img src={`/assets/${cell}.png`} alt={`Slot ${cell}`} className='slot-image' />
                   </div>
                 );
               })}
@@ -179,8 +177,19 @@ function Slots() {
           ))}
         </div>
 
-        <div className="game-bet-controls">
-          <CurrencyProvider base="NZD" DefaultCurrency="NZD">
+        {/* [FX] overlay (sits above grid) */}
+        <ResultFX
+          show={showFx}
+          type={fxType}
+          amount={fxAmount}
+          currency='NZ$'
+          durationMs={2200}
+          align='center'
+          onDone={() => setShowFx(false)}
+        />
+
+        <div className='game-bet-controls'>
+          <CurrencyProvider base='NZD' DefaultCurrency='NZD'>
             <BetControls
               balance={balance}
               bet={bet}

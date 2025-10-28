@@ -4,7 +4,7 @@ export type UniversityOption = {
   domains?: string[];
 };
 
-// International (Top 10 Global), sorted A → Z
+// International (Top 10 Global), sorted A to Z
 export const INTERNATIONAL_UNIS: UniversityOption[] = [
   {
     label: 'California Institute of Technology (Caltech)',
@@ -22,7 +22,7 @@ export const INTERNATIONAL_UNIS: UniversityOption[] = [
   { label: 'University of Oxford', value: 'oxford', domains: ['ox.ac.uk'] },
 ];
 
-// New Zealand, sorted A → Z
+// New Zealand, sorted A to Z
 export const NZ_UNIS: UniversityOption[] = [
   { label: 'Auckland University of Technology (AUT)', value: 'aut', domains: ['aut.ac.nz'] },
   { label: 'Lincoln University', value: 'lincoln', domains: ['lincoln.ac.nz'] },
