@@ -195,12 +195,12 @@ export default function Blackjackm({ gameId = 'testGame' }: { gameId?: string })
     try {
       const g2 = await getDoc(gameRef);
       const gData: any = g2.exists() ? g2.data() : {};
-      const requiredPlayers = gData?.minPlayers ?? 2;
 
       const playersColRef = collection(db, 'games', gameId, 'players');
       const snap = await getDocs(playersColRef);
       const all = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
       const active = all.filter((p) => p.status === 'active');
+      const requiredPlayers = active.length;
 
       const everyoneReady =
         active.length >= requiredPlayers &&
