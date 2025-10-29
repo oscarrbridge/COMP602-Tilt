@@ -20,6 +20,7 @@ import {
   serverTimestamp,
   writeBatch,
 } from 'firebase/firestore';
+import { placeBet, recordWinTx, recordLossTx } from '../../../Backend/transactions';
 import { db } from '../../../Backend/firebase/firebaseConfig';
 import { evaluateHand } from './pokerHandEvaluator';
 import { updateDoc } from 'firebase/firestore';
@@ -133,6 +134,59 @@ export default function PokerGame() {
     }
   };
 
+  // ===== Chip management =====
+  const buyChips = async (amount: number) => {
+    if (!user || !gameId) return;
+    try {
+      // Deduct from wallet
+      await placeBet(user.uid, amount, 1, 'poker');
+
+      // Add chips in Firestore
+      const meRef = doc(db, 'games', gameId, 'players', user.uid);
+      const meSnap = await getDoc(meRef);
+      const meData: any = meSnap.data();
+      const currentChips = meData?.chips || 0;
+      await updateDoc(meRef, {
+        chips: currentChips + amount,
+        updatedAt: serverTimestamp(),
+      });
+
+      alert(`Successfully bought ${amount} chips!`);
+    } catch (err) {
+      console.error('Buy chips failed:', err);
+      alert('Failed to buy chips. Please try again.');
+    }
+  };
+
+  const cashOutChips = async (amount: number) => {
+    if (!user || !gameId) return;
+    try {
+      const meRef = doc(db, 'games', gameId, 'players', user.uid);
+      const meSnap = await getDoc(meRef);
+      const meData: any = meSnap.data();
+      const currentChips = meData?.chips || 0;
+
+      if (amount > currentChips) {
+        alert('Not enough chips to cash out that amount.');
+        return;
+      }
+
+      // Deduct chips
+      await updateDoc(meRef, {
+        chips: currentChips - amount,
+        updatedAt: serverTimestamp(),
+      });
+
+      // Add back to wallet
+      await recordWinTx(user.uid, amount, 1, 'poker');
+
+      alert(`Successfully cashed out ${amount} chips!`);
+    } catch (err) {
+      console.error('Cashout failed:', err);
+      alert('Failed to cash out. Please try again.');
+    }
+  };
+
   const sanitize = (obj: Record<string, any>) => {
     const o: Record<string, any> = {};
     for (const [k, v] of Object.entries(obj)) {
@@ -229,7 +283,7 @@ export default function PokerGame() {
         playersSnap.docs.filter((d) => (d.data() as any).status === 'playing').map((d) => d.id)
       );
       if (alive.size <= 1) {
-        // ✅ end hand now for any client; no host required
+        // end hand now for any client; no host required
         await finishIfSingleSurvivor(gameId);
         return;
       }
@@ -521,6 +575,28 @@ export default function PokerGame() {
             </aside>
           )}
         </div>
+          {/* Warning if player doesn’t have enough chips */}
+          {toCall > me?.chips && (
+            <div className='pkr-warning' style={{ color: 'red', marginTop: 10 }}>
+              You don’t have enough chips to call. Please add more chips to continue.
+            </div>
+          )}
+      <div style={{ marginTop: 0, display: 'flex', gap: 10 }}>
+        <button
+          className='bj-btn bj-btn--blue'
+          onClick={() => buyChips(500)}
+        >
+          Buy 500 Chips ($5)
+        </button>
+
+        <button
+          className='bj-btn bj-btn--blue'
+          onClick={() => cashOutChips(500)}
+        >
+          Cash Out 500 Chips ($5)
+        </button>
+      </div>
+
         {/* Controls (unchanged behavior) */}
         <div className='bj-controls' style={{ marginTop: 20 }}>
           {myTurn && round !== 'showdown' && (

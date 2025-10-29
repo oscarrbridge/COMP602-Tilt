@@ -41,7 +41,10 @@
 .bj-table {
   position: relative; /* allow floating panel */
   overflow: hidden; /* keep contents inside rounded frame */
-  margin: 120px auto;
+  margin-top: 120px;
+  margin-right: auto;
+  margin-bottom: 30px; /* reduced bottom margin so controls move up */
+  margin-left: auto;
   padding: 10px 14px 22px;
   width: min(740px, 86vw);
   border-radius: 12px;

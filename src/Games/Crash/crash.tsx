@@ -42,17 +42,17 @@ export default function Crash() {
   const animRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
 
-  // [FX] overlay state
+  // overlay state
   const [showFx, setShowFx] = useState(false);
   const [fxType, setFxType] = useState<'win' | 'loss'>('win');
   const [fxAmount, setFxAmount] = useState<number | undefined>(undefined);
 
-  // points represent the *actual emitted* points over time (past progress)
+  // points represent the *actual emitted* points over time (
   const [points, setPoints] = useState<{ x: number; y: number }[]>([{ x: 0, y: 1 }]);
 
   const canCashOut = state === 'in-progress' && !cashedOutAt;
 
-  // Animation loop (emits points as time progresses)
+  // Animation loop 
   useEffect(() => {
     if (state !== 'in-progress' || crashPoint == null) return;
 
@@ -75,7 +75,6 @@ export default function Crash() {
       if (t >= durationToCrash) {
         // reached crash
         setCurrentMult(crashPoint);
-        // include final crash point as last emitted point (ensures trailing line reaches final)
         setPoints((prev) => {
           const last = prev[prev.length - 1];
           // avoid duplicate if already near crashPoint
@@ -98,7 +97,7 @@ export default function Crash() {
     // intentionally depend on state & crashPoint only
   }, [state, crashPoint]);
 
-  // Countdown logic — generate crashPoint *just before* entering in-progress
+  // countdown timer
   useEffect(() => {
     if (state !== 'countdown') return;
     let remaining = COUNTDOWN_SECS;
@@ -111,8 +110,7 @@ export default function Crash() {
       } else {
         clearInterval(interval);
         setCountdown(0);
-
-        // generate crash point right before the round begins
+        //gernerate the crash point
         setCrashPoint(generateCrashPoint());
 
         setState('in-progress');
@@ -137,7 +135,7 @@ export default function Crash() {
       resetGraph();
       setState('idle');
       setRoundId((r) => r + 1);
-      // [FX] ensure overlay is hidden when a new round is queued
+      // ensure overlay is hidden when a new round is queued
       setShowFx(false);
     }, afterMs);
   }
@@ -173,7 +171,7 @@ export default function Crash() {
     await recordWinTx(user.uid, finalAmount, 1, 'crash');
     await refreshBalance();
 
-    // [FX] show win overlay (display dollars)
+    // [show win overlay
     setFxType('win');
     setFxAmount(finalAmount / 100);
     setShowFx(true);
@@ -187,20 +185,15 @@ export default function Crash() {
       await applyBooster(0);
       await recordLossTx(user.uid, betInBase, 1, 'crash');
       await refreshBalance();
-
-      // [FX] show loss overlay (display dollars lost = stake)
       setFxType('loss');
       setFxAmount(betInBase / 100);
       setShowFx(true);
 
       queueNextRound();
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 
-  // Graph memoization:
-  // - displayPoints = points (past emitted points) while in-progress/crashed/cashed-out
-  // - during idle/countdown show only baseline (no preview/predictive curve)
+  // Graph 
   const graph = useMemo(() => {
     const W = 1000;
     const H = 500;
@@ -209,11 +202,8 @@ export default function Crash() {
 
     const maxX = Math.max(12, displayPoints[displayPoints.length - 1]?.x ?? 12);
 
-    // IMPORTANT: do NOT include crashPoint while in-progress to avoid leaking final value.
-    // Only include crashPoint in maxY after the round is finished (crashed or cashed-out).
     const includeCrashInMax = (state === 'crashed' || state === 'cashed-out') && crashPoint != null;
 
-    // compute maxY from actual emitted points (and crash point only after finish)
     const measuredYs = displayPoints.map((p) => p.y);
     const fallback = 3;
     const maxY = Math.max(fallback, ...measuredYs, includeCrashInMax ? crashPoint! : 1);
@@ -295,7 +285,7 @@ export default function Crash() {
                   );
                 })}
 
-                {/* Trailing polyline: draws only emitted (past) points while the round is live or after it finished */}
+                {/* Graph Line */}
                 {(state === 'in-progress' || state === 'crashed' || state === 'cashed-out') && (
                   <polyline
                     fill='none'
@@ -308,7 +298,6 @@ export default function Crash() {
                   />
                 )}
 
-                {/* Dot representing the current multiplier (only during gameplay and after crash) */}
                 {((state === 'in-progress' || state === 'crashed' || state === 'cashed-out') &&
                   graph.displayPoints.length > 0 &&
                   (() => {
@@ -326,7 +315,7 @@ export default function Crash() {
                   null}
               </svg>
 
-              {/* [FX] overlay, above the graph */}
+              {/*  overlay, above the graph */}
               <ResultFX
                 show={showFx}
                 type={fxType}
