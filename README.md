@@ -1,6 +1,25 @@
 # Tilt Project
 
-## Structure
+> This is a learning project that combines a React/Vite frontend with a FastAPI backend.  
+> It includes casino game UIs, Firebase Auth/Firestore, and Stripe-powered deposits/withdrawals.
+
+![Tilt Screenshot](./public/assets/readme.png)
+
+---
+
+## Table of Contents
+- [Project Structure](#project-structure)
+- [Requirements](#requirements)
+- [Environment Variables](#environment-variables)
+- [Build Scripts](#build-scripts)
+- [Stripe listener](#stripe-listener)
+- [API & Data](#api--data)
+- [Included Packages](#included-packages)
+
+---
+
+## Project Structure
+
 The repository has the following structure:
 
 - **[Backend/](Backend/)** — backend server
@@ -11,34 +30,47 @@ The repository has the following structure:
 
 ---
 
+## Requirements
+
+- **Node.js** ≥ 18
+- **Python** ≥ 3.10
+- **Stripe CLI** (for local webhooks)
+- **Firebase** project (Web config + Admin Service Account)
+
+---
+
 ## Environment Variables
 
-Stripe functionality (deposits/withdrawals) requires local environment files.
-`.gitignore` excludes `.env` files, so create them locally:
+> `.env` files are **gitignored**. Create them locally.
 
-**Root `.env` (server):**
+### Backend (root `.env`)
 ```dotenv
+# Stripe
 STRIPE_SECRET_KEY=sk_test_xxx
 STRIPE_WEBHOOK_SECRET=whsec_xxx
+
+# Firebase Admin
+GOOGLE_APPLICATION_CREDENTIALS=./Backend/firebase/serviceAccount.json
 ```
+
+---
+
 ## **Build Scripts**
 
-### **Frontend localhost**
+# 1) Frontend
+cd COMP602-Tilt
+npm install
+npm run dev         # -> http://localhost:5173
 
-cd to COMP602-Tilt> 
+# 2) Backend (new terminal)
+pip install -r requirements.txt
+python -m uvicorn Backend.main:app --reload --port 4000  # -> http://localhost:4000
 
-  ```npm install```
-  
-  ```npm run dev ```
-  
-### **Backend server**
+# 3) Stripe webhooks (new terminal) * Requires the setup below
+stripe login
+stripe listen --forward-to http://localhost:4000/payments/webhook
 
-cd to COMP602-Tilt> 
-
-```pip install -r requirements.txt```
-
-```py -m uvicorn Backend.main:app --reload --port 4000```
-
+---
 
 ### **Stripe listener**
 To receive Stripe webhook events locally, you need the Stripe CLI.
@@ -77,6 +109,16 @@ stripe login
 # Forward webhook events to FastAPI backend
 stripe listen --forward-to http://localhost:4000/payments/webhook
 ```
+
+---
+
+## API & Data
+
+>Backend base: http://localhost:4000
+>
+>Routers: see Backend/routers/ (payments, game endpoints, etc.)
+>
+>Firestore: collections like games/{gameId}/players/{uid}, plus ledgers.
 
 ## **Included Packages**
 
