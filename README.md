@@ -58,17 +58,23 @@ GOOGLE_APPLICATION_CREDENTIALS=./Backend/firebase/serviceAccount.json
 ## **Build Scripts**
 
 # 1) Frontend
+```
 cd COMP602-Tilt
 npm install
 npm run dev         # -> http://localhost:5173
+```
 
 # 2) Backend (new terminal)
+```
 pip install -r requirements.txt
 python -m uvicorn Backend.main:app --reload --port 4000  # -> http://localhost:4000
+```
 
 # 3) Stripe webhooks (new terminal) * Requires the setup below
+```
 stripe login
 stripe listen --forward-to http://localhost:4000/payments/webhook
+```
 
 ---
 
