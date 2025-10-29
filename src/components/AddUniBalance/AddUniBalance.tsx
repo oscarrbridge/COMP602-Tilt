@@ -67,13 +67,13 @@ export default function AddUniBalance() {
       
       // Add uni balance using the backend function
     if(trimmedCode.length == 16){
-      await addUniBalance(uid, 100);
+      await addUniBalance(uid, 1000);
     }
     //else{
       //await addUniBalance(uid, uniAmount);
     //}
       // Success: show message and clear code
-      setOk(`Success! Added ${100} uni balance to your account.`);
+      setOk(`Success! Added ${1000} uni balance to your account.`);
       setCode('');
     } catch (err: any) {
       // Failed: show error message

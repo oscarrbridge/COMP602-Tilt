@@ -2,7 +2,7 @@ import { db } from './firebaseConfig';
 import { doc, collection, runTransaction, serverTimestamp, increment } from 'firebase/firestore';
 
 export type transactionType = 'bet' | 'win' | 'loss' | 'deposit' | 'withdraw';
-export type balanceType = 'balance' | 'unibalance';
+export type balanceType = 'balance' | 'uniBalance';
 
 export async function userTransaction(
   uid: string,
@@ -29,21 +29,21 @@ export async function userTransaction(
     const loss = affectsStats && amount < 0 ? Math.abs(amount) : 0;
 
     // Determine field names based on balance type
-    const totalWinningsField = balanceType === 'unibalance' ? 'uniTotalWinnings' : 'totalWinnings';
-    const totalLossesField = balanceType === 'unibalance' ? 'uniTotalLosses' : 'totalLosses';
-    const netProfitField = balanceType === 'unibalance' ? 'uniNetProfit' : 'netProfit';
+    const totalWinningsField = balanceType === 'uniBalance' ? 'uniTotalWinnings' : 'totalWinnings';
+    const totalLossesField = balanceType === 'uniBalance' ? 'uniTotalLosses' : 'totalLosses';
+    const netProfitField = balanceType === 'uniBalance' ? 'uniNetProfit' : 'netProfit';
 
     // Initilise transaction collection on first write ie: a user's first transaction
     if (!user.exists()) {
       transaction.set(userDoc, {
         balance: balanceType === 'balance' ? after : 0,
-        unibalance: balanceType === 'unibalance' ? after : 0,
+        uniBalance: balanceType === 'uniBalance' ? after : 0,
         totalWinnings: balanceType === 'balance' ? win : 0,
         totalLosses: balanceType === 'balance' ? loss : 0,
         netProfit: balanceType === 'balance' && affectsStats ? amount : 0,
-        uniTotalWinnings: balanceType === 'unibalance' ? win : 0,
-        uniTotalLosses: balanceType === 'unibalance' ? loss : 0,
-        uniNetProfit: balanceType === 'unibalance' && affectsStats ? amount : 0,
+        uniTotalWinnings: balanceType === 'uniBalance' ? win : 0,
+        uniTotalLosses: balanceType === 'uniBalance' ? loss : 0,
+        uniNetProfit: balanceType === 'uniBalance' && affectsStats ? amount : 0,
         createdAt: serverTimestamp(),
         lastUpdated: serverTimestamp(),
       });
@@ -91,8 +91,8 @@ export const deposit = (uid: string, amt: number) =>
 export const withdraw = (uid: string, amt: number) =>
   userTransaction(uid, -Math.abs(amt), 'withdraw','balance');
 
-// Unibalance functions
+// uniBalance functions
 export const uniDeposit = (uid: string, amt: number) => 
-  userTransaction(uid, Math.abs(amt), 'deposit', 'unibalance');
+  userTransaction(uid, Math.abs(amt), 'deposit', 'uniBalance');
 export const uniWithdraw = (uid: string, amt: number) =>
-  userTransaction(uid, -Math.abs(amt), 'withdraw', 'unibalance');
+  userTransaction(uid, -Math.abs(amt), 'withdraw', 'uniBalance');
