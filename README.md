@@ -3,7 +3,7 @@
 > This is a learning project that combines a React/Vite frontend with a FastAPI backend.  
 > It includes casino game UIs, Firebase Auth/Firestore, and Stripe-powered deposits/withdrawals.
 
-![Tilt Screenshot](./public/assets/readme.png)
+![Tilt Screenshot](./public/assets/screenshot.png)
 
 ---
 
